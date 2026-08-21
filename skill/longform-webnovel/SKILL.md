@@ -1,0 +1,146 @@
+---
+name: longform-webnovel
+description: 创建、规划、连载、续写和修订可长期扩展的中文网文项目；可选研究番茄等平台的公开市场样本并保存证据，筛选有辨识度的书名和封面提示词，选择语言风格，将知名作者的公开写作手法转译为参数，为核心配角维护独立弧光和非主角中心关系，维护跨会话正史，并让每章经过编辑审稿、目标读者模拟和不宣称判断作者身份的模板化语言风险检查。适用于开新网文、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、设计配角或感情线、写番茄风格章节、继续连载、生成卷纲或章纲、检查一致性、修复注水、扩展新卷或长期续写小说。
+---
+
+# 长期网文连载
+
+把小说视为持续演化的状态，而不是一串互不相干的章节。默认面向中文网文，每章约 2500 字，采用快进入、强推进、清晰回报和自然断章的阅读节奏。题材不固定；先从故事承诺推导写法，不套用固定类型模板。
+
+## 基本原则
+
+1. 让故事长期扩展，但不给故事注水。每次扩展必须来自已有行动的后果。
+2. 保持三层规划：当前章具体、未来 5–10 章清楚、当前卷稳定；更远内容只保留方向和选择，不写死。
+3. 每章至少改变两个状态维度：目标、关系、认知、资源/能力、世界局势、道德位置。
+4. 每 3 章兑现一次小爽点或小高潮，每 5 章兑现一次大爽点或大高潮；重合章由大爽点同时完成两级职责，不机械叠加。每轮兑现都必须造成真实状态变化。
+5. 不用单纯提高战力、扩大地图或复制反派来续命。升级必须同时增加代价、责任、限制或新的对抗方式。
+6. 重大决策询问作者，其余内容自主完成。按 [approval-policy.md](references/approval-policy.md) 判断。
+7. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
+8. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。
+9. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
+10. 让少量核心配角拥有独立欲望、选择和后果。感情可以指向主角、反派或其他角色，不把所有关系写成主角奖励。
+11. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
+
+## 识别任务
+
+- **新建项目**：用户只有灵感、题材、梗或一句话设想。
+- **继续连载**：项目结构存在，用户要求下一章、若干章或继续写。
+- **规划扩展**：用户要求卷纲、章纲、新地图、新阶段或长期方向。
+- **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真或战力失控。
+- **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
+
+先读取 [project-system.md](references/project-system.md)。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像或感情关系时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
+
+## 新建项目
+
+1. 若用户未指定项目路径，在当前工作目录下使用安全的作品名创建项目文件夹。
+2. 只询问无法合理推断且会改变作品方向的信息。通常一次收集：故事种子、希望避免的内容、主角初始困境。题材可以由故事种子推导，也可以给出 3 个差异明显的方案让作者选择。
+3. 提出简短的故事合同，并按 [style-system.md](references/style-system.md) 给出 2–4 个适配的语言风格选项。用户指定作者时先做手法转译卡。
+4. 用户要求市场定位或题材竞争不明时，按 [market-research.md](references/market-research.md) 研究公开来源；正式建项前先把快照保存在项目外的临时工作目录，不能成为迟迟不写的借口。
+5. 按 [publishing-package.md](references/publishing-package.md) 生成 8–12 个非公式化书名，筛出 3 个做公开精确检索；为推荐书名提供封面主提示词、负面提示词和后期排版说明。
+6. 将故事合同、第一卷重大设计、语言风格、终选书名和封面提示词一起交给作者确认。不要在确认前批量写正文。
+7. 运行：
+
+```bash
+python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书名> --style <风格标识>
+```
+
+8. 用 `publishing_package.py` 保存公开检索记录与封面提示词；若第 4 步生成了市场快照，用 `market_brief.py` 归档到项目。将确认内容和已作出的重大选择写入故事合同及决策记录，建立主要人物、分层配角与世界规则，规划当前卷和未来 5–10 章。
+9. 运行 `plan_cadence.py --write` 建立未来 15 章的节拍锚点，补全每个锚点的回报类型、铺垫和代价。
+10. 运行 `validate_project.py`。只有 `publishingPackage.status` 和 `styleProfile.status` 均已确认后才开始正文；市场研究不是许可条件。
+
+## 继续连载
+
+按以下顺序执行，不要依赖聊天记忆代替项目文件：
+
+1. 定位包含 `project.json` 的项目根目录。
+2. 若 `schemaVersion` 旧于当前版本或缺少 v5 文件，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
+3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`planning/current-volume.md`、`planning/rolling-outline.md`。
+4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`。
+5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
+6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
+7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
+8. 若无阻断，先按章号判断本章是普通章、小爽点章还是大爽点章，再确认目的、两项以上状态变化、兑现内容、结尾推动力和本章五个风格锚点，然后自主写作。
+9. 按 [review-system.md](references/review-system.md) 运行语言风险扫描、独立编辑审稿和目标读者模拟；必要时自动修改一次并重新审查，不因普通写作选择打断作者。
+10. 按“章节提交事务”更新全部状态文件，再向作者报告。
+
+## 章节提交事务
+
+把正文和状态更新视为同一次提交。不得先直接修改正式项目再补状态：
+
+1. 按 [operations.md](references/operations.md) 创建 staging 目录，把新正文和所有拟更新文件按项目相对路径写入 staging。
+2. 在 staging 中写 `chapters/第NNNN章-标题.md`，不要覆盖现有章节，除非用户明确要求修订。
+3. 运行：
+
+```bash
+python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
+```
+
+4. 运行 `prose_lint.py`，将结果写入 `reviews/第NNNN章-lint.json`；再按 [review-system.md](references/review-system.md) 分离执行编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。报告必须绑定当前正文 SHA-256。
+5. 若存在阻断项，自动修改一次并重新运行指标、扫描和两类审稿。仍有高优先级问题或弃读风险时停止提交；只有作者通过重大决策记录明确接受风险时才可例外。
+6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。
+7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
+8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
+9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
+10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择和关系变化追加证据；普通露面不算弧光推进。
+11. 在 staging 中更新 `planning/rolling-outline.md`：删除已完成章，细化新的近景章，使窗口仍保持 5–10 章；用 `plan_cadence.py` 补齐新的 15 章节拍锚点。
+12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。
+13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。
+
+提交失败时正式项目保持原状态，修复 staging 后重试。若异常中断造成部分写入，使用脚本报告的备份目录执行 `commit_chapter.py --restore`，不得假装提交成功。
+
+## 连续创作多章
+
+- 默认顺序写作；下一章必须基于上一章真正发生的内容重新规划。
+- 每写完一章都执行完整提交事务，不能等整批结束后才补状态。
+- 每 3 章完成一个小兑现；每 5 章完成一个能改变后续局势的大兑现。大爽点章同时执行阶段审查：承诺兑现率、重复模式、角色能动性、线索负债、战力/资源通胀、未解决矛盾。
+- 每 5 章检查核心配角是否做过主角未安排的有效选择；每 15 章至少推进一名核心配角的选择或后果。
+- 到达小篇章或卷末时停止自动跨越边界。若下一步属于重大决策，先询问作者。
+- 不并行撰写相邻正文；相邻章节存在强因果依赖，批量并行容易破坏连续性。
+
+## 长期扩展
+
+使用 [continuation-engine.md](references/continuation-engine.md) 的扩展闸门。只有同时满足以下条件才开启新篇章或新卷：
+
+- 已兑现至少一个旧承诺；
+- 新目标是此前选择或后果导致的，而非凭空降临；
+- 规则、关系或代价至少有一项发生结构性变化；
+- 至少关闭或转化一条旧剧情线；
+- 新冲突的解决方式不能复刻最近两个篇章。
+
+长期连载不等于拒绝结局。始终保留“可收束路径”：当前主线在若干卷内能够结束；如果继续，是开启有因果联系的新阶段，而不是无限拖延同一问题。
+
+## 修订与诊断
+
+先从高层到低层检查：故事承诺 → 卷结构 → 人物弧 → 章节因果 → 场景 → 句子。不要用润色掩盖结构问题。
+
+修改既有正史前：
+
+1. 列出改动会影响的角色、时间线、伏笔、后续章节和世界规则。
+2. 若改动属于重大决策，等待作者确认。
+3. 修改正文与所有受影响状态，记录到 `state/decisions.json`。
+4. 运行项目校验，并抽查受影响章节的前后衔接。
+
+## 面向作者的输出
+
+保持简洁，不展示原始 JSON 或内部长清单。
+
+- 写章后报告：章节、约略字数、爽点级别、本章实际变化、兑现/新增的线索、下一章方向。
+- 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及关系或立场如何改变。
+- 有重大决策时：先说明为什么现在必须决定，再给 2–4 个差异明确的选项和影响。
+- 开新书时：正文之前展示终选书名的检索结论、完整封面提示词和负面提示词。
+- 有校验问题时：区分阻断错误和可继续的警告。
+- 不用“无限生成”承诺掩盖上下文限制；依靠项目文件实现跨会话延续。
+
+## 脚本
+
+- `scripts/init_project.py`：创建原创的长期连载项目骨架和初始状态。
+- `scripts/migrate_project.py`：将旧项目安全迁移到当前 schema，并保留迁移备份。
+- `scripts/plan_cadence.py`：生成或写入 15 章节拍锚点。
+- `scripts/style_profile.py`：列出、预览或安全应用预设/自定义语言风格档案。
+- `scripts/publishing_package.py`：检查书名公式化风险，保存确认书名、公开检索记录和封面提示词。
+- `scripts/market_brief.py`：校验并保存带日期、公开来源、样本和置信度的市场观察。
+- `scripts/commit_chapter.py`：在隔离预览中校验后原子替换文件；失败时自动回滚。
+- `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号。
+- `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
+- `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复和提交一致性。

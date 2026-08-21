@@ -1,0 +1,4 @@
+interface:
+  display_name: "长期网文连载"
+  short_description: "公开市场研究、独立章节审稿与长期一致性的中文网文连载系统"
+  default_prompt: "使用 $longform-webnovel 创建一部有公开市场依据、独立章节审稿、鲜明配角弧光且可长期连载不注水的中文网文。"
