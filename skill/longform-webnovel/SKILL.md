@@ -1,6 +1,6 @@
 ---
 name: longform-webnovel
-description: 创建、规划、连载、续写和修订可长期扩展的中文网文项目；可选研究番茄等平台的公开市场样本并保存证据，筛选有辨识度的书名和封面提示词，选择语言风格，将知名作者的公开写作手法转译为参数，为核心配角维护独立弧光和非主角中心关系，维护跨会话正史，并让每章经过编辑审稿、目标读者模拟和不宣称判断作者身份的模板化语言风险检查。适用于开新网文、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、设计配角或感情线、写番茄风格章节、继续连载、生成卷纲或章纲、检查一致性、修复注水、扩展新卷或长期续写小说。
+description: 创建、规划、连载、续写和修订可长期扩展的中文网文项目；可选研究番茄等平台的公开市场样本并保存证据，筛选有辨识度的书名和封面提示词，选择语言风格，将知名作者的公开写作手法转译为参数，为核心配角维护独立弧光和多类型关系网络，维护跨会话正史，并让每章经过编辑审稿、目标读者模拟和不宣称判断作者身份的模板化语言风险检查。适用于开新网文、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、设计配角、群像或关系线、写番茄风格章节、继续连载、生成卷纲或章纲、检查一致性、修复注水、扩展新卷或长期续写小说。
 ---
 
 # 长期网文连载
@@ -18,7 +18,7 @@ description: 创建、规划、连载、续写和修订可长期扩展的中文�
 7. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
 8. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。
 9. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
-10. 让少量核心配角拥有独立欲望、选择和后果。感情可以指向主角、反派或其他角色，不把所有关系写成主角奖励。
+10. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
 11. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
 
 ## 识别任务
@@ -29,7 +29,7 @@ description: 创建、规划、连载、续写和修订可长期扩展的中文�
 - **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真或战力失控。
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 
-先读取 [project-system.md](references/project-system.md)。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像或感情关系时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
 
 ## 新建项目
 
@@ -82,7 +82,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
 9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
-10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择和关系变化追加证据；普通露面不算弧光推进。
+10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。
 11. 在 staging 中更新 `planning/rolling-outline.md`：删除已完成章，细化新的近景章，使窗口仍保持 5–10 章；用 `plan_cadence.py` 补齐新的 15 章节拍锚点。
 12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。
 13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。
@@ -126,7 +126,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 保持简洁，不展示原始 JSON 或内部长清单。
 
 - 写章后报告：章节、约略字数、爽点级别、本章实际变化、兑现/新增的线索、下一章方向。
-- 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及关系或立场如何改变。
+- 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及其目标、能力、身份、信念、关系或立场如何改变。
 - 有重大决策时：先说明为什么现在必须决定，再给 2–4 个差异明确的选项和影响。
 - 开新书时：正文之前展示终选书名的检索结论、完整封面提示词和负面提示词。
 - 有校验问题时：区分阻断错误和可继续的警告。

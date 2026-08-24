@@ -704,6 +704,19 @@ def test_cast_arcs(base: Path) -> None:
     write_json(cast_path, cast_doc)
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
+    non_romantic = read_json(cast_path)
+    non_romantic["characters"][0]["relationships"][0].update(
+        {
+            "kind": "mentorship",
+            "status": "strained",
+            "basis": "对方传授档案鉴伪术，却要求她维护旧制度",
+            "cost": "追查真相会公开否定恩师的毕生选择",
+        }
+    )
+    write_json(cast_path, non_romantic)
+    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    write_json(cast_path, cast_doc)
+
     unknown = read_json(cast_path)
     unknown["characters"][0]["relationships"][0]["targetId"] = "missing-person"
     write_json(cast_path, unknown)

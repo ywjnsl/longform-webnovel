@@ -41,8 +41,36 @@ VALID_CAST_TIER = {"anchor", "recurring", "cameo"}
 VALID_CAST_ROLE = {"ally", "rival", "antagonist", "foil", "mentor", "family", "romantic", "civilian", "other"}
 VALID_CAST_STATUS = {"active", "deferred", "resolved", "departed", "dead"}
 VALID_ARC_PHASE = {"none", "setup", "pressure", "choice", "consequence", "changed", "closed"}
-VALID_RELATION_KIND = {"love", "loyalty", "rivalry", "debt", "family", "friendship", "fear", "interest", "other"}
-VALID_RELATION_STATUS = {"hidden", "expressed", "reciprocated", "rejected", "complicated", "ended", "transformed"}
+VALID_RELATION_KIND = {
+    "love",
+    "loyalty",
+    "rivalry",
+    "debt",
+    "family",
+    "friendship",
+    "mentorship",
+    "duty",
+    "ideology",
+    "belonging",
+    "fear",
+    "interest",
+    "other",
+}
+VALID_RELATION_STATUS = {
+    "latent",
+    "active",
+    "strained",
+    "mutual",
+    "hostile",
+    "broken",
+    "ended",
+    "transformed",
+    "hidden",
+    "expressed",
+    "reciprocated",
+    "rejected",
+    "complicated",
+}
 VALID_REWARD_TYPE = {
     "power",
     "status",
