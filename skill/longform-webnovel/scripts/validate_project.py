@@ -99,6 +99,15 @@ VALID_COMPLETION_INTENT = {"continue", "uncertain", "stop"}
 VALID_READER_CHANNEL = {"transportation", "aesthetic", "social", "curiosity", "flow"}
 VALID_READER_VALENCE = {"positive", "negative", "mixed"}
 VALID_RESOLUTION_ACTION = {"accepted", "revised", "author-approved"}
+FINAL_REVIEW_CHECKS = (
+    "promise",
+    "causality",
+    "continuity",
+    "setupPayoff",
+    "characterConsequences",
+    "titleResonance",
+    "endingBoundary",
+)
 CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
 PLACEHOLDER_VALUES = {"待填写", "待规划", "待复核", "tbd", "todo"}
 CORE_TEXT_FILES = (
@@ -374,6 +383,67 @@ def validate_chapter_reviews(
             errors.append(f"Chapter {chapter} has an unresolved high-priority editor finding")
         if reader_blocks and not exception_approved:
             errors.append(f"Chapter {chapter} reader simulation reports drop-risk or stop intent")
+
+
+def chapter_bundle_digest(chapter_files: dict[int, Path], committed: int) -> str:
+    """Hash the ordered committed chapter bundle for the full-story review gate."""
+    digest = hashlib.sha256()
+    for chapter in range(1, committed + 1):
+        path = chapter_files.get(chapter)
+        if path is None:
+            continue
+        digest.update(f"chapter:{chapter:04d}:{path.name}\n".encode("utf-8"))
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def validate_final_review(
+    root: Path,
+    project: dict,
+    chapter_files: dict[int, Path],
+    committed: object,
+    mode: str,
+    short_status: object,
+    errors: list[str],
+) -> None:
+    """Require an external-reader full-story review before a short story is complete."""
+    if mode != "fanqie-short-story" or short_status != "complete":
+        return
+    if not isinstance(committed, int) or committed <= 0:
+        return
+
+    path = root / "reviews" / "final-review.json"
+    if not path.is_file():
+        errors.append("Completed short story needs reviews/final-review.json")
+        return
+    review = load_json(path, errors)
+    if review.get("schemaVersion") != 1:
+        errors.append("Full-story review schemaVersion must be 1")
+    if review.get("storyMode") != "fanqie-short-story":
+        errors.append("Full-story review storyMode must be fanqie-short-story")
+    if review.get("reviewedThroughChapter") != committed:
+        errors.append("Full-story review must cover every committed chapter")
+    if review.get("perspective") != "external-reader":
+        errors.append("Full-story review perspective must be external-reader")
+    expected_digest = chapter_bundle_digest(chapter_files, committed)
+    if review.get("reviewedTextSha256") != expected_digest:
+        errors.append("Full-story review hash does not match the committed chapter bundle")
+
+    if review.get("editorStatus") != "pass":
+        errors.append("Full-story review editorStatus must be pass")
+    if review.get("readerStatus") != "engaged":
+        errors.append("Full-story review readerStatus must be engaged")
+    if review.get("completionIntent") != "complete":
+        errors.append("Full-story review completionIntent must be complete")
+    checks = review.get("checks")
+    if not isinstance(checks, dict):
+        errors.append("Full-story review needs checks object")
+    else:
+        for check in FINAL_REVIEW_CHECKS:
+            if checks.get(check) != "pass":
+                errors.append(f"Full-story review check {check} must be pass")
+    if not is_concrete(review.get("resolution")):
+        errors.append("Full-story review needs a concrete resolution")
 
 
 def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: list[str], warnings: list[str]) -> None:
@@ -746,6 +816,7 @@ def main() -> int:
                 errors.append("Completed short story must commit exactly shortStory.plannedSections sections")
 
     validate_chapter_reviews(root, project, chapter_files, committed, decision_doc, errors)
+    validate_final_review(root, project, chapter_files, committed, mode, short_status, errors)
 
     seen: set[str] = set()
     active = 0

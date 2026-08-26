@@ -65,7 +65,10 @@ def build_shadow(root: Path, staged: dict[str, Path]) -> Path:
     shadow = Path(tempfile.mkdtemp(prefix="preview-", dir=transaction_root))
 
     shutil.copy2(root / "project.json", shadow / "project.json")
-    for name in ("canon", "planning", "state"):
+    # The validator checks completed market research against its dated snapshot.
+    # Keep research in the shadow project so a normal chapter commit does not
+    # require temporarily downgrading an otherwise valid project.
+    for name in ("canon", "planning", "state", "research"):
         if (root / name).is_dir():
             shutil.copytree(root / name, shadow / name)
     for name in ("chapters", "reviews", "sessions"):
@@ -124,6 +127,14 @@ def validate_transition(root: Path, staged: dict[str, Path], allow_revision: boo
         raise ValueError("Invalid project chapter counters")
     if new_committed != new_draft:
         raise ValueError("A chapter commit must align latestDraftChapter and lastCommittedChapter")
+    current_story = current.get("shortStory") if isinstance(current.get("shortStory"), dict) else {}
+    proposed_story = proposed.get("shortStory") if isinstance(proposed.get("shortStory"), dict) else {}
+    if (
+        proposed_story.get("status") == "complete"
+        and current_story.get("status") != "complete"
+        and "reviews/final-review.json" not in staged
+    ):
+        raise ValueError("Completing a short story requires staged reviews/final-review.json")
     if allow_revision:
         if new_committed not in {old_committed, old_committed + 1}:
             raise ValueError("Revision mode may keep the current chapter or advance by one")

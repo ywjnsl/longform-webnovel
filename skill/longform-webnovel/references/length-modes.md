@@ -57,7 +57,7 @@
 - `planning/rolling-outline.md` 覆盖全部剩余分节，不维护未来 5–10 章窗口；
 - `shortStory.status` 从 `planning` 进入 `drafting`，全文完成并通过终审后改为 `complete`；
 - `plannedSections` 是当前结构合同。需要增减时先判断是否改变结局与核心体验；重大改变先问作者；
-- 标记 `complete` 前，主要线索必须 `resolved` 或 `transformed`，最后一节必须交付结局级 `major` 回报；
+- 标记 `complete` 前，主要线索必须 `resolved` 或 `transformed`，最后一节必须交付结局级 `major` 回报，并完成绑定全文哈希的 `reviews/final-review.json` 外部读者终审；
 - 完结终审额外检查主承诺兑现、伏笔回收、因果闭合、人物选择后果、标题照应和开放结尾边界。
 
 不要在已标记 `complete` 后自动生成下一章。续作、新篇或改成长篇都属于新的重大决策。

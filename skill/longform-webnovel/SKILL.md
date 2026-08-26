@@ -56,6 +56,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
+- 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。
 
 ## 继续连载
 
@@ -92,7 +93,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
 10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。
 11. 在 staging 中更新 `planning/rolling-outline.md`：长篇删除已完成章并保持 5–10 章窗口，用 `plan_cadence.py` 补齐 15 章节拍；短故事删除已完成分节并保持全部剩余结构可见，不向结局之后补新锚点。
-12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。
+12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。短故事最后一节若要标记 `complete`，同时暂存 `reviews/final-review.json`。
 13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。
 
 提交失败时正式项目保持原状态，修复 staging 后重试。若异常中断造成部分写入，使用脚本报告的备份目录执行 `commit_chapter.py --restore`，不得假装提交成功。
@@ -150,5 +151,6 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 - `scripts/market_brief.py`：校验并保存带日期、公开来源、样本和置信度的市场观察。
 - `scripts/commit_chapter.py`：在隔离预览中校验后原子替换文件；失败时自动回滚。
 - `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号。
+- `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。
 - `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
 - `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复和提交一致性。
