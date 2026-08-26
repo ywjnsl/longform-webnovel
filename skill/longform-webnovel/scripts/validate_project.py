@@ -12,7 +12,15 @@ from pathlib import Path
 
 from market_brief import validate_snapshot
 from publishing_package import analyze_title
-from webnovel_io import CURRENT_CAST_SCHEMA, CURRENT_PROJECT_SCHEMA, CURRENT_REWARD_SCHEMA, content_char_count
+from webnovel_io import (
+    CURRENT_CAST_SCHEMA,
+    CURRENT_PROJECT_SCHEMA,
+    CURRENT_REWARD_SCHEMA,
+    VALID_STORY_MODES,
+    content_char_count,
+    short_story_anchors,
+    story_mode,
+)
 
 
 REQUIRED = (
@@ -368,7 +376,7 @@ def validate_chapter_reviews(
             errors.append(f"Chapter {chapter} reader simulation reports drop-risk or stop intent")
 
 
-def validate_cast_arcs(cast_doc: dict, committed: object, errors: list[str], warnings: list[str]) -> None:
+def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: list[str], warnings: list[str]) -> None:
     if cast_doc.get("schemaVersion") != CURRENT_CAST_SCHEMA:
         errors.append(f"cast-arcs.json schemaVersion must be {CURRENT_CAST_SCHEMA}; run migrate_project.py")
     as_of = cast_doc.get("asOfChapter")
@@ -518,9 +526,10 @@ def validate_cast_arcs(cast_doc: dict, committed: object, errors: list[str], war
     for relation_label, target in pending_targets:
         if target != "protagonist" and target not in ids:
             errors.append(f"{relation_label} references unknown targetId: {target}")
-    if active_anchors > 5:
+    anchor_limit = 3 if mode == "fanqie-short-story" else 5
+    if active_anchors > anchor_limit:
         warnings.append(f"High anchor-cast load: {active_anchors}; merge arcs or demote characters that do not need full trajectories")
-    if isinstance(committed, int) and committed - legacy_through >= 5 and not any(
+    if mode == "serial" and isinstance(committed, int) and committed - legacy_through >= 5 and not any(
         isinstance(character, dict)
         and character.get("tier") == "anchor"
         and isinstance(character.get("introducedChapter"), int)
@@ -528,11 +537,11 @@ def validate_cast_arcs(cast_doc: dict, committed: object, errors: list[str], war
         for character in characters
     ):
         errors.append("By five audited chapters, the project needs at least one anchor supporting character with an independent arc")
-    if isinstance(committed, int) and committed - legacy_through >= 5 and active_anchors:
+    if mode == "serial" and isinstance(committed, int) and committed - legacy_through >= 5 and active_anchors:
         recent_start = max(legacy_through + 1, committed - 4)
         if not any(recent_start <= chapter <= committed for chapter in recent_arc_chapters):
             warnings.append(f"No supporting-cast choice/consequence advanced in chapters {recent_start}-{committed}")
-    if isinstance(committed, int) and committed - legacy_through >= 15:
+    if mode == "serial" and isinstance(committed, int) and committed - legacy_through >= 15:
         cycle_start = committed - 14
         if not any(cycle_start <= chapter <= committed for chapter in anchor_arc_chapters):
             errors.append(f"At least one anchor supporting character must advance by choice/consequence in chapters {cycle_start}-{committed}")
@@ -567,6 +576,36 @@ def main() -> int:
         errors.append(f"project.json schemaVersion must be {CURRENT_PROJECT_SCHEMA}; run migrate_project.py for older projects")
     if reward_doc.get("schemaVersion") != CURRENT_REWARD_SCHEMA:
         errors.append(f"rewards.json schemaVersion must be {CURRENT_REWARD_SCHEMA}; run migrate_project.py for older projects")
+
+    mode = story_mode(project)
+    if mode not in VALID_STORY_MODES:
+        errors.append(f"project.json storyMode is invalid: {mode}")
+    short_story = project.get("shortStory")
+    planned_sections = None
+    short_status = None
+    target_total = None
+    if mode == "fanqie-short-story":
+        if not isinstance(short_story, dict):
+            errors.append("fanqie-short-story project needs shortStory settings")
+            short_story = {}
+        target_total = short_story.get("targetTotalChars")
+        if target_total is not None and (
+            not isinstance(target_total, int) or isinstance(target_total, bool) or target_total <= 0
+        ):
+            errors.append("shortStory.targetTotalChars must be null or a positive integer")
+        planned_sections = short_story.get("plannedSections")
+        if (
+            not isinstance(planned_sections, int)
+            or isinstance(planned_sections, bool)
+            or not 1 <= planned_sections <= 300
+        ):
+            errors.append("shortStory.plannedSections must be between 1 and 300")
+            planned_sections = None
+        short_status = short_story.get("status")
+        if short_status not in {"planning", "drafting", "complete"}:
+            errors.append(f"shortStory.status is invalid: {short_status}")
+        if short_story.get("endingType") not in {"closed", "open"}:
+            errors.append("shortStory.endingType must be closed or open")
 
     style = project.get("styleProfile")
     style_primary = None
@@ -688,6 +727,16 @@ def main() -> int:
                 if markers:
                     errors.append(f"Committed project still has unresolved marker(s) in {relative}: {', '.join(markers)}")
 
+        if mode == "fanqie-short-story" and isinstance(planned_sections, int):
+            if committed > 0 and target_total is None:
+                errors.append("Short story needs shortStory.targetTotalChars before the first section is committed")
+            if short_status == "planning" and committed > 0:
+                errors.append("shortStory.status must change from planning to drafting before the first section is committed")
+            if committed > planned_sections:
+                errors.append("Committed short-story sections exceed shortStory.plannedSections")
+            if short_status == "complete" and committed != planned_sections:
+                errors.append("Completed short story must commit exactly shortStory.plannedSections sections")
+
     validate_chapter_reviews(root, project, chapter_files, committed, decision_doc, errors)
 
     seen: set[str] = set()
@@ -737,10 +786,13 @@ def main() -> int:
             if isinstance(committed, int) and isinstance(last, int) and committed - last > 8:
                 warnings.append(f"Thread {thread_id} has not advanced for {committed - last} chapters")
 
-    if active > 8:
+    active_limit = 3 if mode == "fanqie-short-story" else 8
+    if active > active_limit:
         warnings.append(f"High active-thread load: {active}; resolve, merge, or defer before opening more")
+    if mode == "fanqie-short-story" and short_status == "complete" and active:
+        errors.append("Completed short story cannot retain open, advanced, or deferred threads")
 
-    validate_cast_arcs(cast_doc, committed, errors, warnings)
+    validate_cast_arcs(cast_doc, committed, mode, errors, warnings)
 
     cadence = project.get("rewardCadence")
     if not isinstance(cadence, dict):
@@ -901,7 +953,7 @@ def main() -> int:
         isinstance(value, int) and not isinstance(value, bool) and value > 0
         for value in (small_every, major_every, enforce_from)
     )
-    if isinstance(committed, int) and cadence_valid:
+    if mode == "serial" and isinstance(committed, int) and cadence_valid:
         for chapter in range(enforce_from, committed + 1):
             required = "major" if chapter % major_every == 0 else ("small" if chapter % small_every == 0 else None)
             if required is None:
@@ -924,6 +976,24 @@ def main() -> int:
                 warnings.append(f"Rolling outline has no planned {required} reward beat for chapter {chapter}")
             elif required == "major" and beat.get("level") != "major":
                 warnings.append(f"Planned reward for chapter {chapter} must be major")
+    elif mode == "fanqie-short-story" and isinstance(committed, int) and isinstance(planned_sections, int):
+        anchors = short_story_anchors(planned_sections)
+        for chapter, anchor in anchors.items():
+            required = anchor["reward"]
+            if required is None:
+                continue
+            beat = beat_by_chapter.get(chapter)
+            if chapter <= committed:
+                if not beat or beat.get("status") != "delivered":
+                    errors.append(f"Short-story structural anchor at section {chapter} is missing its delivered {required} reward beat")
+                elif required == "major" and beat.get("level") != "major":
+                    errors.append(f"Short-story structural anchor at section {chapter} requires a major reward beat")
+                elif required == "small" and beat.get("level") not in {"small", "major"}:
+                    errors.append(f"Short-story structural anchor at section {chapter} requires at least a small reward beat")
+            elif not beat:
+                warnings.append(f"Short-story outline has no planned {required} reward beat for structural section {chapter}")
+            elif required == "major" and beat.get("level") != "major":
+                warnings.append(f"Planned short-story reward for section {chapter} must be major")
 
     decisions = decision_doc.get("decisions", [])
     if not isinstance(decisions, list):

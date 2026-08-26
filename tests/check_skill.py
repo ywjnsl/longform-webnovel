@@ -23,6 +23,7 @@ def main() -> None:
     assert (SKILL / "agents" / "openai.yaml").is_file()
     assert (SKILL / "references" / "review-system.md").is_file()
     assert (SKILL / "references" / "market-research.md").is_file()
+    assert (SKILL / "references" / "length-modes.md").is_file()
     assert (SKILL / "scripts" / "validate_project.py").is_file()
     assert (SKILL / "scripts" / "prose_lint.py").is_file()
     assert (SKILL / "scripts" / "market_brief.py").is_file()

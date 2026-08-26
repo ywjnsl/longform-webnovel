@@ -167,6 +167,7 @@ def main() -> int:
     else:
         cadence.setdefault("enforceFromChapter", 1)
     project["rewardCadence"] = cadence
+    project.setdefault("storyMode", "serial")
     review_gate = project.get("reviewGate") if isinstance(project.get("reviewGate"), dict) else {}
     review_gate.setdefault("enforceFromChapter", committed + 1 if old_version < 5 else 1)
     review_gate.setdefault("editorRequired", True)

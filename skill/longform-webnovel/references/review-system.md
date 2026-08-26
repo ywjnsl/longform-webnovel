@@ -28,6 +28,8 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 5. 最多自动修订一次；正文变化后必须重跑扫描和两类审稿，因为旧哈希与证据已经失效。
 6. 编辑 `blocked`、未解决的 `high` 问题、读者 `drop-risk` 或 `stop` 会阻断提交。若作者明确接受风险，先把确认写入 `state/decisions.json`，再使用 `author-approved` 和对应 `decisionId`。
 
+番茄短故事的最后一节还要执行全文终审：核对单一主承诺是否兑现、主要线索是否闭合、关键铺垫是否回收、配角选择是否产生后果、结局是否同时具备因果必然性与初读意外感。开放结尾只允许保留作者已确认的余韵，不能遗漏主要矛盾的处理。
+
 ## 审稿文件
 
 `reviews/第NNNN章-review.json` 使用以下结构：

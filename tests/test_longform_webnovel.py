@@ -256,6 +256,71 @@ def test_initialization_and_cadence(base: Path) -> None:
     assert len(read_json(project / "state/rewards.json")["beats"]) == 7
 
 
+def test_short_story_mode(base: Path) -> None:
+    project = base / "short-story"
+    run(
+        "python3",
+        str(SCRIPTS / "init_project.py"),
+        "--path",
+        str(project),
+        "--title",
+        "短故事模式测试",
+        "--style",
+        "fanqie-clean",
+        "--mode",
+        "fanqie-short-story",
+        "--target-total-chars",
+        "10000",
+        "--sections",
+        "5",
+    )
+    index = read_json(project / "project.json")
+    assert index["storyMode"] == "fanqie-short-story"
+    assert index["shortStory"] == {
+        "targetTotalChars": 10000,
+        "plannedSections": 5,
+        "status": "planning",
+        "endingType": "closed",
+    }
+    assert "短故事全文结构" in (project / "planning/current-volume.md").read_text(encoding="utf-8")
+
+    planned = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--json").stdout)
+    assert planned["mode"] == "fanqie-short-story"
+    assert planned["count"] == 5
+    assert max(row["chapter"] for row in planned["chapters"]) == 5
+    assert "结局收束" in planned["chapters"][-1]["role"]
+    assert planned["chapters"][-1]["reward"] == "major"
+    single = json.loads(
+        run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "1", "--json").stdout
+    )
+    assert len(single["chapters"]) == 1
+    assert "开局扰动" in single["chapters"][0]["role"] and "结局收束" in single["chapters"][0]["role"]
+    assert single["chapters"][0]["reward"] == "major"
+    written = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--write", "--json").stdout)
+    assert written["added"] >= 2
+    validation = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    assert validation["ok"]
+    assert not any("chapter 15" in warning.lower() for warning in validation["warnings"])
+
+    index = read_json(project / "project.json")
+    index["shortStory"]["status"] = "complete"
+    write_json(project / "project.json", index)
+    incomplete = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("must commit exactly" in error for error in incomplete["errors"])
+    index["shortStory"]["status"] = "planning"
+    write_json(project / "project.json", index)
+
+    index.pop("storyMode")
+    index.pop("shortStory")
+    write_json(project / "project.json", index)
+    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+
+    index["storyMode"] = "unknown-mode"
+    write_json(project / "project.json", index)
+    invalid = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("storyMode is invalid" in error for error in invalid["errors"])
+
+
 def test_committed_project_guards(base: Path) -> None:
     project = base / "guard-errors"
     run("python3", str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "错误防线")
@@ -912,6 +977,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="longform-webnovel-v2-") as temporary:
         base = Path(temporary)
         test_initialization_and_cadence(base)
+        test_short_story_mode(base)
         test_committed_project_guards(base)
         test_style_profiles(base)
         test_publishing_package(base)
