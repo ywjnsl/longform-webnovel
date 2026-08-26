@@ -2,7 +2,7 @@
 
 ## 正文前闸门
 
-第一章正文之前，必须向作者展示并确认：候选书名、推荐理由、公开检索结果、封面主提示词和负面提示词。确认后写入 `canon/publishing-package.md`。不得先写正文，再补一个与内容无关的包装。
+第一章正文之前，必须向作者展示并确认：候选书名、推荐理由、公开检索结果、封面主提示词、负面提示词，以及书名排版与字体说明。确认后写入 `canon/publishing-package.md`。不得先写正文，再补一个与内容无关的包装。
 
 已有连载迁移时保留原书名和既有封面。只有作者要求改名或换封面时才重新走确认流程。
 
@@ -38,13 +38,21 @@ python3 <skill-dir>/scripts/publishing_package.py --check-title <候选书名>
 - 与题材相符的写实度或插画表现方式；
 - 不出现哪些错误元素的负面提示。
 
+封面包装还必须单独说明书名如何落版，至少包括：
+
+- 书名准确文字、断行方式和最多几行；
+- 书名位置、对齐方式、占画面宽度比例和安全区；
+- 中文字体家族与字重，例如“思源宋体 Heavy”或“思源黑体 Heavy”，不能只写“古风字体”或“高级字体”；
+- 字号层级、字色、描边、阴影或其他可执行的可读性处理；
+- 作者名、平台角标与书名之间的层级和避让关系。
+
 不在提示词里要求模仿具体在世艺术家，也不使用受保护角色。优先生成无文字底图，中文书名和作者名后期排版；图像模型直接生成汉字容易乱码。
 
 避免“电影感、史诗感、细节丰富、8K”等空词堆叠。每个视觉元素都应回答：它如何让读者一眼看出这本书独有的冲突？
 
 ## 保存包装
 
-把定位、封面主提示词和公开检索记录分别写入 UTF-8 临时文件，然后运行：
+把定位、封面主提示词、书名排版说明和公开检索记录分别写入 UTF-8 临时文件，然后运行：
 
 ```bash
 python3 <skill-dir>/scripts/publishing_package.py \
@@ -52,8 +60,9 @@ python3 <skill-dir>/scripts/publishing_package.py \
   --title <确认书名> \
   --positioning-file <定位.txt> \
   --cover-prompt-file <封面提示词.txt> \
+  --title-layout-file <书名排版与字体.txt> \
   --negative-prompt-file <负面提示词.txt> \
   --research-notes-file <检索记录.txt>
 ```
 
-脚本会备份并同步 `project.json` 与 `canon/publishing-package.md`。已有正文后改名必须先记录重大决策，再加 `--confirmed`。
+`--title-layout-file` 可省略，脚本会使用明确的默认版式与字体建议；新书仍应按题材和定位提供专属说明。脚本会备份并同步 `project.json` 与 `canon/publishing-package.md`。已有正文后改名必须先记录重大决策，再加 `--confirmed`。

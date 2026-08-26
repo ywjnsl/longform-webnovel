@@ -157,7 +157,11 @@ PUBLISHING_TEMPLATE = """# 书名与封面包装
 - 唯一性检查：待确认
 - 封面提示词状态：待确认
 
-在第一章正文前按 `references/publishing-package.md` 确认书名、公开检索记录和封面提示词。
+## 书名排版与字体说明
+
+待确认：书名位置、断行、字体家族与字重、字号层级、字色、描边/阴影，以及作者名和平台角标的避让规则。
+
+在第一章正文前按 `references/publishing-package.md` 确认书名、公开检索记录、封面提示词和书名排版说明。
 """
 
 MARKET_BRIEF_TEMPLATE = """# 市场观察

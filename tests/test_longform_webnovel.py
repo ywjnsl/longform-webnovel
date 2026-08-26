@@ -71,7 +71,9 @@ def initialize(path: Path, title: str) -> None:
         "- 唯一性检查：`completed`\n"
         "- 封面提示词状态：`ready`\n"
         f"- 小说名：{title}\n\n"
-        "## 封面主提示词\n\n测试用的独特封面构图和主体。\n",
+        "## 封面主提示词\n\n测试用的独特封面构图和主体。\n\n"
+        "## 书名排版与字体说明\n\n"
+        "书名位置在上方安全区，字体使用思源宋体 Heavy，字色为暖白并配深色描边。\n",
         encoding="utf-8",
     )
     cast_doc = read_json(path / "state/cast-arcs.json")
@@ -464,6 +466,7 @@ def test_publishing_package(base: Path) -> None:
 
     positioning = base / "positioning.txt"
     cover = base / "cover-prompt.txt"
+    title_layout = base / "title-layout.txt"
     negative = base / "negative-prompt.txt"
     research = base / "title-research.txt"
     positioning.write_text("都市超自然悬疑：失踪邮件会提前一天寄到唯一能看见它们的人手中。", encoding="utf-8")
@@ -471,6 +474,11 @@ def test_publishing_package(base: Path) -> None:
         "中文网文竖版 2:3，无文字底图。雨夜旧城区的狭长邮局门口，一名年轻收件人侧身握住正在渗出白雾的黑色信封，"
         "远处整条街的门牌同时缺失。人物位于下方三分之一，信封是唯一高亮主体，冷青环境与一束暖黄门灯对照，"
         "上方保留干净的中文书名安全区，写实悬疑插画，细节清楚但背景不过度拥挤。",
+        encoding="utf-8",
+    )
+    title_layout.write_text(
+        "书名《雾城收件人》位置在画面上方 18% 的安全区，分两行居中对齐；字体使用思源黑体 Heavy，"
+        "字色为暖白，配 2px 深青描边和轻微阴影，书名宽度约占画面 72%。作者名置于书名下方，字号为书名的 24%。",
         encoding="utf-8",
     )
     negative.write_text("乱码文字，水印，平台标识，多余人物，主体裁切，过度霓虹，廉价素材拼贴，模仿具体艺术家。", encoding="utf-8")
@@ -486,6 +494,8 @@ def test_publishing_package(base: Path) -> None:
         str(positioning),
         "--cover-prompt-file",
         str(cover),
+        "--title-layout-file",
+        str(title_layout),
         "--negative-prompt-file",
         str(negative),
         "--research-notes-file",
@@ -497,8 +507,17 @@ def test_publishing_package(base: Path) -> None:
     applied = json.loads(run(*args).stdout)
     assert Path(applied["backup"]).is_dir()
     assert read_json(project / "project.json")["title"] == "雾城收件人"
-    assert "雨夜旧城区" in (project / "canon/publishing-package.md").read_text(encoding="utf-8")
+    package_text = (project / "canon/publishing-package.md").read_text(encoding="utf-8")
+    assert "雨夜旧城区" in package_text
+    assert "思源黑体 Heavy" in package_text and "书名排版与字体说明" in package_text
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+
+    (project / "canon/publishing-package.md").write_text(
+        package_text.replace("## 书名排版与字体说明", "## 排版说明"), encoding="utf-8"
+    )
+    invalid_layout = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("title layout and typography" in error for error in invalid_layout["errors"])
+    run(*args)
 
     index = read_json(project / "project.json")
     index["lastCommittedChapter"] = 1

@@ -669,6 +669,14 @@ def main() -> int:
         for marker in ("- 定名状态：`confirmed`", "- 唯一性检查：`completed`", "- 封面提示词状态：`ready`"):
             if marker not in package_text:
                 errors.append(f"canon/publishing-package.md is missing active marker: {marker}")
+        layout_heading = "## 书名排版与字体说明"
+        if layout_heading not in package_text:
+            errors.append("canon/publishing-package.md is missing title layout and typography instructions")
+        else:
+            layout_text = package_text.split(layout_heading, 1)[1]
+            for required_term in ("位置", "字体", "字色"):
+                if required_term not in layout_text:
+                    errors.append(f"canon/publishing-package.md title layout is missing {required_term} guidance")
         title_result = analyze_title(title)
         errors.extend(f"Title quality: {message}" for message in title_result["errors"])
         warnings.extend(f"Title quality: {message}" for message in title_result["warnings"])
