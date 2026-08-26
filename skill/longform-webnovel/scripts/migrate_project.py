@@ -38,6 +38,10 @@ def render_legacy_package(title: str) -> str:
 - 封面提示词状态：`legacy-existing`
 - 小说名：{title}
 
+## 书名排版与字体说明
+
+保留既有封面和排版；作者要求换封面时，再确认书名位置、字体家族与字重、字号层级、字色和安全区。
+
 这是迁移项目。保留原书名和既有封面；作者要求改名或换封面时，再执行公开检索、提供封面提示词并记录重大决策。
 """
 
@@ -52,7 +56,11 @@ def render_unconfirmed_package() -> str:
 - 唯一性检查：待确认
 - 封面提示词状态：待确认
 
-在第一章正文前确认书名、公开检索记录和封面提示词。
+## 书名排版与字体说明
+
+待确认：书名位置、断行、字体家族与字重、字号层级、字色、描边/阴影，以及作者名和平台角标的避让规则。
+
+在第一章正文前确认书名、公开检索记录、封面提示词和书名排版说明。
 """
 
 
@@ -167,6 +175,7 @@ def main() -> int:
     else:
         cadence.setdefault("enforceFromChapter", 1)
     project["rewardCadence"] = cadence
+    project.setdefault("storyMode", "serial")
     review_gate = project.get("reviewGate") if isinstance(project.get("reviewGate"), dict) else {}
     review_gate.setdefault("enforceFromChapter", committed + 1 if old_version < 5 else 1)
     review_gate.setdefault("editorRequired", True)

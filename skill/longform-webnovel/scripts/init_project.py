@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create an original, durable project skeleton for a serialized webnovel."""
+"""Create an original, durable project skeleton for a webnovel or short story."""
 
 from __future__ import annotations
 
@@ -105,6 +105,49 @@ TEXT_FILES = {
 """,
 }
 
+SHORT_STORY_PLANNING_FILES = {
+    "planning/series-map.md": """# 短故事收束地图
+
+## 单一主承诺
+
+待填写。
+
+## 主要矛盾的终点
+
+待确认。
+
+## 开放结尾边界
+
+默认完整收束；若作者明确选择开放结尾，在此记录保留什么余韵、必须回答什么。
+""",
+    "planning/current-volume.md": """# 短故事全文结构
+
+## 开局扰动
+
+待确认。
+
+## 不可逆选择与主要对抗
+
+待确认。
+
+## 中点翻转
+
+待规划。
+
+## 决定性对抗与结局
+
+待确认。
+""",
+    "planning/rolling-outline.md": """# 短故事分节纲
+
+覆盖全部剩余分节。每节写明：目的、阻碍、状态变化、揭示或兑现，以及它如何逼近结局。
+
+按全文比例标记开局扰动、不可逆选择、中点翻转、决定性对抗和结局收束；分节较少时允许同节承担多个结构职责。
+
+待规划。
+""",
+}
+
 PUBLISHING_TEMPLATE = """# 书名与封面包装
 
 ## 状态
@@ -114,7 +157,11 @@ PUBLISHING_TEMPLATE = """# 书名与封面包装
 - 唯一性检查：待确认
 - 封面提示词状态：待确认
 
-在第一章正文前按 `references/publishing-package.md` 确认书名、公开检索记录和封面提示词。
+## 书名排版与字体说明
+
+待确认：书名位置、断行、字体家族与字重、字号层级、字色、描边/阴影，以及作者名和平台角标的避让规则。
+
+在第一章正文前按 `references/publishing-package.md` 确认书名、公开检索记录、封面提示词和书名排版说明。
 """
 
 MARKET_BRIEF_TEMPLATE = """# 市场观察
@@ -136,8 +183,18 @@ def main() -> int:
     parser.add_argument("--path", required=True, help="Project directory to create")
     parser.add_argument("--title", required=True, help="Novel title")
     parser.add_argument("--style", choices=sorted(PRESETS), help="Optional initial language style preset")
+    parser.add_argument("--mode", choices=("serial", "fanqie-short-story"), default="serial")
+    parser.add_argument("--target-total-chars", type=int, help="Optional short-story total content-character target")
+    parser.add_argument("--sections", type=int, default=5, help="Planned short-story sections (default: 5)")
     parser.add_argument("--force-empty", action="store_true", help="Allow an existing empty directory")
     args = parser.parse_args()
+
+    if args.mode == "serial" and args.target_total_chars is not None:
+        raise SystemExit("--target-total-chars is only valid with --mode fanqie-short-story")
+    if args.target_total_chars is not None and args.target_total_chars <= 0:
+        raise SystemExit("--target-total-chars must be positive")
+    if not 1 <= args.sections <= 300:
+        raise SystemExit("--sections must be between 1 and 300")
 
     root = Path(args.path).expanduser().resolve()
     if root.exists():
@@ -164,6 +221,7 @@ def main() -> int:
         "schemaVersion": CURRENT_PROJECT_SCHEMA,
         "title": args.title,
         "platformStyle": "fanqie",
+        "storyMode": args.mode,
         "targetChapterChars": 2500,
         "rewardCadence": {
             "smallEvery": 3,
@@ -205,6 +263,13 @@ def main() -> int:
         "createdAt": now,
         "updatedAt": now,
     }
+    if args.mode == "fanqie-short-story":
+        project["shortStory"] = {
+            "targetTotalChars": args.target_total_chars,
+            "plannedSections": args.sections,
+            "status": "planning",
+            "endingType": "closed",
+        }
     state = {
         "schemaVersion": 1,
         "asOfChapter": 0,
@@ -228,7 +293,10 @@ def main() -> int:
     write_json(root / "state/rewards.json", rewards)
     write_json(root / "state/cast-arcs.json", cast_arcs)
     write_json(root / "state/decisions.json", decisions)
-    for relative, content in TEXT_FILES.items():
+    text_files = dict(TEXT_FILES)
+    if args.mode == "fanqie-short-story":
+        text_files.update(SHORT_STORY_PLANNING_FILES)
+    for relative, content in text_files.items():
         (root / relative).write_text(content, encoding="utf-8")
     style_content = render_profile(args.style) if args.style else render_unselected_profile()
     (root / "canon/style-profile.md").write_text(style_content, encoding="utf-8")

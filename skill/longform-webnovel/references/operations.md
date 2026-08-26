@@ -44,7 +44,7 @@ python3 <skill-dir>/scripts/commit_chapter.py \
   --staging <staging目录>
 ```
 
-脚本执行以下操作：获取项目锁、验证路径、构造隔离预览、运行完整校验、备份将被替换的文件、用原子文件替换提交。普通提交只允许从最后已提交章前进一章。
+脚本执行以下操作：获取项目锁、验证路径、构造隔离预览（包括 `research/` 快照）、运行完整校验、备份将被替换的文件、用原子文件替换提交。普通提交只允许从最后已提交章前进一章。
 
 先检查而不写入：
 
@@ -65,3 +65,16 @@ python3 <skill-dir>/scripts/commit_chapter.py \
 ```
 
 恢复会按备份清单还原旧文件，并删除该次提交新建的文件。恢复后立即运行项目校验。
+
+## 合并完稿
+
+短故事标记 `complete` 且项目校验通过后，用以下命令生成单一发布 Markdown：
+
+```bash
+python3 <skill-dir>/scripts/merge_chapters.py \
+  --project <项目目录> \
+  --output <输出文件> \
+  --strip-headings
+```
+
+脚本按已提交章号排序，`--strip-headings` 只移除章节 H1，不改正文段落，并验证合并稿有效字符总数与章节总和一致。输出文件不得写入 `chapters/`。
