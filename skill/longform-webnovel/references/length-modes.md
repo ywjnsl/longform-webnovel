@@ -59,6 +59,7 @@
 - `plannedSections` 是当前结构合同。需要增减时先判断是否改变结局与核心体验；重大改变先问作者；
 - 标记 `complete` 前，主要线索必须 `resolved` 或 `transformed`，最后一节必须交付结局级 `major` 回报，并完成绑定全文哈希的 `reviews/final-review.json` 外部读者终审；
 - 完结终审额外检查主承诺兑现、伏笔回收、因果闭合、人物选择后果、标题照应和开放结尾边界。
+- 标题、首屏和试读节点若承担主要分发入口，写作前与完稿后都按 [short-story-information-flow.md](short-story-information-flow.md) 回读；这只是入口质量检查，不是流量保证。
 
 不要在已标记 `complete` 后自动生成下一章。续作、新篇或改成长篇都属于新的重大决策。
 

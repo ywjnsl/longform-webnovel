@@ -32,6 +32,8 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 
 先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
 
+番茄短故事做信息流标题、开头、试读节点或入口审稿时，再读 [short-story-information-flow.md](references/short-story-information-flow.md)。不要无差别加载全部参考资料。
+
 ## 新建项目
 
 1. 若用户未指定项目路径，在当前工作目录下使用安全的作品名创建项目文件夹。
@@ -54,6 +56,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 
 - 一个短故事是一个有终点的作品，不是缩短版无限连载。只保留一个主承诺、一个主要矛盾和能在结局前闭合的少量副线。
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。
+- 短故事动笔前建立入口合同；标题、前 100 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。
