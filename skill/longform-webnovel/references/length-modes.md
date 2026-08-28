@@ -4,7 +4,7 @@
 
 `project.json.storyMode` 只使用两个值：
 
-- `serial`：默认长篇连载。每章约 2500 个有效内容字符，未来 5–10 章滚动规划，执行 3/5/15 章节拍。
+- `serial`：默认长篇连载。每章以约 2500 个有效内容字符作为起始估算和节奏异常信号，不是硬性配额；未来 5–10 章滚动规划，执行 3/5/15 章节拍。
 - `fanqie-short-story`：番茄短故事。把作品视为一次完整的有限叙事，可写成一个完整文本或少量连续分节，不把长篇循环机械压缩。
 
 旧项目没有 `storyMode` 时按 `serial` 读取。模式改变会重写故事合同、节奏和结局预期，属于必须由作者确认的重大决策。
@@ -56,7 +56,7 @@
 
 - `planning/rolling-outline.md` 覆盖全部剩余分节，不维护未来 5–10 章窗口；
 - `shortStory.status` 从 `planning` 进入 `drafting`，全文完成并通过终审后改为 `complete`；
-- `plannedSections` 是当前结构合同。需要增减时先判断是否改变结局与核心体验；重大改变先问作者；
+- `plannedSections` 是当前结构合同和叙事职责清单，不是字数配额。需要增减时先判断是否改变结局与核心体验；重大改变先问作者。若一节只能靠重复对白、重复解释或无后果反转来达到长度，优先增加一个来自既有行动后果或必要未闭合线索的新分节，并为它写明独立的因果职责；若增节改变主承诺、结局类型或主要矛盾，走重大决策确认流程。增减分节后同步更新 `planning/rolling-outline.md`、爽点账本、状态快照和 `project.json` 中的 `shortStory.plannedSections`。
 - 标记 `complete` 前，主要线索必须 `resolved` 或 `transformed`，最后一节必须交付结局级 `major` 回报，并完成绑定全文哈希的 `reviews/final-review.json` 外部读者终审；
 - 完结终审额外检查主承诺兑现、伏笔回收、因果闭合、人物选择后果、标题照应和开放结尾边界。
 - 标题、首屏和试读节点若承担主要分发入口，写作前与完稿后都按 [short-story-information-flow.md](short-story-information-flow.md) 回读；这只是入口质量检查，不是流量保证。

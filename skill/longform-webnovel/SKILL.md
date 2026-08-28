@@ -5,21 +5,22 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 
 # 长期网文连载
 
-把小说视为持续演化的状态，而不是一串互不相干的章节。默认 `serial` 面向中文长篇网文，每章约 2500 字；`fanqie-short-story` 面向一次完整收束的番茄短故事。两种模式都采用快进入、强推进和清晰回报，题材不固定；先从故事承诺推导写法，不套用固定类型模板。
+把小说视为持续演化的状态，而不是一串互不相干的章节。默认 `serial` 面向中文长篇网文，每章以约 2500 字作为起始估算和节奏信号，不是硬性配额；`fanqie-short-story` 面向一次完整收束的番茄短故事，也按场景职责保留篇幅弹性。两种模式都采用快进入、强推进和清晰回报，题材不固定；先从故事承诺推导写法，不套用固定类型模板。
 
 ## 基本原则
 
 1. 让故事长期扩展，但不给故事注水。每次扩展必须来自已有行动的后果。
 2. 长篇保持三层规划：当前章具体、未来 5–10 章清楚、当前卷稳定；更远内容只保留方向和选择。短故事让当前节具体、全部剩余分节可见、结局稳定。
 3. 每章至少改变两个状态维度：目标、关系、认知、资源/能力、世界局势、道德位置。
-4. 长篇每 3 章兑现一次小爽点或小高潮，每 5 章兑现一次大爽点或大高潮；短故事改用全文比例结构锚点，不机械补齐 3/5 章。所有兑现都必须造成真实状态变化。
-5. 不用单纯提高战力、扩大地图或复制反派来续命。升级必须同时增加代价、责任、限制或新的对抗方式。
-6. 重大决策询问作者，其余内容自主完成。按 [approval-policy.md](references/approval-policy.md) 判断。
-7. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
-8. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。
-9. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
-10. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
-11. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
+4. 章节目标字数是节奏参考，不是硬性配额。正文不足时先补充能推进因果、揭示信息、迫使选择或交付回报的场景；若继续扩写会注水，就拆分或增加章节/分节，并同步更新章纲、爽点账本、状态快照和篇幅合同。
+5. 长篇每 3 章兑现一次小爽点或小高潮，每 5 章兑现一次大爽点或大高潮；短故事改用全文比例结构锚点，不机械补齐 3/5 章。所有兑现都必须造成真实状态变化。
+6. 不用单纯提高战力、扩大地图或复制反派来续命。升级必须同时增加代价、责任、限制或新的对抗方式。
+7. 重大决策询问作者，其余内容自主完成。按 [approval-policy.md](references/approval-policy.md) 判断。
+8. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
+9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。
+10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
+11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
+12. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
 
 ## 识别任务
 
@@ -32,7 +33,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 
 先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
 
-番茄短故事做信息流标题、开头、试读节点或入口审稿时，再读 [short-story-information-flow.md](references/short-story-information-flow.md)。不要无差别加载全部参考资料。
+番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。不要无差别加载全部参考资料。
 
 ## 新建项目
 
@@ -56,7 +57,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 
 - 一个短故事是一个有终点的作品，不是缩短版无限连载。只保留一个主承诺、一个主要矛盾和能在结局前闭合的少量副线。
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。
-- 短故事动笔前建立入口合同；标题、前 100 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。
+- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。
@@ -82,7 +83,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 
 1. 按 [operations.md](references/operations.md) 创建 staging 目录，把新正文和所有拟更新文件按项目相对路径写入 staging。
 2. 在 staging 中写 `chapters/第NNNN章-标题.md`，不要覆盖现有章节，除非用户明确要求修订。
-3. 运行；短故事先用“目标总字符数 ÷ 预计分节数”确定本节初始目标，单篇不分节时使用全文目标替换 `2500`：
+3. 运行章节指标；短故事先用“目标总字符数 ÷ 预计分节数”得到本节起始估算，单篇不分节时使用全文目标替换 `2500`。这个 `--target` 只用于发现节奏异常，不得阻断自然短章、长章或合理增节：
 
 ```bash
 python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500

@@ -36,6 +36,8 @@ staging/
 
 每章同时暂存 `sessions/*chapter-NNNN*.md` 交接记录。`project.json.totalContentChars` 使用 `chapter_metrics.py` 的 `contentChars` 口径累加；修订旧章时用新旧正文有效字符差更新。
 
+章节长度只作为审稿信号，不是必须填满的指标。若正文偏短，先检查是否缺少推进因果、有效信息、人物选择或回报；禁止用重复对白、重复解释、无后果反转或把同一正文机械拆成多个标题来达标。需要新增长篇章节或短故事分节时，先在 `planning/rolling-outline.md` 写清新增分节的因果职责、入口、结尾推动力及其与前后章的关系，再同步更新 `project.json` 的章号字段或 `shortStory.plannedSections`、爽点账本和四个状态快照。若增章改变主承诺、结局类型或主要矛盾，按重大决策流程等待作者确认。
+
 ## 校验并提交
 
 ```bash
