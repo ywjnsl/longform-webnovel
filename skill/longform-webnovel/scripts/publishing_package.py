@@ -58,7 +58,24 @@ def read_bounded(path: Path, label: str, minimum: int, maximum: int) -> str:
     return content
 
 
-def render_package(title: str, positioning: str, cover_prompt: str, negative_prompt: str, research: str, checked_at: str) -> str:
+def default_title_layout(title: str) -> str:
+    return f"""- 书名文字：后期准确叠加《{title}》，不要让图像模型直接生成汉字。
+- 主标题位置：置于画面上方约 15%–30% 的安全区，居中或按主体视线留出横向排版空间；不得压住人物脸部和核心道具。
+- 字体建议：思源宋体 Heavy（Source Han Serif SC Heavy / Noto Serif CJK SC Black），端庄、有文学感；若题材确认偏现代动作，可改用思源黑体 Heavy。
+- 字号与层级：书名占画面宽度约 65%–78%，两行以内；第一行更大，行距约字号的 0.85–1.0 倍，保证缩略图仍能读清。
+- 字色与效果：主色用暖白或浅金，添加 1–2px 深色描边和柔和阴影，确保在复杂背景上清晰但不做夸张发光。
+- 作者名与角标：作者名置于书名下方或底部安全区，字号为书名的 20%–30%；平台角标只放在不影响标题和主体的位置。"""
+
+
+def render_package(
+    title: str,
+    positioning: str,
+    cover_prompt: str,
+    negative_prompt: str,
+    title_layout: str,
+    research: str,
+    checked_at: str,
+) -> str:
     return f"""# 书名与封面包装
 
 ## 状态
@@ -92,9 +109,11 @@ def render_package(title: str, positioning: str, cover_prompt: str, negative_pro
 
 按番茄作者帮助中心公开要求，成品封面使用 600×800 像素、3:4 竖版，PNG 或 JPEG，文件不超过 5MB。成品必须包含准确书名“{title}”和作者笔名（替换为后台真实笔名），字迹清晰、完整、无遮挡；不得含外站 Logo、二维码、网址或水印。
 
-## 排版说明
+## 书名排版与字体说明
 
-必须写明书名准确文字、断行、最多行数、位置、对齐、占画面宽度比例、四边安全区、中文字体家族与字重、字号层级、字色、描边/阴影，以及作者名的位置和避让关系。优先生成无文字封面底图，为书名、作者名和平台角标保留明确安全区；文字在后期排版，不依赖图像模型生成汉字。作者笔名不得由图像模型自行编造。
+{title_layout}
+
+优先生成无文字封面底图，为书名、作者名和平台角标保留明确安全区；文字在后期排版，不依赖图像模型生成汉字。作者笔名不得由图像模型自行编造。
 """
 
 
@@ -106,6 +125,7 @@ def main() -> int:
     parser.add_argument("--positioning-file", type=Path)
     parser.add_argument("--cover-prompt-file", type=Path)
     parser.add_argument("--negative-prompt-file", type=Path)
+    parser.add_argument("--title-layout-file", type=Path, help="Optional title typography and layout notes")
     parser.add_argument("--research-notes-file", type=Path)
     parser.add_argument("--confirmed", action="store_true", help="Confirm changing a title after chapters have been committed")
     parser.add_argument("--dry-run", action="store_true")
@@ -125,6 +145,11 @@ def main() -> int:
     cover_prompt = read_bounded(args.cover_prompt_file, "cover prompt", 80, 3000)
     research = read_bounded(args.research_notes_file, "research notes", 30, 3000)
     negative = read_bounded(args.negative_prompt_file, "negative prompt", 10, 1000) if args.negative_prompt_file else ""
+    title_layout = (
+        read_bounded(args.title_layout_file, "title layout", 30, 2000)
+        if args.title_layout_file
+        else default_title_layout(args.title.strip())
+    )
 
     root = args.project.expanduser().resolve()
     project_path = root / "project.json"
@@ -140,7 +165,7 @@ def main() -> int:
         raise SystemExit("Changing the title after committed chapters is a major decision; pass --confirmed after author approval")
 
     checked_at = utc_now()
-    content = render_package(args.title.strip(), positioning, cover_prompt, negative, research, checked_at)
+    content = render_package(args.title.strip(), positioning, cover_prompt, negative, title_layout, research, checked_at)
     proposed = dict(project)
     proposed["title"] = args.title.strip()
     proposed["publishingPackage"] = {

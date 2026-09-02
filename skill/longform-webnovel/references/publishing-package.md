@@ -2,7 +2,7 @@
 
 ## 正文前闸门
 
-第一章正文之前，必须向作者展示并确认：候选书名、推荐理由、公开检索结果、封面主提示词和负面提示词。确认后写入 `canon/publishing-package.md`。不得先写正文，再补一个与内容无关的包装。
+第一章正文之前，必须向作者展示并确认：候选书名、推荐理由、公开检索结果、封面主提示词、负面提示词，以及书名排版与字体说明。确认后写入 `canon/publishing-package.md`。不得先写正文，再补一个与内容无关的包装。
 
 已有连载迁移时保留原书名和既有封面。只有作者要求改名或换封面时才重新走确认流程。
 
@@ -25,6 +25,8 @@ python3 <skill-dir>/scripts/publishing_package.py --check-title <候选书名>
 本地检查只能发现明显公式。再对前 3 名做公开精确检索：至少覆盖通用搜索引擎和目标网文平台；搜索完整标题、去标点标题和最有辨识度的 4–8 字短语。记录检查日期、平台、同名/近似结果和判断。不要声称绝对唯一，只说明检索范围内未发现高风险撞名。
 
 评价候选时看四项：与核心卖点的绑定度、口头传播、封面可读性、精确检索区分度。最终定名属于开书重大决策，由作者确认。
+
+番茄短故事另做一次信息流检查：标题应让读者一眼识别至少一个人物/关系或类型信号，并暗示一个具体事件和反常结果、代价或问题。可以使用文学化短名，但必须在简介和首屏补足“谁遇到了什么”；不要为了追求接近 30 字牺牲清楚度。详细的标题与开头合同见 [short-story-information-flow.md](short-story-information-flow.md)。
 
 ## 封面提示词
 
@@ -64,8 +66,9 @@ python3 <skill-dir>/scripts/publishing_package.py \
   --title <确认书名> \
   --positioning-file <定位.txt> \
   --cover-prompt-file <封面提示词.txt> \
+  --title-layout-file <书名排版与字体.txt> \
   --negative-prompt-file <负面提示词.txt> \
   --research-notes-file <检索记录.txt>
 ```
 
-脚本会备份并同步 `project.json` 与 `canon/publishing-package.md`。已有正文后改名必须先记录重大决策，再加 `--confirmed`。
+`--title-layout-file` 可省略，脚本会使用明确的默认版式与字体建议；新书仍应按题材和定位提供专属说明。脚本会备份并同步 `project.json` 与 `canon/publishing-package.md`。已有正文后改名必须先记录重大决策，再加 `--confirmed`。

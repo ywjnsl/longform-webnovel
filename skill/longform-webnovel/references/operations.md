@@ -36,6 +36,8 @@ staging/
 
 每章同时暂存 `sessions/*chapter-NNNN*.md` 交接记录。`project.json.totalContentChars` 使用 `chapter_metrics.py` 的 `contentChars` 口径累加；修订旧章时用新旧正文有效字符差更新。
 
+章节长度只作为审稿信号，不是必须填满的指标。若正文偏短，先检查是否缺少推进因果、有效信息、人物选择或回报；禁止用重复对白、重复解释、无后果反转或把同一正文机械拆成多个标题来达标。需要新增长篇章节或短故事分节时，先在 `planning/rolling-outline.md` 写清新增分节的因果职责、入口、结尾推动力及其与前后章的关系，再同步更新 `project.json` 的章号字段或 `shortStory.plannedSections`、爽点账本和四个状态快照。若增章改变主承诺、结局类型或主要矛盾，按重大决策流程等待作者确认。
+
 ## 校验并提交
 
 ```bash
@@ -44,7 +46,7 @@ python3 <skill-dir>/scripts/commit_chapter.py \
   --staging <staging目录>
 ```
 
-脚本执行以下操作：获取项目锁、验证路径、构造隔离预览、运行完整校验、备份将被替换的文件、用原子文件替换提交。普通提交只允许从最后已提交章前进一章。
+脚本执行以下操作：获取项目锁、验证路径、构造隔离预览（包括 `research/` 快照）、运行完整校验、备份将被替换的文件、用原子文件替换提交。普通提交只允许从最后已提交章前进一章。
 
 先检查而不写入：
 
@@ -65,3 +67,16 @@ python3 <skill-dir>/scripts/commit_chapter.py \
 ```
 
 恢复会按备份清单还原旧文件，并删除该次提交新建的文件。恢复后立即运行项目校验。
+
+## 合并完稿
+
+短故事标记 `complete` 且项目校验通过后，用以下命令生成单一发布 Markdown：
+
+```bash
+python3 <skill-dir>/scripts/merge_chapters.py \
+  --project <项目目录> \
+  --output <输出文件> \
+  --strip-headings
+```
+
+脚本按已提交章号排序，`--strip-headings` 只移除章节 H1，不改正文段落，并验证合并稿有效字符总数与章节总和一致。输出文件不得写入 `chapters/`。

@@ -9,6 +9,7 @@ import re
 import shutil
 import tempfile
 import uuid
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from pathlib import Path
 CURRENT_PROJECT_SCHEMA = 5
 CURRENT_REWARD_SCHEMA = 2
 CURRENT_CAST_SCHEMA = 1
+VALID_STORY_MODES = {"serial", "fanqie-short-story"}
 CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 ASCII_WORD_RE = re.compile(r"[A-Za-z0-9]+")
 
@@ -158,6 +160,30 @@ def chapter_role(chapter: int) -> str:
     return roles[(chapter - 1) % 15 + 1]
 
 
+def story_mode(project: dict) -> str:
+    """Treat pre-mode projects as serial projects for backward compatibility."""
+    return project.get("storyMode", "serial")
+
+
+def short_story_anchors(total_sections: int) -> dict[int, dict]:
+    """Map percentage-based short-story turns onto a finite section count."""
+    markers = (
+        (0.10, "开局扰动：尽快让核心异常、欲望或压力发生", None),
+        (0.25, "不可逆选择：主角主动进入主要冲突", "small"),
+        (0.50, "中点翻转：认知、关系或目标发生实质改写", "small"),
+        (0.80, "决定性对抗：主要矛盾进入不可回避的解决", "major"),
+        (1.00, "结局收束：兑现主承诺并交代关键后果", "major"),
+    )
+    anchors: dict[int, dict] = {}
+    for ratio, role, reward in markers:
+        section = max(1, min(total_sections, math.ceil(total_sections * ratio)))
+        anchor = anchors.setdefault(section, {"roles": [], "reward": None})
+        anchor["roles"].append(role)
+        if reward == "major" or (reward == "small" and anchor["reward"] is None):
+            anchor["reward"] = reward
+    return anchors
+
+
 def required_reward(chapter: int, cadence: dict) -> str | None:
     small = cadence["smallEvery"]
     major = cadence["majorEvery"]
@@ -168,12 +194,12 @@ def required_reward(chapter: int, cadence: dict) -> str | None:
     return None
 
 
-def blank_beat(chapter: int, level: str) -> dict:
+def blank_beat(chapter: int, level: str, role: str | None = None) -> dict:
     return {
         "chapter": chapter,
         "level": level,
         "status": "planned",
-        "role": chapter_role(chapter),
+        "role": role or chapter_role(chapter),
         "rewardType": "unassigned",
         "payoff": "待规划",
         "setupChapters": [],
