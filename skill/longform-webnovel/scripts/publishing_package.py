@@ -26,6 +26,14 @@ FORMULAIC_PATTERNS = (
     (re.compile(r"^(最强|绝世|无敌|极品).{0,6}(神|王|帝|婿|高手|战神)$"), "常见最强身份公式"),
     (re.compile(r"^我在.{1,8}(当|做|成了|修仙|种田)$"), "常见‘我在某处’公式"),
 )
+COVER_STYLES = (
+    "editorial-impact",
+    "classical-calligraphy",
+    "cinematic-3d",
+    "action-display",
+    "emotional-handwritten",
+    "mystery-file",
+)
 
 
 def analyze_title(title: str) -> dict:
@@ -58,13 +66,37 @@ def read_bounded(path: Path, label: str, minimum: int, maximum: int) -> str:
     return content
 
 
-def default_title_layout(title: str) -> str:
-    return f"""- 书名文字：后期准确叠加《{title}》，不要让图像模型直接生成汉字。
-- 主标题位置：置于画面上方约 15%–30% 的安全区，居中或按主体视线留出横向排版空间；不得压住人物脸部和核心道具。
-- 字体建议：思源宋体 Heavy（Source Han Serif SC Heavy / Noto Serif CJK SC Black），端庄、有文学感；若题材确认偏现代动作，可改用思源黑体 Heavy。
-- 字号与层级：书名占画面宽度约 65%–78%，两行以内；第一行更大，行距约字号的 0.85–1.0 倍，保证缩略图仍能读清。
-- 字色与效果：主色用暖白或浅金，添加 1–2px 深色描边和柔和阴影，确保在复杂背景上清晰但不做夸张发光。
-- 作者名与角标：作者名置于书名下方或底部安全区，字号为书名的 20%–30%；平台角标只放在不影响标题和主体的位置。"""
+def default_title_layout(title: str, style: str = "editorial-impact") -> str:
+    shared = f"""- 准确文字：仅使用书名“{title}”，不增字、不漏字、不改字，不用拼音或英文替代；阅读顺序必须清楚。
+- 缩略图标准：按 120×160 像素预览时，主标题仍须在 1 秒内辨认；四边保留至少画面宽度 5% 的安全距离，不得遮挡人物眼睛、嘴巴和核心道具。
+- 作者名：使用“作者：〔后台真实笔名〕”占位，字号为主标题的 20%–26%，不得由模型编造笔名。"""
+    profiles = {
+        "editorial-impact": """- 版式：主标题位于上半部，最多两行横排，标题块占画面宽度 72%–82%、高度 24%–34%，主副层级明确。
+- 字形：宽扁、字面饱满的重黑标题骨架，横竖笔画接近等粗，方头略带外扩切角，不使用普通文档黑体的平直效果。
+- 字效：暖白或亮橙正面，先加窄白色内描边，再加深红或深蓝外包边；向右下投射短硬阴影，局部高光只落在上缘，形成海报式浅浮雕。
+- 图文关系：标题可压住人物肩部或衣角不超过 6%，人物头部与关键动作完整露出；标题背后降低纹理与高光密度。""",
+        "classical-calligraphy": """- 版式：主标题在左中部或画面中轴纵排 2–3 列，列间错落，标题块占画面宽度 30%–42%、高度 55%–70%，从上到下、从右向左阅读。
+- 字形：瘦长榜书行楷骨架，重心略高，起收笔有锋，粗细反差明显；笔画保留可见飞白、枯笔和墨色浓淡，不做电脑楷体。
+- 字效：旧宣纸暖白与哑光金箔混合材质，细暗红外描边，极浅纸面投影；配一枚小号朱文题签作层级点缀，不承载作者名。
+- 图文关系：竖排标题像诏令或题签压在场景前层，可覆盖衣摆或器物边缘不超过 8%，不得遮挡人物脸部与故事关键物证。""",
+        "cinematic-3d": """- 版式：主标题置于上半部中央，两行横排，第一行占宽约 76%，第二行占宽约 58%；小号副题独立置于标题下方窄横条。
+- 字形：宽扁几何重黑骨架，字腔紧、笔画粗、端点方正带切角，主关键词放大 115%–130%。
+- 字效：亮橙到金黄硬渐变正面，窄象牙白内高光、深红包边、黑蓝第二层描边；向右下挤出 6–10 像素金属侧面并配硬投影，边缘有少量磨砂颗粒，禁止塑料发光感。
+- 图文关系：人物与门、阶梯或城市透视线共同指向标题，标题在人物前层但不压头部，背后用深色放射线强化轮廓。""",
+        "action-display": """- 版式：主标题占画面下三分之一，整体向右上倾斜约 7 度，一至两行斜切排版，标题块占宽 82%–92%。
+- 字形：超粗紧缩黑体骨架，方头刀锋切角，部分横画外伸形成速度感；关键词比其余文字大 20%，但保持同一阅读基线。
+- 字效：暖白到橙红硬渐变正面，白色窄内高光、深褐粗外描边、黑色短投影，字腰穿过一条锐利红色速度线；不得使用模糊光晕。
+- 图文关系：标题允许压住人物肩部、制服下缘或前景碎片 5%–10%，人物面部、徽章和手中物件必须完整可见。""",
+        "emotional-handwritten": """- 版式：主标题沿人物视线留白侧排成 2–3 行错落结构，占宽 48%–64%、高度 28%–42%，行首不完全齐平但阅读顺序明确。
+- 字形：粗手写骨架，字面大小有克制变化，笔触有停顿、回锋和干湿差，基线稳定，不做儿童涂鸦或纤细签名字。
+- 字效：哑光暖白或低饱和绛红笔触，单层深色描边和向右下的柔和短阴影；只用一处与故事相关的折痕、裂线或波形融入笔画。
+- 图文关系：文字与人物之间保留清楚呼吸区，可轻压衣角，不能跨过眼睛和嘴部；标题背后的光线保持均匀低纹理。""",
+        "mystery-file": """- 版式：主标题置于上部窄区或右侧纵排，占画面宽度 28%–54%，周围保留大面积暗部；编号和日期只能作为小号辅助层。
+- 字形：窄长宋黑混合骨架，横细竖重、字距紧，局部边缘像被档案裁刀截断，但每个汉字结构完整。
+- 字效：骨白或警示红平面字，深黑细描边和轻微错版套印，不做霓虹、厚重金属或大面积发光。
+- 图文关系：标题压在档案袋、门框或阴影前层，避开人物五官和线索物件；真实机构徽标、印章与编号格式不得出现。""",
+    }
+    return profiles[style] + "\n" + shared
 
 
 def render_package(
@@ -126,6 +158,12 @@ def main() -> int:
     parser.add_argument("--cover-prompt-file", type=Path)
     parser.add_argument("--negative-prompt-file", type=Path)
     parser.add_argument("--title-layout-file", type=Path, help="Optional title typography and layout notes")
+    parser.add_argument(
+        "--cover-style",
+        choices=COVER_STYLES,
+        default="editorial-impact",
+        help="Fallback title-effect profile used when --title-layout-file is omitted",
+    )
     parser.add_argument("--research-notes-file", type=Path)
     parser.add_argument("--confirmed", action="store_true", help="Confirm changing a title after chapters have been committed")
     parser.add_argument("--dry-run", action="store_true")
@@ -148,7 +186,7 @@ def main() -> int:
     title_layout = (
         read_bounded(args.title_layout_file, "title layout", 30, 2000)
         if args.title_layout_file
-        else default_title_layout(args.title.strip())
+        else default_title_layout(args.title.strip(), args.cover_style)
     )
 
     root = args.project.expanduser().resolve()
@@ -181,6 +219,7 @@ def main() -> int:
         "dryRun": args.dry_run,
         "title": args.title.strip(),
         "titleWarnings": title_result["warnings"],
+        "coverStyle": "custom" if args.title_layout_file else args.cover_style,
         "project": str(root),
     }
     if not args.dry_run:

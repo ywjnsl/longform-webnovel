@@ -515,6 +515,16 @@ def test_publishing_package(base: Path) -> None:
     assert "思源黑体 Heavy" in package_text and "书名排版与字体说明" in package_text
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
+    styled_args = list(args)
+    layout_flag = styled_args.index("--title-layout-file")
+    del styled_args[layout_flag : layout_flag + 2]
+    styled_args.extend(("--cover-style", "classical-calligraphy"))
+    styled = json.loads(run(*styled_args).stdout)
+    assert styled["coverStyle"] == "classical-calligraphy"
+    styled_text = (project / "canon/publishing-package.md").read_text(encoding="utf-8")
+    assert "飞白" in styled_text and "纵排 2–3 列" in styled_text and "120×160" in styled_text
+    run(*args)
+
     (project / "canon/publishing-package.md").write_text(
         package_text.replace("## 书名排版与字体说明", "## 排版说明"), encoding="utf-8"
     )
