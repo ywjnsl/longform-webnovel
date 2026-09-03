@@ -246,6 +246,8 @@ def commit(project: Path, stage: Path, *, dry_run: bool = False, expect: int = 0
 def test_initialization_and_cadence(base: Path) -> None:
     project = base / "initial"
     initialize(project, "初始化测试")
+    assert (project / "performance/snapshots").is_dir()
+    assert read_json(project / "project.json")["performanceFeedback"]["status"] == "unrequested"
     result = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert result["ok"]
     dry = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--json").stdout)
@@ -587,6 +589,192 @@ def test_market_research(base: Path) -> None:
     failed = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(invalid_path), expect=1).stdout)
     joined = "\n".join(failed["errors"])
     assert "at least 2 public sources" in joined and "at least 5 observed works" in joined and "confidence" in joined
+
+
+def test_short_story_market_boundary(base: Path) -> None:
+    project = base / "short-story-market"
+    run(
+        "python3",
+        str(SCRIPTS / "init_project.py"),
+        "--path",
+        str(project),
+        "--title",
+        "短故事市场边界",
+        "--mode",
+        "fanqie-short-story",
+    )
+    source_urls = ["https://example.com/short-story", "https://example.org/short-story"]
+    snapshot = {
+        "schemaVersion": 1,
+        "asOfDate": "2026-09-03",
+        "platform": "番茄小说",
+        "scope": {
+            "audience": "短故事读者",
+            "genre": "古言悬疑",
+            "ranking": "短故事频道公开样本",
+            "sampleWindow": "频道内五个近期样本",
+            "contentForm": "short-story",
+        },
+        "sources": [
+            {"title": "短故事页一", "url": source_urls[0], "accessedAt": "2026-09-03", "contentForm": "short-story"},
+            {"title": "短故事页二", "url": source_urls[1], "accessedAt": "2026-09-03", "contentForm": "short-story"},
+        ],
+        "samples": [
+            {
+                "title": f"短故事样本{index}",
+                "sourceUrl": source_urls[index % 2],
+                "tags": ["短故事", "悬疑"],
+                "observedSignals": [f"样本{index}公开展示了具体入口冲突"],
+            }
+            for index in range(1, 6)
+        ],
+        "observations": ["入口冲突具体", "主角目标清楚", "短篇结局闭合"],
+        "hypotheses": [
+            {"claim": "具体危机便于理解", "confidence": "medium", "evidenceTitles": ["短故事样本1"]},
+            {"claim": "身份反差仍有空间", "confidence": "low", "evidenceTitles": ["短故事样本2"]},
+        ],
+        "opportunities": ["改造冲突机制", "避开重复身份"],
+        "avoidCopying": ["不复用书名", "不拼接情节"],
+    }
+    snapshot_path = base / "short-story-market.json"
+    write_json(snapshot_path, snapshot)
+    args = ("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(snapshot_path))
+    assert json.loads(run(*args, "--dry-run").stdout)["ok"]
+
+    wrong_scope = json.loads(json.dumps(snapshot, ensure_ascii=False))
+    wrong_scope["scope"]["contentForm"] = "longform"
+    wrong_scope_path = base / "wrong-short-story-scope.json"
+    write_json(wrong_scope_path, wrong_scope)
+    errors = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_scope_path), expect=1).stdout)["errors"]
+    assert any("scope.contentForm=short-story" in error for error in errors)
+
+    wrong_source = json.loads(json.dumps(snapshot, ensure_ascii=False))
+    wrong_source["sources"][0]["contentForm"] = "mixed"
+    wrong_source_path = base / "wrong-short-story-source.json"
+    write_json(wrong_source_path, wrong_source)
+    errors = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_source_path), expect=1).stdout)["errors"]
+    assert any("source #1 must use contentForm=short-story" in error for error in errors)
+
+
+def make_story_project(path: Path, title: str, contract: str, characters: str) -> None:
+    write_json(path / "project.json", {"title": title})
+    (path / "canon").mkdir(parents=True, exist_ok=True)
+    (path / "canon/story-contract.md").write_text(f"# 故事合同\n\n{contract}\n", encoding="utf-8")
+    (path / "canon/characters.md").write_text(f"# 人物\n\n{characters}\n", encoding="utf-8")
+
+
+def test_story_overlap(base: Path) -> None:
+    library = base / "story-library"
+    make_story_project(
+        library / "old-palace-story",
+        "病王爷的药账",
+        "谢昭宁嫁给病王爷萧砚川，借接管药房追查北境军饷和姐姐冤案。",
+        "谢昭宁擅长辨药记账，萧砚川掌握北境旧部，柳含章藏着药房钥匙。",
+    )
+    make_story_project(
+        library / "old-modern-story",
+        "深夜末班车",
+        "公交司机周闻发现每逢暴雨就多出一站，他必须在黎明前找到失踪乘客。",
+        "周闻熟悉城市路线，记者林遥追查旧站拆迁档案，两人没有医术或王府背景。",
+    )
+    make_story_project(
+        library / "old-modern-story" / ".webnovel" / "backups" / "files",
+        "不应参与比较的备份",
+        "谢昭宁嫁给病王爷萧砚川，借接管药房追查北境军饷和姐姐冤案。",
+        "谢昭宁、萧砚川与柳含章。",
+    )
+    similar = base / "similar-candidate.md"
+    similar.write_text(
+        "# 候选\n\n谢昭宁嫁给病王爷萧砚川，以争宠为名接管药房，追查北境军饷和姐姐冤案。\n",
+        encoding="utf-8",
+    )
+    similar_result = json.loads(
+        run("python3", str(SCRIPTS / "story_overlap.py"), "--candidate", str(similar), "--library", str(library), expect=1).stdout
+    )
+    assert similar_result["highestRisk"] == "high"
+    assert similar_result["comparedProjectCount"] == 2
+    assert not any(".webnovel" in row["project"] for row in similar_result["comparisons"])
+    assert "plagiarism" in similar_result["note"]
+
+    distinct = base / "distinct-candidate.md"
+    distinct.write_text(
+        "# 候选\n\n极地气象员顾雪在通信中断后修复冰芯钻机，并决定公开海洋污染记录。\n",
+        encoding="utf-8",
+    )
+    distinct_result = json.loads(
+        run("python3", str(SCRIPTS / "story_overlap.py"), "--candidate", str(distinct), "--library", str(library)).stdout
+    )
+    assert distinct_result["highestRisk"] == "low"
+
+
+def test_performance_feedback(base: Path) -> None:
+    project = base / "performance-feedback"
+    initialize(project, "发布反馈测试")
+    data = {
+        "schemaVersion": 1,
+        "platform": "番茄小说",
+        "windowStart": "2026-08-29",
+        "windowEnd": "2026-08-31",
+        "recommendationStatus": "initial-complete",
+        "impressions": 17,
+        "reads": 4,
+        "completedReads": None,
+        "unlocks": None,
+        "likes": 0,
+        "comments": 0,
+        "bookshelves": 0,
+        "notes": "后台统计样本",
+    }
+    input_path = base / "performance-input.json"
+    write_json(input_path, data)
+    args = ("python3", str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(input_path))
+    before = (project / "project.json").read_text(encoding="utf-8")
+    dry = json.loads(run(*args, "--dry-run").stdout)
+    assert dry["stage"] == "insufficient-exposure" and dry["readRate"] == 0.2353
+    assert (project / "project.json").read_text(encoding="utf-8") == before
+    assert not (project / "performance/latest-diagnosis.md").exists()
+
+    applied = json.loads(run(*args).stdout)
+    assert applied["stage"] == "insufficient-exposure"
+    assert read_json(project / "project.json")["performanceFeedback"]["snapshotCount"] == 1
+    assert read_json(project / "performance/snapshots/2026-08-29-to-2026-08-31.json")["impressions"] == 17
+    diagnosis = (project / "performance/latest-diagnosis.md").read_text(encoding="utf-8")
+    assert "样本不足，不据此改正文或判断包装成败" in diagnosis
+    assert "不是番茄官方流量标准" in diagnosis
+
+    invalid = dict(data)
+    invalid.update({"windowStart": "2026-09-01", "windowEnd": "2026-08-31", "reads": 18})
+    invalid_path = base / "invalid-performance.json"
+    write_json(invalid_path, invalid)
+    failed = json.loads(run("python3", str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(invalid_path), expect=1).stdout)
+    joined = "\n".join(failed["errors"])
+    assert "reads cannot exceed impressions" in joined and "windowStart cannot be after windowEnd" in joined
+
+
+def test_opening_audit(base: Path) -> None:
+    chapter = base / "opening-audit.md"
+    chapter.write_text(
+        "# 第一节\n\n"
+        + "谢昭宁推开灵堂大门，当众扣下陪葬名册。宗正寺的人拔刀拦她，她把王府金印压在棺盖上。" * 12
+        + "\n\n“今日谁敢封棺，我就让谁把名字写进验尸记录。”她说。\n",
+        encoding="utf-8",
+    )
+    output = base / "opening-audit.json"
+    result = json.loads(
+        run(
+            "python3",
+            str(SCRIPTS / "opening_audit.py"),
+            str(chapter),
+            "--window",
+            "300",
+            "--output",
+            str(output),
+        ).stdout
+    )
+    assert result["windowFilled"] and result["openingContentChars"] == 300
+    assert [segment["range"] for segment in result["segments"]] == ["1-100", "101-200", "201-300"]
+    assert read_json(output)["openingText"] == result["openingText"]
+    assert "predict traffic" in result["note"]
 
 
 def test_prose_lint(base: Path) -> None:
@@ -1001,6 +1189,10 @@ def main() -> None:
         test_style_profiles(base)
         test_publishing_package(base)
         test_market_research(base)
+        test_short_story_market_boundary(base)
+        test_story_overlap(base)
+        test_performance_feedback(base)
+        test_opening_audit(base)
         test_prose_lint(base)
         test_review_gate(base)
         test_migration(base)

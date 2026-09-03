@@ -15,6 +15,7 @@ from webnovel_io import CURRENT_PROJECT_SCHEMA, backup_files, load_json, utc_now
 
 
 VALID_CONFIDENCE = {"low", "medium", "high"}
+VALID_CONTENT_FORMS = {"short-story", "longform", "mixed"}
 SAFE_NAME_RE = re.compile(r"[^a-z0-9-]+")
 
 
@@ -35,7 +36,7 @@ def string_list(value: object, label: str, minimum: int, errors: list[str]) -> l
     return result
 
 
-def validate_snapshot(snapshot: dict) -> list[str]:
+def validate_snapshot(snapshot: dict, project_mode: str = "serial") -> list[str]:
     errors: list[str] = []
     if snapshot.get("schemaVersion") != 1:
         errors.append("snapshot schemaVersion must be 1")
@@ -54,6 +55,11 @@ def validate_snapshot(snapshot: dict) -> list[str]:
         for field in ("audience", "genre", "ranking", "sampleWindow"):
             if not concrete(scope.get(field)):
                 errors.append(f"scope.{field} must be a non-empty string")
+        content_form = scope.get("contentForm")
+        if content_form is not None and content_form not in VALID_CONTENT_FORMS:
+            errors.append("scope.contentForm must be short-story, longform, or mixed")
+        if project_mode == "fanqie-short-story" and content_form != "short-story":
+            errors.append("fanqie-short-story projects require scope.contentForm=short-story; longform or mixed rankings are supporting evidence only")
 
     sources = snapshot.get("sources")
     source_urls: set[str] = set()
@@ -79,6 +85,11 @@ def validate_snapshot(snapshot: dict) -> list[str]:
                 errors.append(f"Duplicate source URL: {url}")
             else:
                 source_urls.add(url)
+            source_form = source.get("contentForm")
+            if source_form is not None and source_form not in VALID_CONTENT_FORMS:
+                errors.append(f"{label} contentForm must be short-story, longform, or mixed")
+            if project_mode == "fanqie-short-story" and source_form != "short-story":
+                errors.append(f"{label} must use contentForm=short-story for a short-story market snapshot")
 
     samples = snapshot.get("samples")
     sample_titles: set[str] = set()
@@ -179,7 +190,7 @@ def main() -> int:
     if project.get("schemaVersion") != CURRENT_PROJECT_SCHEMA:
         raise SystemExit("Project schema is not current; run migrate_project.py first")
     snapshot = load_json(args.snapshot.expanduser().resolve())
-    errors = validate_snapshot(snapshot)
+    errors = validate_snapshot(snapshot, project.get("storyMode", "serial"))
     if errors:
         print(json.dumps({"ok": False, "errors": errors}, ensure_ascii=False, indent=2))
         return 1

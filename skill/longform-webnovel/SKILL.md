@@ -29,19 +29,20 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 - **继续连载**：项目结构存在，用户要求下一章、若干章或继续写。
 - **规划扩展**：用户要求卷纲、章纲、新地图、新阶段或长期方向。
 - **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真或战力失控。
+- **发布后诊断**：用户提供展现、阅读、完读、解锁或互动数据，要求判断低展现或低完读原因。
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 
 先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
 
-番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。不要无差别加载全部参考资料。
+番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
 ## 新建项目
 
 1. 若用户未指定项目路径，在当前工作目录下使用安全的作品名创建项目文件夹。
 2. 只询问无法合理推断且会改变作品方向的信息。通常一次收集：故事种子、希望避免的内容、主角初始困境。题材可以由故事种子推导，也可以给出 3 个差异明显的方案让作者选择。
 3. 确认 `serial` 或 `fanqie-short-story`，提出简短的故事合同，并按 [style-system.md](references/style-system.md) 给出 2–4 个适配的语言风格选项。用户指定作者时先做手法转译卡。短故事还需确认目标总长度、预计分节和结尾类型。
-4. 用户要求市场定位或题材竞争不明时，按 [market-research.md](references/market-research.md) 研究公开来源；正式建项前先把快照保存在项目外的临时工作目录，不能成为迟迟不写的借口。
-5. 按 [publishing-package.md](references/publishing-package.md) 生成 8–12 个非公式化书名，筛出 3 个做公开精确检索；为推荐书名提供封面主提示词、负面提示词，以及明确的书名排版、字体、字重、字色和安全区说明。
+4. 用户要求市场定位或题材竞争不明时，按 [market-research.md](references/market-research.md) 研究公开来源；正式建项前先把快照保存在项目外的临时工作目录，不能成为迟迟不写的借口。短故事必须以短故事专属样本为主要证据，长篇榜只能作为旁证，不能据此宣称短故事热门。
+5. 按 [publishing-package.md](references/publishing-package.md) 生成 8–12 个非公式化书名，筛出 3 个做公开精确检索；为推荐书名提供封面主提示词、负面提示词，以及明确的书名排版、字体、字重、字色和安全区说明。将候选合同或项目运行 `story_overlap.py`，与作者同一作品库中的历史项目比较；高风险时重做人物、关系、核心危机或解决机制，除非作者确认是同世界观续作。
 6. 将故事合同、第一卷重大设计、语言风格、终选书名和封面提示词一起交给作者确认。不要在确认前批量写正文。
 7. 运行：
 
@@ -57,10 +58,11 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 
 - 一个短故事是一个有终点的作品，不是缩短版无限连载。只保留一个主承诺、一个主要矛盾和能在结局前闭合的少量副线。
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。
-- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。
+- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。
+- 发布后不要从一次小流量测试反推永久结论。保存推荐状态和完整漏斗数据；下一个故事的选题与包装可以吸收数据，但不能把无样本的猜测写成平台规则。
 
 ## 继续连载
 
@@ -88,6 +90,8 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 ```bash
 python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 ```
+
+   `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](references/short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
 4. 运行 `prose_lint.py`，将结果写入 `reviews/第NNNN章-lint.json`；再按 [review-system.md](references/review-system.md) 分离执行编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。报告必须绑定当前正文 SHA-256。
 5. 若存在阻断项，自动修改一次并重新运行指标、扫描和两类审稿。仍有高优先级问题或弃读风险时停止提交；只有作者通过重大决策记录明确接受风险时才可例外。
@@ -153,8 +157,11 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 - `scripts/style_profile.py`：列出、预览或安全应用预设/自定义语言风格档案。
 - `scripts/publishing_package.py`：检查书名公式化风险，保存确认书名、公开检索记录和封面提示词。
 - `scripts/market_brief.py`：校验并保存带日期、公开来源、样本和置信度的市场观察。
+- `scripts/story_overlap.py`：比较候选与历史项目的人名、设定和故事发动机文本信号，提示高同质化风险，不判断抄袭或平台处罚。
+- `scripts/performance_feedback.py`：保存发布后统计窗口，计算阅读/完读漏斗并生成带样本限制的诊断。
 - `scripts/commit_chapter.py`：在隔离预览中校验后原子替换文件；失败时自动回滚。
 - `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号。
+- `scripts/opening_audit.py`：按有效字符口径截取短故事前 100/200/300 字窗口，输出入口审稿所需的文本与基础指标；不代替语义判断。
 - `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。
 - `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
 - `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复和提交一致性。

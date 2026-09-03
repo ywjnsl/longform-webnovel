@@ -210,6 +210,7 @@ def main() -> int:
         "chapters",
         "reviews",
         "research/market-snapshots",
+        "performance/snapshots",
         "sessions",
         ".webnovel/backups",
         ".webnovel/staging",
@@ -248,6 +249,13 @@ def main() -> int:
             "asOfDate": None,
             "sourceCount": 0,
             "sampleCount": 0,
+            "updatedAt": now,
+        },
+        "performanceFeedback": {
+            "status": "unrequested",
+            "latestWindowEnd": None,
+            "latestStage": None,
+            "snapshotCount": 0,
             "updatedAt": now,
         },
         "reviewGate": {

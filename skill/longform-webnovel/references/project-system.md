@@ -27,6 +27,9 @@
 ├── reviews/
 ├── research/
 │   └── market-snapshots/
+├── performance/
+│   ├── snapshots/
+│   └── latest-diagnosis.md
 └── sessions/
 ```
 
@@ -49,6 +52,7 @@
 - `decisions.json`：重大决策的待确认、已确认和否决记录。
 - `reviews/`：每章绑定正文哈希的语言风险扫描、编辑诊断和目标读者模拟。
 - `research/market-snapshots/`：带日期、来源 URL 和样本窗口的公开市场快照。
+- `performance/snapshots/`：作者提供的发布后原始统计窗口；`latest-diagnosis.md` 只做漏斗定位，不把本地阈值伪装成平台标准。
 - `sessions/`：跨会话交接，不替代正史文件。
 
 每个正式提交章必须新增包含 `chapter-NNNN` 的 Markdown 交接文件，例如 `sessions/2026-08-21-chapter-0016.md`。它记录本章已同步的状态和下一会话入口，不保存尚未发生的计划为正史。
@@ -64,6 +68,8 @@
 `project.json.publishingPackage` 保存定名、唯一性检查和封面提示词状态。新书第一章提交前必须为 `active`；旧项目迁移可为 `legacy`。完整流程见 [publishing-package.md](publishing-package.md)。
 
 `project.json.marketResearch` 保存可选研究状态、截止日期和来源/样本数，必须与 `canon/market-brief.md` 和对应快照一致。`unrequested` 不阻止创作。格式与边界见 [market-research.md](market-research.md)。
+
+`project.json.performanceFeedback` 保存最新统计窗口、诊断阶段和快照数。发布数据不是正文提交门槛；只有作者提供数据时才更新，格式和样本边界见 [performance-feedback.md](performance-feedback.md)。
 
 `project.json.reviewGate` 保存开始强制执行的章号，以及编辑、读者模拟和语言扫描开关。新项目从第 1 章执行；旧项目迁移只从下一章开始，不伪造历史审稿。完整格式见 [review-system.md](review-system.md)。
 
