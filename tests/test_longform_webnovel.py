@@ -247,6 +247,7 @@ def test_initialization_and_cadence(base: Path) -> None:
     project = base / "initial"
     initialize(project, "初始化测试")
     assert (project / "performance/snapshots").is_dir()
+    assert (project / "research/reference-adaptations").is_dir()
     assert read_json(project / "project.json")["performanceFeedback"]["status"] == "unrequested"
     result = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert result["ok"]
@@ -705,6 +706,75 @@ def test_story_overlap(base: Path) -> None:
         run("python3", str(SCRIPTS / "story_overlap.py"), "--candidate", str(distinct), "--library", str(library)).stdout
     )
     assert distinct_result["highestRisk"] == "low"
+
+
+def test_reference_guard(base: Path) -> None:
+    source = base / "reference-story.md"
+    copied = base / "copied-draft.md"
+    distinct = base / "distinct-draft.md"
+    forbidden = base / "forbidden-name-draft.md"
+    report = base / "reference-report.json"
+    exact_block = (
+        "林照晚把旧城铜铃放进火盆时，门外的报丧人忽然改口，说死者昨夜还在码头签过货单。"
+        "她没有追问，先锁住账房，再让伙计把当日所有船票铺在院中。"
+    )
+    source.write_text(
+        "# 参考故事\n\n" + exact_block + "铜铃里藏着失踪船主留下的盐税暗码，林照晚必须在涨潮前找到沉船。\n",
+        encoding="utf-8",
+    )
+    copied.write_text("# 候选\n\n新人物走进院子。" + exact_block + "随后她决定继续调查。\n", encoding="utf-8")
+    copied_result = json.loads(
+        run(
+            "python3",
+            str(SCRIPTS / "reference_guard.py"),
+            "--source",
+            str(source),
+            "--candidate",
+            str(copied),
+            "--output",
+            str(report),
+            expect=1,
+        ).stdout
+    )
+    assert copied_result["risk"] == "high" and copied_result["maxSharedRunUnits"] >= 60
+    assert read_json(report)["candidatePhraseContainment"] == copied_result["candidatePhraseContainment"]
+    assert "not a plagiarism or legal determination" in copied_result["note"]
+
+    distinct.write_text(
+        "# 候选\n\n极地气象员顾雪发现卫星回传被人替换。她关闭自动站，用冰芯年代反推污染船航线，并在风暴前公开数据。\n",
+        encoding="utf-8",
+    )
+    distinct_result = json.loads(
+        run(
+            "python3",
+            str(SCRIPTS / "reference_guard.py"),
+            "--source",
+            str(source),
+            "--candidate",
+            str(distinct),
+            "--forbid-term",
+            "林照晚",
+            "--forbid-term",
+            "旧城铜铃",
+        ).stdout
+    )
+    assert distinct_result["risk"] == "low" and not distinct_result["matchedForbiddenTerms"]
+
+    forbidden.write_text("# 候选\n\n林照晚在空间站修复了失控的氧气循环。\n", encoding="utf-8")
+    forbidden_result = json.loads(
+        run(
+            "python3",
+            str(SCRIPTS / "reference_guard.py"),
+            "--source",
+            str(source),
+            "--candidate",
+            str(forbidden),
+            "--forbid-term",
+            "林照晚",
+            expect=1,
+        ).stdout
+    )
+    assert forbidden_result["risk"] == "high" and forbidden_result["matchedForbiddenTerms"] == ["林照晚"]
 
 
 def test_performance_feedback(base: Path) -> None:
@@ -1191,6 +1261,7 @@ def main() -> None:
         test_market_research(base)
         test_short_story_market_boundary(base)
         test_story_overlap(base)
+        test_reference_guard(base)
         test_performance_feedback(base)
         test_opening_audit(base)
         test_prose_lint(base)

@@ -1,6 +1,6 @@
 ---
 name: longform-webnovel
-description: 创建、规划、连载、续写和修订中文长篇网文或番茄短故事项目；可选研究番茄等平台的公开市场样本并保存证据，筛选有辨识度的书名和封面提示词，选择语言风格，将知名作者的公开写作手法转译为参数，为核心配角维护独立弧光和多类型关系网络，维护跨会话正史，并让正文经过编辑审稿、目标读者模拟和不宣称判断作者身份的模板化语言风险检查。适用于开新网文、创作番茄短故事、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、设计配角、群像或关系线、写番茄风格正文、继续连载、生成卷纲或章纲、检查一致性、修复注水、扩展新卷或完成有限篇幅小说。
+description: 创建、规划、连载、续写和修订中文长篇网文或番茄短故事项目；也可把参考短故事拆成可迁移的结构、情绪与叙事机制，生成非换名复述的新故事并检查原文复用风险。支持公开市场样本、书名与封面提示词、语言风格、配角弧光、跨会话正史、编辑审稿和目标读者模拟。适用于开新网文、创作或仿写短故事、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、继续连载、修订诊断、扩展新卷或完成有限篇幅小说；不用于洗稿或逐段同义改写。
 ---
 
 # 长期网文连载
@@ -26,13 +26,14 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 
 - **新建项目**：用户只有灵感、题材、梗或一句话设想。
 - **番茄短故事**：用户要写可一次完结或少量分节的短故事。
+- **参考短故事再创作**：用户提供样稿并要求仿写、借结构、换题材重写或生成相似阅读体验。
 - **继续连载**：项目结构存在，用户要求下一章、若干章或继续写。
 - **规划扩展**：用户要求卷纲、章纲、新地图、新阶段或长期方向。
 - **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真或战力失控。
 - **发布后诊断**：用户提供展现、阅读、完读、解锁或互动数据，要求判断低展现或低完读原因。
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 
-先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。不要无差别加载全部参考资料。
 
 番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
@@ -53,6 +54,12 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 8. 用 `publishing_package.py` 保存公开检索记录与封面提示词；若第 4 步生成了市场快照，用 `market_brief.py` 归档到项目。将确认内容和已作出的重大选择写入故事合同及决策记录，建立主要人物、分层配角与世界规则。长篇规划当前卷和未来 5–10 章；短故事按 [length-modes.md](references/length-modes.md) 规划全文剩余分节。
 9. 运行 `plan_cadence.py --write`。长篇建立未来 15 章节拍；短故事按预计总分节建立全文比例结构锚点。补全每个锚点的回报类型、铺垫和代价。
 10. 运行 `validate_project.py`。只有 `publishingPackage.status` 和 `styleProfile.status` 均已确认后才开始正文；市场研究不是许可条件。
+
+## 参考短故事再创作
+
+把“仿写”解释为复用阅读机制，不解释为换名复述。先从参考稿提取抽象机制卡和必须替换清单，再只依据机制卡设计新故事合同；人物专名、独特物件、事件链、证据链、关键场面、结局揭示和标志性表达不得沿用。参考稿属于作者本人或公版且作者明确要求改编时，才按其确认的授权范围保留具体元素。
+
+写正文时不要逐段对照参考稿。每节完成后运行 `reference_guard.py` 检查连续原文复用与禁用词，再运行 `story_overlap.py` 检查作者作品库内的同质化；任一高风险都先重写，不能把脚本结论称为抄袭认定或法律判断。
 
 ### 番茄短故事差异
 
@@ -158,6 +165,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 - `scripts/publishing_package.py`：检查书名公式化风险，保存确认书名、公开检索记录和封面提示词。
 - `scripts/market_brief.py`：校验并保存带日期、公开来源、样本和置信度的市场观察。
 - `scripts/story_overlap.py`：比较候选与历史项目的人名、设定和故事发动机文本信号，提示高同质化风险，不判断抄袭或平台处罚。
+- `scripts/reference_guard.py`：比较参考稿与候选正文的连续复用片段和禁用专名，提示编辑风险，不作抄袭或法律认定。
 - `scripts/performance_feedback.py`：保存发布后统计窗口，计算阅读/完读漏斗并生成带样本限制的诊断。
 - `scripts/commit_chapter.py`：在隔离预览中校验后原子替换文件；失败时自动回滚。
 - `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号。

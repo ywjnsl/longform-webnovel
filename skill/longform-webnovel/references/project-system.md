@@ -26,7 +26,8 @@
 ├── chapters/
 ├── reviews/
 ├── research/
-│   └── market-snapshots/
+│   ├── market-snapshots/
+│   └── reference-adaptations/
 ├── performance/
 │   ├── snapshots/
 │   └── latest-diagnosis.md
@@ -52,6 +53,7 @@
 - `decisions.json`：重大决策的待确认、已确认和否决记录。
 - `reviews/`：每章绑定正文哈希的语言风险扫描、编辑诊断和目标读者模拟。
 - `research/market-snapshots/`：带日期、来源 URL 和样本窗口的公开市场快照。
+- `research/reference-adaptations/`：参考短故事的来源说明、抽象机制卡、必须替换清单和复用检查结果；默认不保存参考全文。
 - `performance/snapshots/`：作者提供的发布后原始统计窗口；`latest-diagnosis.md` 只做漏斗定位，不把本地阈值伪装成平台标准。
 - `sessions/`：跨会话交接，不替代正史文件。
 

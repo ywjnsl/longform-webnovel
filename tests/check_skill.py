@@ -24,6 +24,7 @@ def main() -> None:
     assert (SKILL / "references" / "review-system.md").is_file()
     assert (SKILL / "references" / "market-research.md").is_file()
     assert (SKILL / "references" / "performance-feedback.md").is_file()
+    assert (SKILL / "references" / "reference-adaptation.md").is_file()
     assert (SKILL / "references" / "length-modes.md").is_file()
     assert (SKILL / "references" / "short-story-information-flow.md").is_file()
     assert (SKILL / "scripts" / "validate_project.py").is_file()
@@ -31,6 +32,7 @@ def main() -> None:
     assert (SKILL / "scripts" / "market_brief.py").is_file()
     assert (SKILL / "scripts" / "opening_audit.py").is_file()
     assert (SKILL / "scripts" / "story_overlap.py").is_file()
+    assert (SKILL / "scripts" / "reference_guard.py").is_file()
     assert (SKILL / "scripts" / "performance_feedback.py").is_file()
     print("Skill structure is valid")
 

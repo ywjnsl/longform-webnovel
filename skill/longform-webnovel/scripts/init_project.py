@@ -210,6 +210,7 @@ def main() -> int:
         "chapters",
         "reviews",
         "research/market-snapshots",
+        "research/reference-adaptations",
         "performance/snapshots",
         "sessions",
         ".webnovel/backups",
