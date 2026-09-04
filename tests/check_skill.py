@@ -32,8 +32,10 @@ def main() -> None:
     assert (SKILL / "references" / "cover-typography.md").is_file()
     assert (SKILL / "references" / "ensemble.md").is_file()
     assert (SKILL / "references" / "ensemble-character.md").is_file()
+    assert (SKILL / "references" / "scene-craft.md").is_file()
     assert (SKILL / "templates" / "character" / "SKILL.md").is_file()
     assert "ensemble.md" in text
+    assert "scene-craft.md" in text
     assert (SKILL / "scripts" / "validate_project.py").is_file()
     assert (SKILL / "scripts" / "prose_lint.py").is_file()
     assert (SKILL / "scripts" / "market_brief.py").is_file()

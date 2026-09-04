@@ -51,7 +51,7 @@
 2. 写本章合同。弧默认 `open`。
 3. 主角先自由提案。每拍为上场角色启动隔离上下文，只喂公开事实、此人会知道的法则、自己的 skill/state、合同里的 `publicFactsForCast`。角色只输出意图 JSON，写入 `intents/chapter-NNNN/{id}.json`。
 4. 法则裁判只认 `canon/laws.md`，写入 `ruling.json`。被否决的意图记为试图失败，不得改写成成功。
-5. 写手只根据裁定后的意图按 [chapter-craft.md](chapter-craft.md) 写正文。不发明角色没打算做的关键选择。
+5. 写手只根据裁定后的意图按 [chapter-craft.md](chapter-craft.md) 和 [scene-craft.md](scene-craft.md) 写正文。先把空间、身体、动作过程写出来，再写对白。对打、追逐、破境抢关按打斗规则大幅度加厚，不准一句收胜负。不发明角色没打算做的关键选择。被否决的意图写成试图失败。
 6. 再走原有审稿与章节提交事务。提交时同步合同、意图、ruling、上场角色 `state.json`、`planning/current-arc.md`。正文没发生的事不能进正史。
 
 ## 信息隔离
