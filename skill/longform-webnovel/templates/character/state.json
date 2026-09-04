@@ -1,0 +1,17 @@
+{
+  "id": "",
+  "chapter": 0,
+  "alive": true,
+  "location": "",
+  "emotion": {
+    "label": "",
+    "trigger": "",
+    "shown": ""
+  },
+  "wantNow": "",
+  "knownFacts": [],
+  "secrets": [],
+  "relationships": {},
+  "scars": [],
+  "memory": []
+}

@@ -58,6 +58,24 @@ TEXT_FILES = {
 
 待填写。
 """,
+    "canon/laws.md": """# 法则
+
+法则裁判只认本文。写手和角色不得另造例外。新增规则必须随正文实例化后再写入。
+
+## 力量
+
+待填写。
+
+## 信息
+
+- 谁能知道机密：待填写
+- 侦查/感知边界：待填写
+- 角色不得因读者知道而知道
+
+## 冲突裁定
+
+意图互斥时：先看谁在场、谁的信息更真、谁愿意付的代价更高；再看法则谁先被违反。被否决的意图记为试图失败，不得改写成成功。
+""",
     "canon/timeline.md": """# 正史时间线
 
 | 故事时间 | 章号 | 事件 | 影响 |
@@ -102,6 +120,18 @@ TEXT_FILES = {
 先标记节拍锚点：第 3 章倍数为 `small`，第 5 章倍数为 `major`；重合章只标 `major`。
 
 待规划。
+""",
+    "planning/current-arc.md": """# 当前弧
+
+- id: 待填写
+- 目标: 待填写
+- 状态: open
+- 估计章窗: 待填写
+- 成功长什么样: 待填写
+- 失败长什么样: 待填写
+- 本章之前已发生:
+- 还差什么: 待填写
+- 由什么后果开启: 待填写
 """,
 }
 
@@ -178,6 +208,23 @@ def write_json(path: Path, data: object) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+SKILL_ROOT = Path(__file__).resolve().parent.parent
+
+
+def write_character(root: Path, character_id: str, name: str) -> None:
+    """写入项目内角色 skill；情绪与记忆走 state.json，不写进 SKILL.md。"""
+    dest = root / "cast" / character_id
+    dest.mkdir(parents=True, exist_ok=True)
+    skill = (SKILL_ROOT / "templates" / "character" / "SKILL.md").read_text(encoding="utf-8")
+    skill = skill.replace("character-{id}", f"character-{character_id}")
+    skill = skill.replace("{id}", character_id)
+    skill = skill.replace("{姓名}", name)
+    (dest / "SKILL.md").write_text(skill, encoding="utf-8")
+    state = json.loads((SKILL_ROOT / "templates" / "character" / "state.json").read_text(encoding="utf-8"))
+    state["id"] = character_id
+    write_json(dest / "state.json", state)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--path", required=True, help="Project directory to create")
@@ -187,7 +234,11 @@ def main() -> int:
     parser.add_argument("--target-total-chars", type=int, help="Optional short-story total content-character target")
     parser.add_argument("--sections", type=int, default=5, help="Planned short-story sections (default: 5)")
     parser.add_argument("--force-empty", action="store_true", help="Allow an existing empty directory")
+    parser.add_argument("--protagonist-id", default="main", help="Protagonist cast id (not the reserved cast-arcs id protagonist)")
+    parser.add_argument("--protagonist-name", default="主角")
     args = parser.parse_args()
+    if args.protagonist_id.strip() in {"", "protagonist"}:
+        raise SystemExit("--protagonist-id cannot be empty or 'protagonist'")
 
     if args.mode == "serial" and args.target_total_chars is not None:
         raise SystemExit("--target-total-chars is only valid with --mode fanqie-short-story")
@@ -213,6 +264,9 @@ def main() -> int:
         "research/reference-adaptations",
         "performance/snapshots",
         "sessions",
+        "cast",
+        "contracts",
+        "intents",
         ".webnovel/backups",
         ".webnovel/staging",
     ):
@@ -265,6 +319,13 @@ def main() -> int:
             "readerRequired": True,
             "lintRequired": True,
         },
+        "ensemble": {
+            "enabled": True,
+            "protagonistId": args.protagonist_id.strip(),
+            "explorationBeatsDefault": 3,
+            "maxOnStage": 4,
+            "enforceFromChapter": 1,
+        },
         "currentVolume": 1,
         "latestDraftChapter": 0,
         "lastCommittedChapter": 0,
@@ -311,6 +372,16 @@ def main() -> int:
     (root / "canon/style-profile.md").write_text(style_content, encoding="utf-8")
     (root / "canon/publishing-package.md").write_text(PUBLISHING_TEMPLATE, encoding="utf-8")
     (root / "canon/market-brief.md").write_text(MARKET_BRIEF_TEMPLATE, encoding="utf-8")
+    write_character(root, args.protagonist_id.strip(), args.protagonist_name.strip() or "主角")
+    characters_path = root / "canon/characters.md"
+    characters_text = characters_path.read_text(encoding="utf-8")
+    characters_path.write_text(
+        characters_text.replace(
+            "## 主角\n\n待填写。",
+            f"## 主角\n\n- id: `{args.protagonist_id.strip()}`\n- 姓名: {args.protagonist_name.strip() or '主角'}\n- 人设: 待填写。",
+        ),
+        encoding="utf-8",
+    )
 
     print(root)
     return 0

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Integration checks for the staged longform-webnovel v5 skill."""
+"""Integration checks for the staged longform-webnovel v6 skill."""
 
 from __future__ import annotations
 
@@ -51,8 +51,10 @@ def initialize(path: Path, title: str) -> None:
         "canon/story-contract.md",
         "canon/characters.md",
         "canon/world.md",
+        "canon/laws.md",
         "planning/current-volume.md",
         "planning/rolling-outline.md",
+        "planning/current-arc.md",
     ):
         (path / relative).write_text(f"# {relative}\n\n测试项目已有明确内容。\n", encoding="utf-8")
     project = read_json(path / "project.json")
@@ -232,6 +234,65 @@ def prepare_stage(
     session = stage / "sessions" / f"test-chapter-{chapter:04d}.md"
     session.parent.mkdir(parents=True, exist_ok=True)
     session.write_text(f"# 第 {chapter} 章交接\n\n状态已同步。\n", encoding="utf-8")
+    write_ensemble_stage(project_root, stage, chapter)
+
+
+def write_ensemble_stage(project_root: Path, stage: Path, chapter: int) -> None:
+    """群像强制章提交时附带合同、意图、裁判和当前弧。"""
+    ensemble = read_json(project_root / "project.json").get("ensemble") or {}
+    if ensemble.get("enabled") is False:
+        return
+    enforce_from = ensemble.get("enforceFromChapter", 1)
+    if not isinstance(enforce_from, int) or chapter < enforce_from:
+        return
+    protagonist_id = str(ensemble.get("protagonistId") or "main")
+    write_json(
+        stage / "contracts" / f"chapter-{chapter:04d}.json",
+        {
+            "chapter": chapter,
+            "arcId": "test-arc",
+            "arcGoal": "推进测试局面",
+            "arcStatus": "open",
+            "estimatedChapters": [1, 8],
+            "thisChapterMust": "推进或加压一格",
+            "legalOutcomes": ["progress", "setback", "reroute", "expose", "pause-with-scar"],
+            "illegalOutcomes": ["status-quo"],
+            "explorationBeats": 3,
+            "onStage": [protagonist_id],
+            "payoffLevel": "none",
+            "publicFactsForCast": ["测试场面已经开场"],
+        },
+    )
+    write_json(
+        stage / "intents" / f"chapter-{chapter:04d}" / f"{protagonist_id}.json",
+        {
+            "characterId": protagonist_id,
+            "chapter": chapter,
+            "beat": 1,
+            "emotion": {
+                "from": "冷静",
+                "to": "更急",
+                "trigger": "对手逼近档案室",
+                "shown": "少话",
+            },
+            "wantNow": "先确认档案还在不在",
+            "wouldDo": "绕到侧门查看",
+            "wouldSay": ["先别进去。"],
+            "wouldNeverSay": ["我知道结局"],
+        },
+    )
+    write_json(
+        stage / "intents" / f"chapter-{chapter:04d}" / "ruling.json",
+        {"allowed": True, "vetoes": [], "offstage": []},
+    )
+    (stage / "planning").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(project_root / "planning/current-arc.md", stage / "planning/current-arc.md")
+    state_src = project_root / "cast" / protagonist_id / "state.json"
+    if state_src.is_file():
+        state = read_json(state_src)
+        state["chapter"] = chapter
+        state["emotion"] = {"label": "更急", "trigger": "对手逼近档案室", "shown": "少话"}
+        write_json(stage / "cast" / protagonist_id / "state.json", state)
 
 
 def commit(project: Path, stage: Path, *, dry_run: bool = False, expect: int = 0) -> dict:
@@ -363,7 +424,9 @@ def test_committed_project_guards(base: Path) -> None:
 def test_style_profiles(base: Path) -> None:
     unselected = base / "style-unselected"
     run("python3", str(SCRIPTS / "init_project.py"), "--path", str(unselected), "--title", "待选风格")
-    assert read_json(unselected / "project.json")["schemaVersion"] == 5
+    assert read_json(unselected / "project.json")["schemaVersion"] == 6
+    assert read_json(unselected / "project.json")["ensemble"]["protagonistId"] == "main"
+    assert (unselected / "cast/main/SKILL.md").is_file()
     assert read_json(unselected / "project.json")["styleProfile"]["status"] == "unconfirmed"
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
 
@@ -968,7 +1031,8 @@ def test_migration(base: Path) -> None:
     assert upgraded["fromVersion"] == 2 and upgraded["rewardsFromVersion"] == 2
     assert upgraded["legacyUnauditedThrough"] == 0
     upgraded_index = read_json(previous_v2 / "project.json")
-    assert upgraded_index["schemaVersion"] == 5
+    assert upgraded_index["schemaVersion"] == 6
+    assert upgraded_index["ensemble"]["enabled"] is True
     assert upgraded_index["rewardCadence"]["enforceFromChapter"] == 1
     assert upgraded_index["styleProfile"]["status"] == "unconfirmed"
     assert upgraded_index["publishingPackage"]["status"] == "unconfirmed"
@@ -982,7 +1046,7 @@ def test_migration(base: Path) -> None:
     (previous_v3 / "state/cast-arcs.json").unlink()
     upgraded_v3 = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(previous_v3)).stdout)
     assert upgraded_v3["fromVersion"] == 3 and upgraded_v3["castLegacyUnauditedThrough"] == 0
-    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 5
+    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 6
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(previous_v3)).stdout)["ok"]
 
     previous_v4 = base / "previous-v4"
@@ -1279,7 +1343,7 @@ def main() -> None:
         test_migration(base)
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
-    print("longform-webnovel v5 integration checks passed")
+    print("longform-webnovel v6 integration checks passed")
 
 
 if __name__ == "__main__":

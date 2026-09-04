@@ -22,6 +22,7 @@ from webnovel_io import (
     write_text_atomic,
 )
 from webnovel_style import PRESETS, render_legacy_profile, render_profile, render_unselected_profile
+from init_project import TEXT_FILES, write_character
 
 
 CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
@@ -182,6 +183,21 @@ def main() -> int:
     review_gate.setdefault("readerRequired", True)
     review_gate.setdefault("lintRequired", True)
     project["reviewGate"] = review_gate
+    ensemble = project.get("ensemble") if isinstance(project.get("ensemble"), dict) else {}
+    ensemble.setdefault("enabled", True)
+    ensemble.setdefault("protagonistId", "main")
+    ensemble.setdefault("explorationBeatsDefault", 3)
+    ensemble.setdefault("maxOnStage", 4)
+    if old_version < 6:
+        existing_ensemble_from = ensemble.get("enforceFromChapter", committed + 1)
+        if not isinstance(existing_ensemble_from, int) or isinstance(existing_ensemble_from, bool) or existing_ensemble_from <= 0:
+            existing_ensemble_from = committed + 1
+        ensemble["enforceFromChapter"] = max(committed + 1, existing_ensemble_from) if committed else 1
+    else:
+        ensemble.setdefault("enforceFromChapter", 1)
+    if ensemble.get("protagonistId") == "protagonist":
+        ensemble["protagonistId"] = "main"
+    project["ensemble"] = ensemble
     market_research = project.get("marketResearch")
     if not isinstance(market_research, dict):
         market_research = {
@@ -276,10 +292,21 @@ def main() -> int:
     rewards["asOfChapter"] = committed
     rewards["legacyUnauditedThrough"] = max(int(rewards.get("legacyUnauditedThrough", 0) or 0), committed if reward_legacy else 0)
 
+    laws_path = root / "canon" / "laws.md"
+    laws_needs_write = not laws_path.is_file()
+    arc_path = root / "planning" / "current-arc.md"
+    arc_needs_write = not arc_path.is_file()
+    protagonist_id = str(ensemble.get("protagonistId") or "main")
+    protagonist_skill = root / "cast" / protagonist_id / "SKILL.md"
+    cast_needs_write = not protagonist_skill.is_file()
+
     changed = (
         style_needs_write
         or package_needs_write
         or market_needs_write
+        or laws_needs_write
+        or arc_needs_write
+        or cast_needs_write
         or original_rewards is None
         or original_cast is None
         or json.dumps(project, ensure_ascii=False, sort_keys=True) != original_project
@@ -303,6 +330,13 @@ def main() -> int:
             paths.append(Path("canon/publishing-package.md"))
         if market_needs_write:
             paths.append(Path("canon/market-brief.md"))
+        if laws_needs_write:
+            paths.append(Path("canon/laws.md"))
+        if arc_needs_write:
+            paths.append(Path("planning/current-arc.md"))
+        if cast_needs_write:
+            paths.append(Path(f"cast/{protagonist_id}/SKILL.md"))
+            paths.append(Path(f"cast/{protagonist_id}/state.json"))
         backup = backup_files(root, paths, f"migration-v{old_version}-to-v{CURRENT_PROJECT_SCHEMA}")
         try:
             write_json_atomic(project_path, project)
@@ -321,6 +355,15 @@ def main() -> int:
                 write_text_atomic(package_path, package_content)
             if market_needs_write:
                 write_text_atomic(market_path, render_unrequested_market_brief())
+            (root / "cast").mkdir(parents=True, exist_ok=True)
+            (root / "contracts").mkdir(parents=True, exist_ok=True)
+            (root / "intents").mkdir(parents=True, exist_ok=True)
+            if laws_needs_write:
+                write_text_atomic(laws_path, TEXT_FILES["canon/laws.md"])
+            if arc_needs_write:
+                write_text_atomic(arc_path, TEXT_FILES["planning/current-arc.md"])
+            if cast_needs_write:
+                write_character(root, protagonist_id, "主角")
         except Exception:
             restore_backup(root, backup)
             raise

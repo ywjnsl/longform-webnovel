@@ -28,6 +28,7 @@ REQUIRED = (
     "canon/story-contract.md",
     "canon/characters.md",
     "canon/world.md",
+    "canon/laws.md",
     "canon/style-profile.md",
     "canon/publishing-package.md",
     "canon/market-brief.md",
@@ -35,6 +36,7 @@ REQUIRED = (
     "planning/series-map.md",
     "planning/current-volume.md",
     "planning/rolling-outline.md",
+    "planning/current-arc.md",
     "state/story-state.json",
     "state/threads.json",
     "state/rewards.json",
@@ -114,10 +116,12 @@ CORE_TEXT_FILES = (
     "canon/story-contract.md",
     "canon/characters.md",
     "canon/world.md",
+    "canon/laws.md",
     "canon/style-profile.md",
     "canon/publishing-package.md",
     "planning/current-volume.md",
     "planning/rolling-outline.md",
+    "planning/current-arc.md",
 )
 UNRESOLVED_MARKERS = ("待填写", "待确认", "待规划")
 
@@ -444,6 +448,100 @@ def validate_final_review(
                 errors.append(f"Full-story review check {check} must be pass")
     if not is_concrete(review.get("resolution")):
         errors.append("Full-story review needs a concrete resolution")
+
+
+VALID_ENSEMBLE_OUTCOMES = {"progress", "setback", "reroute", "expose", "pause-with-scar"}
+ENSEMBLE_INTENT_REQUIRED = ("characterId", "chapter", "beat", "emotion", "wantNow", "wouldDo")
+
+
+def validate_ensemble(root: Path, project: dict, committed: object, errors: list[str]) -> None:
+    """校验群像仿真配置，以及强制章之后的合同/意图/裁判文件。"""
+    ensemble = project.get("ensemble")
+    if not isinstance(ensemble, dict):
+        errors.append("project.json needs ensemble; run migrate_project.py")
+        return
+    enabled = ensemble.get("enabled")
+    if not isinstance(enabled, bool):
+        errors.append("ensemble.enabled must be boolean")
+        enabled = True
+    protagonist_id = ensemble.get("protagonistId")
+    if not isinstance(protagonist_id, str) or not protagonist_id.strip() or protagonist_id.strip() == "protagonist":
+        errors.append("ensemble.protagonistId must be a non-empty id other than 'protagonist'")
+        protagonist_id = ""
+    beats_default = ensemble.get("explorationBeatsDefault")
+    max_on_stage = ensemble.get("maxOnStage")
+    enforce_from = ensemble.get("enforceFromChapter")
+    if not isinstance(beats_default, int) or isinstance(beats_default, bool) or not 1 <= beats_default <= 6:
+        errors.append("ensemble.explorationBeatsDefault must be an integer from 1 to 6")
+    if not isinstance(max_on_stage, int) or isinstance(max_on_stage, bool) or not 2 <= max_on_stage <= 6:
+        errors.append("ensemble.maxOnStage must be an integer from 2 to 6")
+        max_on_stage = 4
+    if not isinstance(enforce_from, int) or isinstance(enforce_from, bool) or enforce_from <= 0:
+        errors.append("ensemble.enforceFromChapter must be a positive integer")
+        return
+    if protagonist_id:
+        if not (root / "cast" / protagonist_id / "SKILL.md").is_file():
+            errors.append(f"missing cast/{protagonist_id}/SKILL.md")
+        if not (root / "cast" / protagonist_id / "state.json").is_file():
+            errors.append(f"missing cast/{protagonist_id}/state.json")
+    if not enabled or not isinstance(committed, int) or committed < enforce_from:
+        return
+    for chapter in range(enforce_from, committed + 1):
+        contract_path = root / "contracts" / f"chapter-{chapter:04d}.json"
+        if not contract_path.is_file():
+            errors.append(f"Chapter {chapter} needs contracts/{contract_path.name}")
+            continue
+        contract = load_json(contract_path, errors)
+        if contract.get("chapter") != chapter:
+            errors.append(f"{contract_path.name} chapter does not match filename")
+        illegal = set(contract.get("illegalOutcomes") or [])
+        legal = set(contract.get("legalOutcomes") or [])
+        if "status-quo" not in illegal:
+            errors.append(f"{contract_path.name}: illegalOutcomes must include status-quo")
+        if "status-quo" in legal:
+            errors.append(f"{contract_path.name}: status-quo cannot be legal")
+        if not legal.intersection(VALID_ENSEMBLE_OUTCOMES):
+            errors.append(f"{contract_path.name}: legalOutcomes must include a known unfinished-arc outcome")
+        if contract.get("arcStatus") not in {"open", "resolved", "failed"}:
+            errors.append(f"{contract_path.name}: bad arcStatus")
+        on_stage = contract.get("onStage") or []
+        if not isinstance(on_stage, list) or not on_stage:
+            errors.append(f"{contract_path.name}: onStage must be a non-empty array")
+            on_stage = []
+        elif len(on_stage) > max_on_stage:
+            errors.append(f"{contract_path.name}: onStage exceeds ensemble.maxOnStage")
+        if protagonist_id and protagonist_id not in on_stage:
+            errors.append(f"{contract_path.name}: protagonistId must be onStage")
+        intent_dir = root / "intents" / f"chapter-{chapter:04d}"
+        ruling_path = intent_dir / "ruling.json"
+        if not ruling_path.is_file():
+            errors.append(f"Chapter {chapter} needs intents/chapter-{chapter:04d}/ruling.json")
+        for character_id in on_stage:
+            if not isinstance(character_id, str) or not character_id.strip():
+                errors.append(f"{contract_path.name}: onStage ids must be strings")
+                continue
+            intent_path = intent_dir / f"{character_id}.json"
+            if not intent_path.is_file():
+                errors.append(f"Chapter {chapter} needs {intent_path.relative_to(root)}")
+                continue
+            try:
+                payload = json.loads(intent_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"{intent_path.name}: {exc}")
+                continue
+            items = payload if isinstance(payload, list) else [payload]
+            for item in items:
+                if not isinstance(item, dict):
+                    errors.append(f"{intent_path.name}: intent must be object")
+                    continue
+                for key in ENSEMBLE_INTENT_REQUIRED:
+                    if key not in item:
+                        errors.append(f"{intent_path.name}: missing {key}")
+                emotion = item.get("emotion") or {}
+                if isinstance(emotion, dict) and not emotion.get("trigger"):
+                    errors.append(f"{intent_path.name}: emotion.trigger required")
+                if item.get("characterId") != character_id:
+                    errors.append(f"{intent_path.name}: characterId must match filename")
 
 
 def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: list[str], warnings: list[str]) -> None:
@@ -872,6 +970,7 @@ def main() -> int:
         errors.append("Completed short story cannot retain open, advanced, or deferred threads")
 
     validate_cast_arcs(cast_doc, committed, mode, errors, warnings)
+    validate_ensemble(root, project, committed, errors)
 
     cadence = project.get("rewardCadence")
     if not isinstance(cadence, dict):

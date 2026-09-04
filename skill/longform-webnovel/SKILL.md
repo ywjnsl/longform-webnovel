@@ -1,6 +1,6 @@
 ---
 name: longform-webnovel
-description: 创建、规划、连载、续写和修订中文长篇网文或番茄短故事项目；也可把参考短故事拆成可迁移的结构、情绪与叙事机制，生成非换名复述的新故事并检查原文复用风险。支持追妻追夫火葬场等情感题材、公开市场样本、书名与封面提示词、语言风格、个人声音建模、自然化改稿、配角弧光、跨会话正史、编辑审稿和目标读者模拟。适用于开新网文、创作或仿写短故事、处理 AI 味或模板腔、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、继续连载、修订诊断、扩展新卷或完成有限篇幅小说；不用于洗稿、逐段同义改写或规避内容检测。
+description: 创建、规划、连载、续写和修订中文长篇网文或番茄短故事项目；也可把参考短故事拆成可迁移的结构、情绪与叙事机制，生成非换名复述的新故事并检查原文复用风险。支持追妻追夫火葬场等情感题材、公开市场样本、书名与封面提示词、语言风格、个人声音建模、自然化改稿、配角弧光、跨会话正史、编辑审稿和目标读者模拟。也适用于多Agent小说、角色skill、沙盒连载、跨章弧、修炼法则世界观，以及每个角色隔离情绪与意图后再写章。适用于开新网文、创作或仿写短故事、处理 AI 味或模板腔、市场定位、起书名、制作封面提示词、挑选文风、参考作者手法、继续连载、修订诊断、扩展新卷或完成有限篇幅小说；不用于洗稿、逐段同义改写或规避内容检测。
 ---
 
 # 长期网文连载
@@ -21,6 +21,8 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
 11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
 12. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
+13. 角色是项目内 skill（`cast/{id}/`），不是全局 Cursor skill。写章前先隔离收意图，再由法则裁判否决，最后写手成章；角色不得写正文。
+14. 章不是收束单位，弧才是。每章必须改变状态，但开篇目标可以跨多章才兑现或彻底失败。失败、改路、暴露都算交付；空转非法。
 
 ## 识别任务
 
@@ -32,8 +34,9 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 - **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真或战力失控。
 - **发布后诊断**：用户提供展现、阅读、完读、解锁或互动数据，要求判断低展现或低完读原因。
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
+- **增配角 / 群像仿真**：需要独立角色 skill、按需生成配角，或主角在未完成弧里自由探索。
 
-先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满或要求建立个人声音时，必须读取 [prose-naturalization.md](references/prose-naturalization.md)；常规正文仅在风格档案已有“个人声音证据”或审稿命中相关风险时读取。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满或要求建立个人声音时，必须读取 [prose-naturalization.md](references/prose-naturalization.md)；常规正文仅在风格档案已有“个人声音证据”或审稿命中相关风险时读取。不要无差别加载全部参考资料。
 
 番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
@@ -48,10 +51,10 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 7. 运行：
 
 ```bash
-python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书名> --style <风格标识> --mode <模式>
+python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书名> --style <风格标识> --mode <模式> --protagonist-id <id> --protagonist-name <姓名>
 ```
 
-8. 用 `publishing_package.py` 保存公开检索记录与封面提示词；若第 4 步生成了市场快照，用 `market_brief.py` 归档到项目。将确认内容和已作出的重大选择写入故事合同及决策记录，建立主要人物、分层配角与世界规则。长篇规划当前卷和未来 5–10 章；短故事按 [length-modes.md](references/length-modes.md) 规划全文剩余分节。
+8. 用 `publishing_package.py` 保存公开检索记录与封面提示词；若第 4 步生成了市场快照，用 `market_brief.py` 归档到项目。将确认内容和已作出的重大选择写入故事合同及决策记录，建立主要人物、分层配角、世界规则与 `canon/laws.md`，填主角 `cast/{id}/SKILL.md` 和 `planning/current-arc.md`。长篇规划当前卷和未来 5–10 章；短故事按 [length-modes.md](references/length-modes.md) 规划全文剩余分节。
 9. 运行 `plan_cadence.py --write`。长篇建立未来 15 章节拍；短故事按预计总分节建立全文比例结构锚点。补全每个锚点的回报类型、铺垫和代价。
 10. 运行 `validate_project.py`。只有 `publishingPackage.status` 和 `styleProfile.status` 均已确认后才开始正文；市场研究不是许可条件。
 
@@ -76,13 +79,13 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 按以下顺序执行，不要依赖聊天记忆代替项目文件：
 
 1. 定位包含 `project.json` 的项目根目录。
-2. 若 `schemaVersion` 旧于当前版本或缺少 v5 文件，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
-3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`planning/current-volume.md`、`planning/rolling-outline.md`。
-4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`。
+2. 若 `schemaVersion` 旧于当前版本或缺少 v6 群像文件，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
+3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`canon/laws.md`、`planning/current-volume.md`、`planning/rolling-outline.md`、`planning/current-arc.md`。
+4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`，以及上场角色的 `cast/{id}/state.json`。
 5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
-8. 若无阻断，长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。再确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点；为主要场景补充视角过滤、人物利益、回避核心和压力反应，然后自主写作。
+8. 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判，再按 [chapter-craft.md](references/chapter-craft.md) 写正文。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。本章只推进或加压一格，不要求把弧写完。确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点。
 9. 按 [review-system.md](references/review-system.md) 运行语言风险扫描、独立编辑审稿和目标读者模拟；发现作者判词、对白工具化、人物同声或总结式收尾成簇时，按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段。必要时自动修改一次并重新审查，不因普通写作选择打断作者。
 10. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
@@ -106,7 +109,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
 9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
-10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。
+10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。同步更新上场角色的 `cast/{id}/state.json`、`contracts/chapter-NNNN.json`、`intents/chapter-NNNN/` 与 `planning/current-arc.md`。弧未闭环则保持 `open`。
 11. 在 staging 中更新 `planning/rolling-outline.md`：长篇删除已完成章并保持 5–10 章窗口，用 `plan_cadence.py` 补齐 15 章节拍；短故事删除已完成分节并保持全部剩余结构可见，不向结局之后补新锚点。
 12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。短故事最后一节若要标记 `complete`，同时暂存 `reviews/final-review.json`。
 13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。
@@ -155,7 +158,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
 保持简洁，不展示原始 JSON 或内部长清单。
 
-- 写章后报告：章节、约略字数、爽点级别、本章实际变化、兑现/新增的线索、下一章方向。
+- 写章后报告：章节、约略字数、爽点级别、合法结局类型、弧还差什么、本章实际变化、谁的情绪变了、兑现/新增的线索、下一章方向。
 - 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及其目标、能力、身份、信念、关系或立场如何改变。
 - 有重大决策时：先说明为什么现在必须决定，再给 2–4 个差异明确的选项和影响。
 - 开新书时：正文之前展示终选书名的检索结论、3 个差异明显的书名字效方向及推荐项、适配目标生成器的一次成图提示词、纯底图提示词、标题区域重绘提示词和负面提示词。不能只交付“书法、大气、金色描边”之类抽象形容。
@@ -178,4 +181,4 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 - `scripts/opening_audit.py`：按有效字符口径截取短故事前 100/200/300 字窗口，输出入口审稿所需的文本与基础指标；不代替语义判断。
 - `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。
 - `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
-- `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复和提交一致性。
+- `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复、群像合同/意图和提交一致性。

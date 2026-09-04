@@ -9,6 +9,7 @@
 │   ├── story-contract.md
 │   ├── characters.md
 │   ├── world.md
+│   ├── laws.md               # 力量/信息法则，群像裁判只认这里
 │   ├── style-profile.md
 │   ├── publishing-package.md
 │   ├── market-brief.md
@@ -16,7 +17,14 @@
 ├── planning/
 │   ├── series-map.md
 │   ├── current-volume.md
-│   └── rolling-outline.md
+│   ├── rolling-outline.md
+│   └── current-arc.md        # 未完成弧：目标可跨多章
+├── cast/                     # 角色 skill + 情绪状态，按需加载
+│   └── {id}/
+│       ├── SKILL.md
+│       └── state.json
+├── contracts/                # 本章未完成合同
+├── intents/                  # 角色意图与法则裁判
 ├── state/
 │   ├── story-state.json
 │   ├── threads.json
@@ -39,6 +47,7 @@
 - `story-contract.md`：作品不能轻易改变的承诺、边界和核心体验。
 - `characters.md`：相对稳定的人设、欲望、恐惧、能力边界、语言特征。
 - `world.md`：世界规则和已证实的规则后果；不要堆百科。
+- `laws.md`：修炼/力量/信息法则与冲突裁定；群像裁判只认这里，细节见 [ensemble.md](ensemble.md)。
 - `style-profile.md`：已确认的语言风格参数、作者手法转译、项目定制和禁用倾向。
 - `publishing-package.md`：确认书名、公开检索记录、封面提示词、负面提示词和排版说明。
 - `market-brief.md`：可选的公开市场观察、事实、推断、置信度和创作隔离线。
@@ -46,6 +55,8 @@
 - `series-map.md`：长篇保存可收束主线与远期选择；短故事保存单一主承诺和结局边界。
 - `current-volume.md`：长篇保存当前卷；短故事保存全文有限结构。
 - `rolling-outline.md`：长篇保持未来 5–10 章；短故事覆盖全部剩余分节。
+- `current-arc.md`：当前未完成弧的目标、估计章窗和还差什么；章不是收束单位。
+- `cast/{id}/`：角色稳定人设与隔离情绪状态。主角用 `ensemble.protagonistId`，不要占用 `cast-arcs` 保留 id `protagonist`。
 - `story-state.json`：当前章结束时的机器可读快照。
 - `threads.json`：主线、支线、悬念、伏笔和承诺的生命周期。
 - `rewards.json`：未来爽点计划与已经兑现的 3/5 章节拍账本。
@@ -61,7 +72,7 @@
 
 ## 状态规则
 
-`project.json` 是提交索引。`storyMode` 使用 `serial` 或 `fanqie-short-story`；旧项目缺失时按 `serial`。短故事另以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
+`project.json` 是提交索引。`storyMode` 使用 `serial` 或 `fanqie-short-story`；旧项目缺失时按 `serial`。`ensemble` 保存群像仿真：`enabled`、`protagonistId`、探索配额、同时上场上限，以及从哪一章开始强制合同/意图。短故事另以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
 
 `totalContentChars` 必须等于全部已提交正文的有效字符总数，口径与 `chapter_metrics.py` 一致：忽略 Markdown 标题和代码块，中文按字、连续英文或数字按词计数。正式提交后，故事合同、人物、世界、语言风格、当前卷和滚动章纲不得仍残留初始化模板中的“待填写”“待确认”“待规划”。
 

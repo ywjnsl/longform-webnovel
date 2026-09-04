@@ -8,7 +8,7 @@
 python3 <skill-dir>/scripts/migrate_project.py <项目目录>
 ```
 
-迁移脚本会在 `.webnovel/backups/` 保存迁移前文件，升级项目到 v5，补充语言风格档案、节拍配置、爽点账本、配角弧光账本、可选市场研究状态和章节审稿门禁。旧连载默认沿用最近正文的可观察语言特征，不会被强行套用新预设；已发布旧章节也不会被伪装成已验证，审稿门禁从迁移后的下一章开始。
+迁移脚本会在 `.webnovel/backups/` 保存迁移前文件，升级项目到 v6，补充语言风格档案、节拍配置、爽点账本、配角弧光账本、可选市场研究状态、章节审稿门禁，以及群像仿真所需的 `canon/laws.md`、`planning/current-arc.md`、主角 `cast/` 和 `ensemble` 配置。旧连载的合同/意图从迁移后的下一章开始强制；已发布旧章节不会被伪装成已跑过角色意图。旧连载默认沿用最近正文的可观察语言特征，不会被强行套用新预设；审稿门禁从迁移后的下一章开始。
 
 迁移后运行 `validate_project.py`。`needs-review` 或历史未审计提示不是新正文的写作许可；有时间时回读旧节拍章并补证据。
 
@@ -23,6 +23,10 @@ staging/
 ├── reviews/第0016章-lint.json
 ├── reviews/第0016章-review.json
 ├── planning/rolling-outline.md
+├── planning/current-arc.md
+├── contracts/chapter-0016.json
+├── intents/chapter-0016/ruling.json
+├── cast/{id}/state.json
 ├── state/story-state.json
 ├── state/threads.json
 ├── state/rewards.json
@@ -30,7 +34,7 @@ staging/
 └── sessions/2026-08-21-chapter-0016.md
 ```
 
-必须暂存 `project.json`、四个章节快照状态文件、新章节正文、语言风险扫描和独立审稿报告。四个快照为 `story-state.json`、`threads.json`、`rewards.json` 和 `cast-arcs.json`；提交脚本会从正式项目构造隔离预览，其他未变化文件可以省略。
+必须暂存 `project.json`、四个章节快照状态文件、新章节正文、语言风险扫描和独立审稿报告。四个快照为 `story-state.json`、`threads.json`、`rewards.json` 和 `cast-arcs.json`；群像强制章还要暂存合同、ruling、`planning/current-arc.md` 和上场角色 `cast/{id}/state.json`。提交脚本会从正式项目构造隔离预览，其他未变化文件可以省略。
 
 两个审稿 JSON 必须绑定最终正文的 SHA-256。正文修改后重跑 `prose_lint.py` 并重做编辑/读者审稿，不能沿用旧报告。结构和阻断规则见 [review-system.md](review-system.md)。
 

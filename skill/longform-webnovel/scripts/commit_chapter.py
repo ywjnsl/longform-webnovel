@@ -15,7 +15,7 @@ from pathlib import Path
 from webnovel_io import backup_files, copy_file_atomic, load_json, restore_backup, utc_now, write_json_atomic
 
 
-ALLOWED_TOP_LEVEL = {"project.json", "canon", "planning", "state", "chapters", "reviews", "sessions"}
+ALLOWED_TOP_LEVEL = {"project.json", "canon", "planning", "state", "chapters", "reviews", "sessions", "cast", "contracts", "intents"}
 REQUIRED_STAGED = {
     "project.json",
     "state/story-state.json",
@@ -68,7 +68,7 @@ def build_shadow(root: Path, staged: dict[str, Path]) -> Path:
     # The validator checks completed market research against its dated snapshot.
     # Keep research in the shadow project so a normal chapter commit does not
     # require temporarily downgrading an otherwise valid project.
-    for name in ("canon", "planning", "state", "research"):
+    for name in ("canon", "planning", "state", "research", "cast", "contracts", "intents"):
         if (root / name).is_dir():
             shutil.copytree(root / name, shadow / name)
     for name in ("chapters", "reviews", "sessions"):
@@ -147,6 +147,18 @@ def validate_transition(root: Path, staged: dict[str, Path], allow_revision: boo
         review_path = f"reviews/第{new_committed:04d}章-{suffix}.json"
         if review_path not in staged:
             raise ValueError(f"Staging needs {review_path}")
+    ensemble = proposed.get("ensemble") if isinstance(proposed.get("ensemble"), dict) else {}
+    enforce_from = ensemble.get("enforceFromChapter", 1)
+    enabled = ensemble.get("enabled", True)
+    if enabled and isinstance(enforce_from, int) and new_committed >= enforce_from:
+        contract_path = f"contracts/chapter-{new_committed:04d}.json"
+        ruling_path = f"intents/chapter-{new_committed:04d}/ruling.json"
+        if contract_path not in staged:
+            raise ValueError(f"Ensemble chapter {new_committed} needs staged {contract_path}")
+        if ruling_path not in staged:
+            raise ValueError(f"Ensemble chapter {new_committed} needs staged {ruling_path}")
+        if f"planning/current-arc.md" not in staged:
+            raise ValueError("Ensemble chapter commit needs staged planning/current-arc.md")
     return new_committed
 
 
