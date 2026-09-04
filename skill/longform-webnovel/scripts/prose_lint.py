@@ -22,6 +22,24 @@ MICRO_ACTIONS = ("深吸一口气", "眼中闪过", "嘴角勾起", "心中一�
 EXPLANATION_MARKERS = ("显然", "这意味着", "换句话说", "他意识到", "她意识到", "可想而知", "毋庸置疑")
 SIMILE_MARKERS = ("仿佛", "犹如", "宛若", "如同", "像是")
 SUMMARY_ENDINGS = ("他终于明白", "她终于明白", "这一刻他明白", "这一刻她明白", "从这一刻起", "这意味着")
+CORRECTIVE_PATTERNS = (
+    ("不是…而是/只是…", re.compile(r"不是[^。！？!?\n]{0,48}(?:而是|只是)")),
+    ("没有…而是/只是…", re.compile(r"没有[^。！？!?\n]{0,48}(?:而是|只是)")),
+    ("并非…而是/只是…", re.compile(r"并非[^。！？!?\n]{0,48}(?:而是|只是)")),
+    ("不是…。而是/只是…", re.compile(r"不是[^。！？!?\n]{0,64}[。！？!?]\s*(?:我|他|她|他们|她们|这|那)?(?:而是|只是)")),
+    ("没有…。而是/只是…", re.compile(r"没有[^。！？!?\n]{0,64}[。！？!?]\s*(?:我|他|她|他们|她们|这|那)?(?:而是|只是)")),
+)
+THEME_CLOSURE_MARKERS = (
+    "我没有拿到",
+    "我拿回了",
+    "他没有得到",
+    "她没有得到",
+    "真正的答案",
+    "真正重要的",
+    "原来真正",
+    "这才是",
+)
+REASONING_OPENING_RE = re.compile(r"^(?:我|他|她|他们|她们|这|那)(?:没有|不是|只是|终于|才发现|才明白)")
 
 
 def mean(values: list[int]) -> float:
@@ -59,6 +77,27 @@ def text_metrics(text: str) -> dict:
 def count_markers(text: str, markers: tuple[str, ...]) -> tuple[int, list[str]]:
     counts = [(marker, text.count(marker)) for marker in markers]
     return sum(count for _, count in counts), [marker for marker, count in counts if count]
+
+
+def count_regex_patterns(text: str, patterns: tuple[tuple[str, re.Pattern[str]], ...]) -> tuple[int, list[str]]:
+    matches: list[str] = []
+    for _, pattern in patterns:
+        matches.extend(match.group(0) for match in pattern.finditer(text))
+    return len(matches), matches
+
+
+def repeated_reasoning_openings(text: str) -> list[tuple[str, int]]:
+    sentences = [segment.strip() for segment in SENTENCE_SPLIT_RE.split(strip_markdown(text)) if segment.strip()]
+    openings: Counter[str] = Counter()
+    for sentence in sentences:
+        normalized = CJK_ONLY_RE.sub("", sentence)
+        match = REASONING_OPENING_RE.match(normalized)
+        if match:
+            openings[match.group(0)] += 1
+    return sorted(
+        ((opening, count) for opening, count in openings.items() if count >= 3),
+        key=lambda item: (-item[1], item[0]),
+    )[:4]
 
 
 def repeated_ngrams(text: str, size: int = 8) -> list[tuple[str, int]]:
@@ -108,6 +147,18 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
             }
         )
 
+    corrective_count, corrective_evidence = count_regex_patterns(body, CORRECTIVE_PATTERNS)
+    if corrective_count >= 3 or (corrective_count >= 2 and corrective_count / unit > 0.7):
+        findings.append(
+            {
+                "code": "corrective-scaffold-density",
+                "severity": "review",
+                "count": corrective_count,
+                "evidence": corrective_evidence[:4],
+                "message": "Corrective constructions recur densely; inspect whether they repeatedly pre-package conclusions or create a uniform quotable cadence.",
+            }
+        )
+
     simile_count, simile_evidence = count_markers(body, SIMILE_MARKERS)
     if simile_count / unit > 3.0:
         findings.append(
@@ -130,6 +181,18 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": len(ending_hits),
                 "evidence": ending_hits,
                 "message": "The ending may summarize its meaning; verify that action, image, dialogue, or consequence would create stronger forward pull.",
+            }
+        )
+
+    theme_closure_hits = [marker for marker in THEME_CLOSURE_MARKERS if marker in body[-320:]]
+    if theme_closure_hits:
+        findings.append(
+            {
+                "code": "theme-closure-ending",
+                "severity": "review",
+                "count": len(theme_closure_hits),
+                "evidence": theme_closure_hits,
+                "message": "The final passage may restate the theme after the outcome is already visible; verify whether a concrete consequence can carry the ending.",
             }
         )
 
@@ -163,6 +226,18 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": sum(count for _, count in repeated),
                 "evidence": [phrase for phrase, _ in repeated],
                 "message": "Long phrases recur at least three times; distinguish intentional motifs from accidental echoes.",
+            }
+        )
+
+    repeated_openings = repeated_reasoning_openings(text)
+    if repeated_openings:
+        findings.append(
+            {
+                "code": "repeated-reasoning-openings",
+                "severity": "review",
+                "count": sum(count for _, count in repeated_openings),
+                "evidence": [opening for opening, _ in repeated_openings],
+                "message": "Several sentences share the same corrective or reflective opening; inspect for deliberate voice or an unintended repetitive reasoning cadence.",
             }
         )
 
