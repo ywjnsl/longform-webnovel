@@ -1,4 +1,4 @@
 interface:
   display_name: "中文网文与短故事"
-  short_description: "长期连载、群像角色 skill、跨章弧与独立审稿"
-  default_prompt: "使用 $longform-webnovel 创建一部有独立审稿、角色隔离意图、未完成弧和多类型配角弧光的中文网文或番茄短故事。"
+  short_description: "长期连载、群像角色 skill、跨章弧与自然度门禁"
+  default_prompt: "使用 $longform-webnovel 创建一部有强制网文自然度审稿、角色隔离意图、未完成弧和多类型配角弧光的中文网文或番茄短故事。"

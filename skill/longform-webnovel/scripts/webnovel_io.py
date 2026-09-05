@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-CURRENT_PROJECT_SCHEMA = 6
+CURRENT_PROJECT_SCHEMA = 7
 CURRENT_REWARD_SCHEMA = 2
 CURRENT_CAST_SCHEMA = 1
 VALID_STORY_MODES = {"serial", "fanqie-short-story"}

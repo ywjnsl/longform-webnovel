@@ -21,3 +21,5 @@ jobs:
         run: python tests/check_skill.py
       - name: Run integration tests
         run: python tests/test_longform_webnovel.py
+      - name: Run naturalness gate tests
+        run: python skill/longform-webnovel/tests/test_naturalness_gate.py

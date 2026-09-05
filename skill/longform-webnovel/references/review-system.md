@@ -2,15 +2,18 @@
 
 ## 目的
 
-每章在正式提交前完成三种互补检查：确定性语言风险扫描、编辑诊断、目标读者体验模拟。扫描只发现值得复核的模式，不能判断作者身份，也不能输出“AI 概率”。项目已确认正文和 `canon/style-profile.md` 始终是声音基线。
+每章在正式提交前完成四种互补检查：确定性语言风险扫描、网文自然度审稿、编辑诊断、目标读者体验模拟。扫描只发现值得复核的模式，不能判断作者身份，也不能输出“AI 概率”。项目已确认正文和 `canon/style-profile.md` 始终是声音基线。
+
+网文自然度审稿按 [webnovel-naturalness-review.md](webnovel-naturalness-review.md) 执行。它对所有新写或修改过的章节强制生效，不因 lint 无 finding、普通审稿已通过、作者要求停止润色或正文只改一句而省略。
 
 ## 角色隔离
 
-有可用子代理时，让编辑与读者模拟分别读取本章、必要正史和风格档案，避免互相锚定。没有子代理时，在同一代理内依次执行两个上下文隔离的角色通道：先让读者只报告在哪里产生了什么体验，再让编辑诊断原因和修订方向。读者不替作者改稿，编辑不伪装成目标读者投票。
+有可用子代理时，让自然度审稿、编辑与读者模拟分别读取本章、必要正史和风格档案，避免互相锚定。没有子代理时，在同一代理内依次执行三个上下文隔离的角色通道：先让自然度审稿定位模式簇，再让编辑诊断因果、结构和修订方向，最后让读者只报告在哪里产生了什么体验。读者不替作者改稿，编辑不伪装成目标读者投票。
 
 - 编辑检查：读者承诺、因果、结构、人物、声音、连续性、行文执行。
+- 自然度审稿：解释过满、纠正式骨架、对白播设定、人物同声、因果过度装配、通用反应和主题封口。
 - 读者模拟：以具体目标读者 persona 记录逐点反应、继续阅读意愿、好奇与卡顿位置。
-- 两者可以意见不同。保留分歧，不用平均分消解它。
+- 三者可以意见不同。保留分歧，不用平均分消解它。
 
 ## 执行顺序
 
@@ -23,10 +26,10 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
   --output <staging>/reviews/第NNNN章-lint.json
 ```
 
-3. 独立完成读者模拟与编辑诊断，写 `第NNNN章-review.json`。编辑对自然化风险按“替读者下结论、纠正式骨架过密、对白工具化、能力过度整齐、程序展示过满、人物同声、主题封口”检查是否形成模式簇；判据见 [prose-naturalization.md](prose-naturalization.md)。涉及证据缺口、人物记错或后置揭示时，另查前文旁白与正史是否已把该事实提前写死，并确认早期争议与后期兑现之间存在可追溯的因果。
-4. 优先修因果、人物和结构，再处理行文。普通警告不要求机械修改；自然化修订只改有逐字证据的段落，不能把全文重新生成成另一套统一腔调。
-5. 每轮最多自动修订一次；正文变化后必须重跑扫描和两类审稿，因为旧哈希与证据已经失效。审稿无阻断项且作者确认当前版本达标后停止自然化循环，不因主观分数仍可降低而继续改稿。
-6. 编辑 `blocked`、未解决的 `high` 问题、读者 `drop-risk` 或 `stop` 会阻断提交。若作者明确接受风险，先把确认写入 `state/decisions.json`，再使用 `author-approved` 和对应 `decisionId`。
+3. 按 [webnovel-naturalness-review.md](webnovel-naturalness-review.md) 独立完成自然度审稿，再依次完成编辑诊断与读者模拟，统一写入 `第NNNN章-review.json`。涉及证据缺口、人物记错或后置揭示时，另查前文旁白与正史是否已把该事实提前写死，并确认早期争议与后期兑现之间存在可追溯的因果。
+4. 优先修因果、人物和结构，再处理行文。普通警告不要求机械修改；自然度修订只改有逐字证据的段落，不能把全文重新生成成另一套统一腔调。
+5. 每轮最多自动修订一次；正文变化后必须重跑指标、扫描、自然度审稿、编辑诊断和读者模拟，因为旧哈希与证据已经失效。执行过自然度修改时，在最终报告保存修改前哈希和处理类别；最终 finding 只引用修改后正文仍存在的逐字证据。
+6. 自然度 `needs-revision`、自然度或编辑未解决的 `high` 问题、编辑 `blocked`、读者 `drop-risk` 或 `stop` 会阻断提交。若作者明确接受自然度风险，先把确认写入 `state/decisions.json`，其中 `kind` 为 `naturalness-exception`，并绑定具体 `chapter` 与最终正文 `reviewedTextSha256`；再使用 `author-approved` 和对应 `decisionId`。
 
 番茄短故事第一节在第 2 步后另运行 `opening_audit.py --window 300`。目标读者先只看脚本截出的前 300 字，复述人物关系、当前事件、主角选择、具体风险与下一问；编辑再检查这些信息是否形成因果链。复述需要作者补充背景、主角到 300 字仍无主动选择、风险只有抽象情绪，或下一问无法由后文回答时，至少记为 `high` 入口问题并阻断提交，修订后重新生成窗口。脚本指标本身不形成通过或阻断结论。
 
@@ -68,6 +71,16 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
   "schemaVersion": 1,
   "chapter": 16,
   "reviewedTextSha256": "正文 UTF-8 字节的 SHA-256",
+  "naturalness": {
+    "status": "pass",
+    "diagnosis": "未发现影响沉浸的自然度问题簇。",
+    "reviewedTextSha256": "正文 UTF-8 字节的 SHA-256",
+    "findings": [],
+    "revision": {
+      "action": "not-needed",
+      "notes": "没有证据支持额外修改。"
+    }
+  },
   "editor": {
     "status": "pass-with-notes",
     "diagnosis": "本章的主要判断",
@@ -106,6 +119,9 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 
 枚举值：
 
+- 自然度状态：`pass`、`pass-with-notes`、`needs-revision`。
+- 自然度类别：`over-explanation`、`corrective-syntax`、`expository-dialogue`、`same-voice`、`over-engineered-causality`、`generic-reaction`、`theme-closure`。
+- 自然度处理：`not-needed`、`revised`、`author-approved`。`revised` 必须记录与最终哈希不同的 `beforeTextSha256` 和非空 `changedCategories`；`author-approved` 必须关联已确认的 `naturalness-exception` 决策，该决策的 `chapter` 和 `reviewedTextSha256` 必须与本次最终正文一致。
 - 编辑状态：`pass`、`pass-with-notes`、`blocked`。
 - 优先级：`high`、`medium`、`low`。
 - 编辑维度：`promise`、`causality`、`structure`、`character`、`voice`、`continuity`、`line`。
@@ -113,7 +129,7 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 - 体验通道：`transportation`、`aesthetic`、`social`、`curiosity`、`flow`；倾向：`positive`、`negative`、`mixed`。
 - 处理结果：`accepted`、`revised`、`author-approved`。最后一种还需 `decisionId`。
 
-所有 `evidence` 必须是当前章原文的逐字子串。不要把概括、推测或改写后的句子伪装成证据。
+所有 `evidence` 必须是当前最终章节正文的逐字子串。不要把概括、推测、修改前已删除的句子或改写后的句子伪装成证据。
 
 ## 语言风险解释
 

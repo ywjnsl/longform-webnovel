@@ -318,6 +318,8 @@ def main() -> int:
             "editorRequired": True,
             "readerRequired": True,
             "lintRequired": True,
+            "naturalnessRequired": True,
+            "naturalnessEnforceFromChapter": 1,
         },
         "ensemble": {
             "enabled": True,

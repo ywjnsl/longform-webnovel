@@ -182,6 +182,20 @@ def main() -> int:
     review_gate.setdefault("editorRequired", True)
     review_gate.setdefault("readerRequired", True)
     review_gate.setdefault("lintRequired", True)
+    review_gate["naturalnessRequired"] = True
+    if old_version < 7:
+        existing_naturalness_from = review_gate.get("naturalnessEnforceFromChapter", committed + 1)
+        if (
+            not isinstance(existing_naturalness_from, int)
+            or isinstance(existing_naturalness_from, bool)
+            or existing_naturalness_from <= 0
+        ):
+            existing_naturalness_from = committed + 1
+        review_gate["naturalnessEnforceFromChapter"] = (
+            max(committed + 1, existing_naturalness_from) if committed else 1
+        )
+    else:
+        review_gate.setdefault("naturalnessEnforceFromChapter", 1)
     project["reviewGate"] = review_gate
     ensemble = project.get("ensemble") if isinstance(project.get("ensemble"), dict) else {}
     ensemble.setdefault("enabled", True)

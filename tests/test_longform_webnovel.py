@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Integration checks for the staged longform-webnovel v6 skill."""
+"""Integration checks for the staged longform-webnovel v7 skill."""
 
 from __future__ import annotations
 
@@ -201,6 +201,16 @@ def prepare_stage(
             "schemaVersion": 1,
             "chapter": chapter,
             "reviewedTextSha256": digest,
+            "naturalness": {
+                "status": "pass",
+                "diagnosis": "未发现影响沉浸的自然度问题簇。",
+                "reviewedTextSha256": digest,
+                "findings": [],
+                "revision": {
+                    "action": "not-needed",
+                    "notes": "没有证据支持额外修改。",
+                },
+            },
             "editor": {
                 "status": "pass",
                 "diagnosis": "本章因果清楚，兑现证据与下一步行动能够衔接。",
@@ -295,10 +305,19 @@ def write_ensemble_stage(project_root: Path, stage: Path, chapter: int) -> None:
         write_json(stage / "cast" / protagonist_id / "state.json", state)
 
 
-def commit(project: Path, stage: Path, *, dry_run: bool = False, expect: int = 0) -> dict:
+def commit(
+    project: Path,
+    stage: Path,
+    *,
+    dry_run: bool = False,
+    allow_revision: bool = False,
+    expect: int = 0,
+) -> dict:
     args = ["python3", str(SCRIPTS / "commit_chapter.py"), "--project", str(project), "--staging", str(stage)]
     if dry_run:
         args.append("--dry-run")
+    if allow_revision:
+        args.append("--allow-revision")
     completed = run(*args, expect=expect)
     stream = completed.stdout if expect == 0 else completed.stderr
     return json.loads(stream)
@@ -424,7 +443,7 @@ def test_committed_project_guards(base: Path) -> None:
 def test_style_profiles(base: Path) -> None:
     unselected = base / "style-unselected"
     run("python3", str(SCRIPTS / "init_project.py"), "--path", str(unselected), "--title", "待选风格")
-    assert read_json(unselected / "project.json")["schemaVersion"] == 6
+    assert read_json(unselected / "project.json")["schemaVersion"] == 7
     assert read_json(unselected / "project.json")["ensemble"]["protagonistId"] == "main"
     assert (unselected / "cast/main/SKILL.md").is_file()
     assert read_json(unselected / "project.json")["styleProfile"]["status"] == "unconfirmed"
@@ -1000,6 +1019,42 @@ def test_migration(base: Path) -> None:
     validation = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert validation["ok"] and any("Legacy chapters through 3" in warning for warning in validation["warnings"])
 
+    legacy_revision_stage = base / "legacy-revision-stage"
+    legacy_chapter_text = (project / "chapters" / "第0003章-旧章.md").read_text(encoding="utf-8")
+    prepare_stage(project, legacy_revision_stage, 3)
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    staged_index = read_json(legacy_revision_stage / "project.json")
+    staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
+    write_json(legacy_revision_stage / "project.json", staged_index)
+    legacy_review_path = legacy_revision_stage / "reviews" / "第0003章-review.json"
+    legacy_review = read_json(legacy_review_path)
+    legacy_review.pop("naturalness")
+    write_json(legacy_review_path, legacy_review)
+    rejected_revision = commit(project, legacy_revision_stage, allow_revision=True, expect=1)
+    assert "review needs naturalness object" in rejected_revision["error"]
+
+    prepare_stage(project, legacy_revision_stage, 3)
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    staged_index = read_json(legacy_revision_stage / "project.json")
+    staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
+    write_json(legacy_revision_stage / "project.json", staged_index)
+    legacy_review_path = legacy_revision_stage / "reviews" / "第0003章-review.json"
+    legacy_review = read_json(legacy_review_path)
+    legacy_review.pop("reader")
+    write_json(legacy_review_path, legacy_review)
+    rejected_revision = commit(project, legacy_revision_stage, allow_revision=True, expect=1)
+    assert "review needs reader object" in rejected_revision["error"]
+
+    prepare_stage(project, legacy_revision_stage, 3)
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    staged_index = read_json(legacy_revision_stage / "project.json")
+    staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
+    write_json(legacy_revision_stage / "project.json", staged_index)
+    commit(project, legacy_revision_stage, allow_revision=True)
+
     backups_before = list((project / ".webnovel" / "backups").iterdir())
     repeated = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(project)).stdout)
     backups_after = list((project / ".webnovel" / "backups").iterdir())
@@ -1031,7 +1086,7 @@ def test_migration(base: Path) -> None:
     assert upgraded["fromVersion"] == 2 and upgraded["rewardsFromVersion"] == 2
     assert upgraded["legacyUnauditedThrough"] == 0
     upgraded_index = read_json(previous_v2 / "project.json")
-    assert upgraded_index["schemaVersion"] == 6
+    assert upgraded_index["schemaVersion"] == 7
     assert upgraded_index["ensemble"]["enabled"] is True
     assert upgraded_index["rewardCadence"]["enforceFromChapter"] == 1
     assert upgraded_index["styleProfile"]["status"] == "unconfirmed"
@@ -1046,7 +1101,7 @@ def test_migration(base: Path) -> None:
     (previous_v3 / "state/cast-arcs.json").unlink()
     upgraded_v3 = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(previous_v3)).stdout)
     assert upgraded_v3["fromVersion"] == 3 and upgraded_v3["castLegacyUnauditedThrough"] == 0
-    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 6
+    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 7
     assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(previous_v3)).stdout)["ok"]
 
     previous_v4 = base / "previous-v4"
@@ -1343,7 +1398,7 @@ def main() -> None:
         test_migration(base)
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
-    print("longform-webnovel v6 integration checks passed")
+    print("longform-webnovel v7 integration checks passed")
 
 
 if __name__ == "__main__":

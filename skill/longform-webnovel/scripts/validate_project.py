@@ -101,6 +101,18 @@ VALID_COMPLETION_INTENT = {"continue", "uncertain", "stop"}
 VALID_READER_CHANNEL = {"transportation", "aesthetic", "social", "curiosity", "flow"}
 VALID_READER_VALENCE = {"positive", "negative", "mixed"}
 VALID_RESOLUTION_ACTION = {"accepted", "revised", "author-approved"}
+VALID_NATURALNESS_STATUS = {"pass", "pass-with-notes", "needs-revision"}
+VALID_NATURALNESS_PRIORITY = {"high", "medium", "low"}
+VALID_NATURALNESS_CATEGORY = {
+    "over-explanation",
+    "corrective-syntax",
+    "expository-dialogue",
+    "same-voice",
+    "over-engineered-causality",
+    "generic-reaction",
+    "theme-closure",
+}
+VALID_NATURALNESS_REVISION_ACTION = {"not-needed", "revised", "author-approved"}
 FINAL_REVIEW_CHECKS = (
     "promise",
     "causality",
@@ -224,6 +236,143 @@ def confirmed_decision_ids(decision_doc: dict) -> set[str]:
     }
 
 
+def confirmed_naturalness_decision_ids(decision_doc: dict, chapter: int, digest: str) -> set[str]:
+    decisions = decision_doc.get("decisions", [])
+    if not isinstance(decisions, list):
+        return set()
+    return {
+        item["id"]
+        for item in decisions
+        if isinstance(item, dict)
+        and isinstance(item.get("id"), str)
+        and item.get("status") in {"confirmed", "approved"}
+        and item.get("kind") == "naturalness-exception"
+        and item.get("chapter") == chapter
+        and item.get("reviewedTextSha256") == digest
+    }
+
+
+def validate_naturalness_reviews(
+    root: Path,
+    chapter_files: dict[int, Path],
+    committed: int,
+    gate: dict,
+    decision_doc: dict,
+    errors: list[str],
+) -> None:
+    if gate.get("naturalnessRequired") is not True:
+        return
+    enforce_from = gate.get("naturalnessEnforceFromChapter")
+    if not isinstance(enforce_from, int) or isinstance(enforce_from, bool) or enforce_from <= 0:
+        return
+
+    for chapter in range(enforce_from, committed + 1):
+        chapter_path = chapter_files.get(chapter)
+        if chapter_path is None:
+            continue
+        chapter_text = chapter_path.read_text(encoding="utf-8")
+        digest = hashlib.sha256(chapter_text.encode("utf-8")).hexdigest()
+        review_path = root / "reviews" / f"第{chapter:04d}章-review.json"
+        if not review_path.is_file():
+            errors.append(f"Chapter {chapter} needs reviews/{review_path.name}")
+            continue
+
+        review = load_json(review_path, errors)
+        if review.get("schemaVersion") != 1:
+            errors.append(f"Chapter {chapter} review schemaVersion must be 1")
+        if review.get("chapter") != chapter:
+            errors.append(f"Chapter {chapter} review chapter number does not match")
+        if review.get("reviewedTextSha256") != digest:
+            errors.append(f"Chapter {chapter} review hash does not match chapter text")
+
+        naturalness = review.get("naturalness")
+        if not isinstance(naturalness, dict):
+            errors.append(f"Chapter {chapter} review needs naturalness object")
+            continue
+        status = naturalness.get("status")
+        if status not in VALID_NATURALNESS_STATUS:
+            errors.append(f"Chapter {chapter} naturalness status is invalid: {status}")
+        if not is_concrete(naturalness.get("diagnosis")):
+            errors.append(f"Chapter {chapter} naturalness review needs a concrete diagnosis")
+        if naturalness.get("reviewedTextSha256") != digest:
+            errors.append(f"Chapter {chapter} naturalness hash does not match chapter text")
+
+        findings = naturalness.get("findings")
+        unresolved_high = False
+        if not isinstance(findings, list):
+            errors.append(f"Chapter {chapter} naturalness findings must be an array")
+            findings = []
+        for index, finding in enumerate(findings):
+            label = f"Chapter {chapter} naturalness finding #{index + 1}"
+            if not isinstance(finding, dict):
+                errors.append(f"{label} must be an object")
+                continue
+            if finding.get("priority") not in VALID_NATURALNESS_PRIORITY:
+                errors.append(f"{label} has invalid priority")
+            if finding.get("category") not in VALID_NATURALNESS_CATEGORY:
+                errors.append(f"{label} has invalid category")
+            evidence = validate_string_list(finding.get("evidence"), f"{label} evidence", errors, minimum=1)
+            for evidence_index, snippet in enumerate(evidence):
+                if snippet not in chapter_text:
+                    errors.append(
+                        f"{label} evidence #{evidence_index + 1} must be copied verbatim from chapter text"
+                    )
+            if not is_concrete(finding.get("readerCost")) or not is_concrete(finding.get("direction")):
+                errors.append(f"{label} needs readerCost and revision direction")
+            if not isinstance(finding.get("resolved"), bool):
+                errors.append(f"{label} resolved must be boolean")
+            if finding.get("priority") == "high" and finding.get("resolved") is False:
+                unresolved_high = True
+
+        if status == "pass" and findings:
+            errors.append(f"Chapter {chapter} naturalness pass status cannot contain findings")
+        if status == "needs-revision" and not findings:
+            errors.append(f"Chapter {chapter} naturalness needs-revision status requires findings")
+
+        revision = naturalness.get("revision")
+        if not isinstance(revision, dict):
+            errors.append(f"Chapter {chapter} naturalness review needs revision object")
+            continue
+        action = revision.get("action")
+        if action not in VALID_NATURALNESS_REVISION_ACTION:
+            errors.append(f"Chapter {chapter} naturalness revision action is invalid: {action}")
+        if not is_concrete(revision.get("notes")):
+            errors.append(f"Chapter {chapter} naturalness revision needs concrete notes")
+        if action == "revised":
+            before_digest = revision.get("beforeTextSha256")
+            if (
+                not isinstance(before_digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", before_digest) is None
+                or before_digest == digest
+            ):
+                errors.append(
+                    f"Chapter {chapter} revised naturalness review needs a distinct beforeTextSha256"
+                )
+            changed_categories = validate_string_list(
+                revision.get("changedCategories"),
+                f"Chapter {chapter} revised naturalness review changedCategories",
+                errors,
+                minimum=1,
+            )
+            if not changed_categories:
+                errors.append(f"Chapter {chapter} revised naturalness review needs changedCategories")
+            for category in changed_categories:
+                if category not in VALID_NATURALNESS_CATEGORY:
+                    errors.append(
+                        f"Chapter {chapter} revised naturalness review has invalid changed category: {category}"
+                    )
+        approved_ids = confirmed_naturalness_decision_ids(decision_doc, chapter, digest)
+        exception_approved = action == "author-approved" and revision.get("decisionId") in approved_ids
+        if action == "author-approved" and not exception_approved:
+            errors.append(
+                f"Chapter {chapter} naturalness author-approved revision needs a confirmed decisionId"
+            )
+        if status == "needs-revision" and not exception_approved:
+            errors.append(f"Chapter {chapter} naturalness review still needs revision")
+        if unresolved_high and not exception_approved:
+            errors.append(f"Chapter {chapter} has an unresolved high-priority naturalness finding")
+
+
 def validate_chapter_reviews(
     root: Path,
     project: dict,
@@ -243,10 +392,20 @@ def validate_chapter_reviews(
     for field in ("editorRequired", "readerRequired", "lintRequired"):
         if not isinstance(gate.get(field), bool):
             errors.append(f"reviewGate.{field} must be boolean")
+    if gate.get("naturalnessRequired") is not True:
+        errors.append("reviewGate.naturalnessRequired must be true")
+    naturalness_enforce_from = gate.get("naturalnessEnforceFromChapter")
+    if (
+        not isinstance(naturalness_enforce_from, int)
+        or isinstance(naturalness_enforce_from, bool)
+        or naturalness_enforce_from <= 0
+    ):
+        errors.append("reviewGate.naturalnessEnforceFromChapter must be a positive integer")
     if not isinstance(committed, int) or isinstance(committed, bool):
         return
 
     approved_ids = confirmed_decision_ids(decision_doc)
+    validate_naturalness_reviews(root, chapter_files, committed, gate, decision_doc, errors)
     for chapter in range(enforce_from, committed + 1):
         chapter_path = chapter_files.get(chapter)
         if chapter_path is None:

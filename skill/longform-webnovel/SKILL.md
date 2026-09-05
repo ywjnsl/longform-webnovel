@@ -20,7 +20,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化依靠作者确认样本、人物利益和定向修订，不靠随机句长、故意病句或“去 AI 词表”。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
 10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
 11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
-12. 每章提交前分离执行编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。
+12. 每次写成或修改章节正文后，强制执行网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧审稿失效。
 13. 角色是项目内 skill（`cast/{id}/`），不是全局 Cursor skill。写章前先隔离收意图，再由法则裁判否决，最后写手成章；角色不得写正文。
 14. 章不是收束单位，弧才是。每章必须改变状态，但开篇目标可以跨多章才兑现或彻底失败。失败、改路、暴露都算交付；空转非法。
 
@@ -36,7 +36,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 - **增配角 / 群像仿真**：需要独立角色 skill、按需生成配角，或主角在未完成弧里自由探索。
 
-先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)，审稿时读 [review-system.md](references/review-system.md)；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满或要求建立个人声音时，必须读取 [prose-naturalization.md](references/prose-naturalization.md)；常规正文仅在风格档案已有“个人声音证据”或审稿命中相关风险时读取。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)。每次写成或修改任何章节正文后，必须读取 [webnovel-naturalness-review.md](references/webnovel-naturalness-review.md) 与 [review-system.md](references/review-system.md)，先执行自然度门禁再提交；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满，要求建立个人声音，或自然度审稿需要定向修改时，必须读取 [prose-naturalization.md](references/prose-naturalization.md)。不要无差别加载全部参考资料。
 
 番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
@@ -79,14 +79,14 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 按以下顺序执行，不要依赖聊天记忆代替项目文件：
 
 1. 定位包含 `project.json` 的项目根目录。
-2. 若 `schemaVersion` 旧于当前版本或缺少 v6 群像文件，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
+2. 若 `schemaVersion` 旧于当前版本，缺少 v6 群像文件，或缺少 v7 自然度门禁，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
 3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`canon/laws.md`、`planning/current-volume.md`、`planning/rolling-outline.md`、`planning/current-arc.md`。
 4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`，以及上场角色的 `cast/{id}/state.json`。
 5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
 8. 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判，再按 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md) 写正文。先写空间、身体和动作过程，再写对白。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。本章只推进或加压一格，不要求把弧写完。确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点。
-9. 按 [review-system.md](references/review-system.md) 运行语言风险扫描、独立编辑审稿和目标读者模拟；发现作者判词、对白工具化、人物同声或总结式收尾成簇时，按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段。必要时自动修改一次并重新审查，不因普通写作选择打断作者。
+9. 按 [review-system.md](references/review-system.md) 运行语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
 10. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
 ## 章节提交事务
@@ -103,8 +103,8 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
    `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](references/short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
-4. 运行 `prose_lint.py`，将结果写入 `reviews/第NNNN章-lint.json`；再按 [review-system.md](references/review-system.md) 分离执行编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。风格与自然化问题必须引用成簇证据并说明读者代价，不能根据单个词命中机械重写。报告必须绑定当前正文 SHA-256。
-5. 若存在阻断项，自动修改一次并重新运行指标、扫描和两类审稿。仍有高优先级问题或弃读风险时停止提交；只有作者通过重大决策记录明确接受风险时才可例外。
+4. 运行 `prose_lint.py`，将结果写入 `reviews/第NNNN章-lint.json`；再按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。自然度 finding 必须引用问题簇的逐字证据并说明读者代价，不能根据单个词命中机械重写。自然度对象、审稿报告和 lint 都必须绑定当前正文 SHA-256。
+5. 若自然度审稿或其他审稿存在阻断项，自动定向修改一次并重新运行指标、扫描、自然度审稿、编辑审稿和读者模拟。仍有高优先级问题、`needs-revision` 或弃读风险时停止提交；只有作者通过重大决策记录明确接受风险时才可例外。
 6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
@@ -158,7 +158,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
 保持简洁，不展示原始 JSON 或内部长清单。
 
-- 写章后报告：章节、约略字数、爽点级别、合法结局类型、弧还差什么、本章实际变化、谁的情绪变了、兑现/新增的线索、下一章方向。
+- 写章后报告：章节、约略字数、自然度门禁状态、爽点级别、合法结局类型、弧还差什么、本章实际变化、谁的情绪变了、兑现/新增的线索、下一章方向。
 - 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及其目标、能力、身份、信念、关系或立场如何改变。
 - 有重大决策时：先说明为什么现在必须决定，再给 2–4 个差异明确的选项和影响。
 - 开新书时：正文之前展示终选书名的检索结论、3 个差异明显的书名字效方向及推荐项、适配目标生成器的一次成图提示词、纯底图提示词、标题区域重绘提示词和负面提示词。不能只交付“书法、大气、金色描边”之类抽象形容。

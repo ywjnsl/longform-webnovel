@@ -62,7 +62,7 @@
 - `rewards.json`：未来爽点计划与已经兑现的 3/5 章节拍账本。
 - `cast-arcs.json`：核心/常驻配角的独立目标、弧光阶段、选择证据、转折窗口与关系网络。
 - `decisions.json`：重大决策的待确认、已确认和否决记录。
-- `reviews/`：每章绑定正文哈希的语言风险扫描、编辑诊断和目标读者模拟。
+- `reviews/`：每章绑定最终正文哈希的语言风险扫描、网文自然度审稿、编辑诊断和目标读者模拟。
 - `research/market-snapshots/`：带日期、来源 URL 和样本窗口的公开市场快照。
 - `research/reference-adaptations/`：参考短故事的来源说明、抽象机制卡、必须替换清单和复用检查结果；默认不保存参考全文。
 - `performance/snapshots/`：作者提供的发布后原始统计窗口；`latest-diagnosis.md` 只做漏斗定位，不把本地阈值伪装成平台标准。
@@ -84,7 +84,7 @@
 
 `project.json.performanceFeedback` 保存最新统计窗口、诊断阶段和快照数。发布数据不是正文提交门槛；只有作者提供数据时才更新，格式和样本边界见 [performance-feedback.md](performance-feedback.md)。
 
-`project.json.reviewGate` 保存开始强制执行的章号，以及编辑、读者模拟和语言扫描开关。新项目从第 1 章执行；旧项目迁移只从下一章开始，不伪造历史审稿。完整格式见 [review-system.md](review-system.md)。
+`project.json.reviewGate` 保存普通审稿开始强制执行的章号，以及编辑、读者模拟和语言扫描开关。`naturalnessRequired` 在 v7 必须为 `true`，`naturalnessEnforceFromChapter` 保存其独立生效章号。新项目从第 1 章执行；迁移到 v7 的旧项目只从下一未提交章强制自然度审稿，但历史章一经修订也必须补做，不伪造历史报告。完整格式见 [review-system.md](review-system.md)。
 
 `story-state.json` 只保存当前有效状态和最近变化，不复制整部小说。每项重要事实包含来源章号；推测必须标成 `uncertain`，不能伪装成正史。
 

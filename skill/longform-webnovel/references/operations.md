@@ -8,7 +8,7 @@
 python3 <skill-dir>/scripts/migrate_project.py <项目目录>
 ```
 
-迁移脚本会在 `.webnovel/backups/` 保存迁移前文件，升级项目到 v6，补充语言风格档案、节拍配置、爽点账本、配角弧光账本、可选市场研究状态、章节审稿门禁，以及群像仿真所需的 `canon/laws.md`、`planning/current-arc.md`、主角 `cast/` 和 `ensemble` 配置。旧连载的合同/意图从迁移后的下一章开始强制；已发布旧章节不会被伪装成已跑过角色意图。旧连载默认沿用最近正文的可观察语言特征，不会被强行套用新预设；审稿门禁从迁移后的下一章开始。
+迁移脚本会在 `.webnovel/backups/` 保存迁移前文件，升级项目到 v7，补充语言风格档案、节拍配置、爽点账本、配角弧光账本、可选市场研究状态、章节审稿门禁、v7 网文自然度门禁，以及群像仿真所需的 `canon/laws.md`、`planning/current-arc.md`、主角 `cast/` 和 `ensemble` 配置。旧连载的合同/意图从迁移后的下一章开始强制；已发布旧章节不会被伪装成已跑过角色意图或自然度审稿。旧连载默认沿用最近正文的可观察语言特征，不会被强行套用新预设；自然度门禁从迁移后的下一未提交章开始。
 
 迁移后运行 `validate_project.py`。`needs-review` 或历史未审计提示不是新正文的写作许可；有时间时回读旧节拍章并补证据。
 
@@ -36,7 +36,7 @@ staging/
 
 必须暂存 `project.json`、四个章节快照状态文件、新章节正文、语言风险扫描和独立审稿报告。四个快照为 `story-state.json`、`threads.json`、`rewards.json` 和 `cast-arcs.json`；群像强制章还要暂存合同、ruling、`planning/current-arc.md` 和上场角色 `cast/{id}/state.json`。提交脚本会从正式项目构造隔离预览，其他未变化文件可以省略。
 
-两个审稿 JSON 必须绑定最终正文的 SHA-256。正文修改后重跑 `prose_lint.py` 并重做编辑/读者审稿，不能沿用旧报告。结构和阻断规则见 [review-system.md](review-system.md)。
+两个审稿 JSON 必须绑定最终正文的 SHA-256；`第NNNN章-review.json` 内的 `naturalness.reviewedTextSha256` 也必须匹配。正文发生任何修改后，重跑 `prose_lint.py`、网文自然度审稿、编辑审稿和读者模拟，不能沿用旧报告。执行过自然度定向修改时，最终报告另存修改前哈希与处理类别。结构和阻断规则见 [review-system.md](review-system.md)。
 
 每章同时暂存 `sessions/*chapter-NNNN*.md` 交接记录。`project.json.totalContentChars` 使用 `chapter_metrics.py` 的 `contentChars` 口径累加；修订旧章时用新旧正文有效字符差更新。
 

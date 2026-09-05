@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from webnovel_io import backup_files, copy_file_atomic, load_json, restore_backup, utc_now, write_json_atomic
+from validate_project import validate_chapter_reviews
 
 
 ALLOWED_TOP_LEVEL = {"project.json", "canon", "planning", "state", "chapters", "reviews", "sessions", "cast", "contracts", "intents"}
@@ -162,6 +163,49 @@ def validate_transition(root: Path, staged: dict[str, Path], allow_revision: boo
     return new_committed
 
 
+def validate_legacy_chapter_revision(
+    root: Path,
+    shadow: Path,
+    staged: dict[str, Path],
+    chapter: int,
+    allow_revision: bool,
+) -> None:
+    if not allow_revision:
+        return
+    current = load_json(root / "project.json")
+    if chapter != current.get("lastCommittedChapter"):
+        return
+    proposed = load_json(shadow / "project.json")
+    gate = proposed.get("reviewGate") if isinstance(proposed.get("reviewGate"), dict) else {}
+    enforce_from = gate.get("naturalnessEnforceFromChapter")
+    if not isinstance(enforce_from, int) or isinstance(enforce_from, bool) or chapter >= enforce_from:
+        return
+
+    chapter_prefix = f"chapters/第{chapter:04d}章-"
+    chapter_paths = [
+        shadow / relative
+        for relative in staged
+        if relative.startswith(chapter_prefix) and relative.endswith(".md")
+    ]
+    errors: list[str] = []
+    decisions = load_json(shadow / "state" / "decisions.json")
+    revision_gate = dict(gate)
+    revision_gate["enforceFromChapter"] = chapter
+    revision_gate["naturalnessEnforceFromChapter"] = chapter
+    revision_project = dict(proposed)
+    revision_project["reviewGate"] = revision_gate
+    validate_chapter_reviews(
+        shadow,
+        revision_project,
+        {chapter: chapter_paths[0]},
+        chapter,
+        decisions,
+        errors,
+    )
+    if errors:
+        raise ValueError(json.dumps({"ok": False, "errors": errors, "warnings": []}, ensure_ascii=False, indent=2))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True, type=Path)
@@ -192,6 +236,7 @@ def main() -> int:
         staged = collect_staged_files(staging)
         chapter = validate_transition(root, staged, args.allow_revision)
         shadow = build_shadow(root, staged)
+        validate_legacy_chapter_revision(root, shadow, staged, chapter, args.allow_revision)
         validation = run_validation(shadow)
         if args.dry_run:
             print(json.dumps({"ok": True, "dryRun": True, "chapter": chapter, "validation": validation}, ensure_ascii=False, indent=2))
