@@ -45,6 +45,11 @@ def main() -> None:
     assert (SKILL / "scripts" / "story_overlap.py").is_file()
     assert (SKILL / "scripts" / "reference_guard.py").is_file()
     assert (SKILL / "scripts" / "performance_feedback.py").is_file()
+    assert (SKILL / "scripts" / "repetition_audit.py").is_file()
+    assert "repetition_audit.py" in text
+    review_text = (SKILL / "references" / "webnovel-naturalness-review.md").read_text(encoding="utf-8")
+    assert "rhetorical-symmetry" in review_text
+    assert "externalNaturalness" in review_text
     assert "relationship-regret.md" in text
     assert "relationship-regret.md" in (SKILL / "references" / "genre-routing.md").read_text(encoding="utf-8")
     print("Skill structure is valid")

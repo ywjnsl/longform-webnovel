@@ -104,6 +104,10 @@ VALID_RESOLUTION_ACTION = {"accepted", "revised", "author-approved"}
 VALID_NATURALNESS_STATUS = {"pass", "pass-with-notes", "needs-revision"}
 VALID_NATURALNESS_PRIORITY = {"high", "medium", "low"}
 VALID_NATURALNESS_CATEGORY = {
+    "echo-repetition",
+    "modifier-overuse",
+    "rhetorical-symmetry",
+    "cadence-packaging",
     "over-explanation",
     "corrective-syntax",
     "expository-dialogue",

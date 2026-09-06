@@ -20,7 +20,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化依靠作者确认样本、人物利益和定向修订，不靠随机句长、故意病句或“去 AI 词表”。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
 10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
 11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
-12. 每次写成或修改章节正文后，强制执行网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧审稿失效。
+12. 每次写成或修改章节正文后，强制执行确定性重复审计、网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧报告、finding ID 和例外失效。
 13. 角色是项目内 skill（`cast/{id}/`），不是全局 Cursor skill。写章前先隔离收意图，再由法则裁判否决，最后写手成章；角色不得写正文。
 14. 章不是收束单位，弧才是。每章必须改变状态，但开篇目标可以跨多章才兑现或彻底失败。失败、改路、暴露都算交付；空转非法。
 
@@ -79,14 +79,14 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 按以下顺序执行，不要依赖聊天记忆代替项目文件：
 
 1. 定位包含 `project.json` 的项目根目录。
-2. 若 `schemaVersion` 旧于当前版本，缺少 v6 群像文件，或缺少 v7 自然度门禁，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
+2. 若 `schemaVersion` 旧于当前版本，缺少 v6 群像文件、v7 自然度门禁或 v8 重复门禁，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
 3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`canon/laws.md`、`planning/current-volume.md`、`planning/rolling-outline.md`、`planning/current-arc.md`。
 4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`，以及上场角色的 `cast/{id}/state.json`。
 5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
 8. 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判，再按 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md) 写正文。先写空间、身体和动作过程，再写对白。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。本章只推进或加压一格，不要求把弧写完。确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点。
-9. 按 [review-system.md](references/review-system.md) 运行语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
+9. 按 [review-system.md](references/review-system.md) 运行确定性重复审计、语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
 10. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
 ## 章节提交事务
@@ -103,8 +103,8 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
    `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](references/short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
-4. 运行 `prose_lint.py`，将结果写入 `reviews/第NNNN章-lint.json`；再按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。自然度 finding 必须引用问题簇的逐字证据并说明读者代价，不能根据单个词命中机械重写。自然度对象、审稿报告和 lint 都必须绑定当前正文 SHA-256。
-5. 若自然度审稿或其他审稿存在阻断项，自动定向修改一次并重新运行指标、扫描、自然度审稿、编辑审稿和读者模拟。仍有高优先级问题、`needs-revision` 或弃读风险时停止提交；只有作者通过重大决策记录明确接受风险时才可例外。
+4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。三份报告与自然度对象都必须绑定当前正文 SHA-256。
+5. 若重复、自然度或其他审稿存在阻断项，自动定向修改一次并重新运行指标、重复审计、语言扫描、自然度审稿、编辑审稿和读者模拟。仍有未处置重复、高优先级问题、`needs-revision` 或弃读风险时停止提交；只有符合对应门禁契约的明确例外才可保留。
 6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
@@ -181,4 +181,5 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 - `scripts/opening_audit.py`：按有效字符口径截取短故事前 100/200/300 字窗口，输出入口审稿所需的文本与基础指标；不代替语义判断。
 - `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。
 - `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
+- `scripts/repetition_audit.py`：检查当前章节内及规定前文范围中的长句精确重复与高相似复述，输出哈希绑定的编辑证据。
 - `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复、群像合同/意图和提交一致性。
