@@ -33,10 +33,13 @@ class NaturalnessGateTests(unittest.TestCase):
                 "lintRequired": False,
                 "naturalnessRequired": True,
                 "naturalnessEnforceFromChapter": 1,
+                "repetitionRequired": True,
+                "repetitionEnforceFromChapter": 1,
             }
         }
         self.decisions = {"decisions": []}
         self.review_path = self.root / "reviews" / "第0001章-review.json"
+        self.write_repetition_report()
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -51,6 +54,30 @@ class NaturalnessGateTests(unittest.TestCase):
             review["naturalness"] = naturalness
         self.review_path.write_text(
             json.dumps(review, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    def write_repetition_report(self, findings: list[dict] | None = None) -> None:
+        self.repetition_path = self.root / "reviews" / "第0001章-repetition.json"
+        self.repetition_path.write_text(
+            json.dumps(
+                {
+                    "schemaVersion": 1,
+                    "chapter": 1,
+                    "reviewedTextSha256": self.digest,
+                    "claim": "editorial-repetition-signals-not-authorship-detection",
+                    "scopeFiles": [f"chapters/{self.chapter_path.name}"],
+                    "thresholds": {
+                        "exactMinChars": 14,
+                        "nearMinChars": 18,
+                        "nearJaccard": 0.82,
+                    },
+                    "status": "review" if findings else "pass",
+                    "findings": findings or [],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
 
@@ -90,6 +117,29 @@ class NaturalnessGateTests(unittest.TestCase):
             errors,
         )
 
+    def test_requires_repetition_gate_fields(self) -> None:
+        del self.project["reviewGate"]["repetitionRequired"]
+        del self.project["reviewGate"]["repetitionEnforceFromChapter"]
+
+        errors = self.validate()
+
+        self.assertIn("reviewGate.repetitionRequired must be true", errors)
+        self.assertIn(
+            "reviewGate.repetitionEnforceFromChapter must be a positive integer",
+            errors,
+        )
+
+    def test_reports_invalid_repetition_start_without_crashing(self) -> None:
+        self.project["reviewGate"]["repetitionEnforceFromChapter"] = None
+        self.write_review(self.valid_naturalness())
+
+        errors = self.validate()
+
+        self.assertIn(
+            "reviewGate.repetitionEnforceFromChapter must be a positive integer",
+            errors,
+        )
+
     def test_rejects_review_without_naturalness_object(self) -> None:
         self.write_review()
 
@@ -99,6 +149,68 @@ class NaturalnessGateTests(unittest.TestCase):
 
     def test_accepts_valid_naturalness_review(self) -> None:
         self.write_review(self.valid_naturalness())
+
+        self.assertEqual([], self.validate())
+
+    def test_rejects_repetition_finding_without_disposition(self) -> None:
+        finding = {
+            "id": "repeat-finding-1",
+            "code": "exact-sentence-duplicate",
+            "severity": "block",
+            "similarity": 1.0,
+            "occurrences": [
+                {
+                    "file": f"chapters/{self.chapter_path.name}",
+                    "paragraph": 1,
+                    "sentence": 1,
+                    "text": "第一句已经演出了结果。",
+                },
+                {
+                    "file": f"chapters/{self.chapter_path.name}",
+                    "paragraph": 1,
+                    "sentence": 2,
+                    "text": "第二句又替读者总结了一遍。",
+                },
+            ],
+        }
+        self.write_repetition_report([finding])
+        self.write_review(self.valid_naturalness())
+
+        errors = self.validate()
+
+        self.assertTrue(any("needs a repetition disposition" in error for error in errors))
+
+    def test_accepts_hash_bound_repetition_exception(self) -> None:
+        finding = {
+            "id": "repeat-finding-1",
+            "code": "near-sentence-duplicate",
+            "severity": "review",
+            "similarity": 0.9,
+            "occurrences": [
+                {
+                    "file": f"chapters/{self.chapter_path.name}",
+                    "paragraph": 1,
+                    "sentence": 1,
+                    "text": "第一句已经演出了结果。",
+                },
+                {
+                    "file": f"chapters/{self.chapter_path.name}",
+                    "paragraph": 1,
+                    "sentence": 2,
+                    "text": "第二句又替读者总结了一遍。",
+                },
+            ],
+        }
+        self.write_repetition_report([finding])
+        naturalness = self.valid_naturalness()
+        naturalness["repetitionExceptions"] = [
+            {
+                "findingId": finding["id"],
+                "reason": "人物在质询中逐字要求证人确认原话。",
+                "reviewedTextSha256": self.digest,
+            }
+        ]
+        self.write_review(naturalness)
 
         self.assertEqual([], self.validate())
 
@@ -314,18 +426,20 @@ class NaturalnessProjectLifecycleTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr or result.stdout)
         return json.loads((root / "project.json").read_text(encoding="utf-8"))
 
-    def test_new_project_enables_naturalness_from_first_chapter(self) -> None:
+    def test_new_project_enables_naturalness_and_repetition_from_first_chapter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir) / "novel"
 
             project = self.initialize_project(root)
 
-            self.assertEqual(7, project["schemaVersion"])
+            self.assertEqual(8, project["schemaVersion"])
             self.assertIs(project["reviewGate"]["naturalnessRequired"], True)
             self.assertEqual(
                 1,
                 project["reviewGate"]["naturalnessEnforceFromChapter"],
             )
+            self.assertIs(project["reviewGate"]["repetitionRequired"], True)
+            self.assertEqual(1, project["reviewGate"]["repetitionEnforceFromChapter"])
 
     def test_v6_migration_enforces_naturalness_from_next_chapter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -336,6 +450,8 @@ class NaturalnessProjectLifecycleTests(unittest.TestCase):
             project["latestDraftChapter"] = 3
             project["reviewGate"]["naturalnessRequired"] = False
             project["reviewGate"].pop("naturalnessEnforceFromChapter", None)
+            project["reviewGate"].pop("repetitionRequired", None)
+            project["reviewGate"].pop("repetitionEnforceFromChapter", None)
             (root / "project.json").write_text(
                 json.dumps(project, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
@@ -345,12 +461,36 @@ class NaturalnessProjectLifecycleTests(unittest.TestCase):
 
             self.assertEqual(0, result.returncode, result.stderr or result.stdout)
             migrated = json.loads((root / "project.json").read_text(encoding="utf-8"))
-            self.assertEqual(7, migrated["schemaVersion"])
+            self.assertEqual(8, migrated["schemaVersion"])
             self.assertIs(migrated["reviewGate"]["naturalnessRequired"], True)
             self.assertEqual(
                 4,
                 migrated["reviewGate"]["naturalnessEnforceFromChapter"],
             )
+            self.assertIs(migrated["reviewGate"]["repetitionRequired"], True)
+            self.assertEqual(4, migrated["reviewGate"]["repetitionEnforceFromChapter"])
+
+    def test_v7_migration_enforces_repetition_from_next_chapter(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "novel"
+            project = self.initialize_project(root)
+            project["schemaVersion"] = 7
+            project["lastCommittedChapter"] = 3
+            project["latestDraftChapter"] = 3
+            project["reviewGate"].pop("repetitionRequired", None)
+            project["reviewGate"].pop("repetitionEnforceFromChapter", None)
+            (root / "project.json").write_text(
+                json.dumps(project, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_script("migrate_project.py", str(root))
+
+            self.assertEqual(0, result.returncode, result.stderr or result.stdout)
+            migrated = json.loads((root / "project.json").read_text(encoding="utf-8"))
+            self.assertEqual(8, migrated["schemaVersion"])
+            self.assertIs(migrated["reviewGate"]["repetitionRequired"], True)
+            self.assertEqual(4, migrated["reviewGate"]["repetitionEnforceFromChapter"])
 
 
 if __name__ == "__main__":

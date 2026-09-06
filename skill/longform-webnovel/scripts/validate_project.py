@@ -113,6 +113,7 @@ VALID_NATURALNESS_CATEGORY = {
     "theme-closure",
 }
 VALID_NATURALNESS_REVISION_ACTION = {"not-needed", "revised", "author-approved"}
+VALID_REPETITION_CODE = {"exact-sentence-duplicate", "near-sentence-duplicate"}
 FINAL_REVIEW_CHECKS = (
     "promise",
     "causality",
@@ -252,12 +253,120 @@ def confirmed_naturalness_decision_ids(decision_doc: dict, chapter: int, digest:
     }
 
 
+def validate_repetition_report(
+    root: Path,
+    chapter: int,
+    chapter_path: Path,
+    digest: str,
+    naturalness: dict,
+    required_scope: set[str],
+    errors: list[str],
+) -> None:
+    path = root / "reviews" / f"第{chapter:04d}章-repetition.json"
+    if not path.is_file():
+        errors.append(f"Chapter {chapter} needs reviews/{path.name}")
+        return
+    report = load_json(path, errors)
+    if report.get("schemaVersion") != 1:
+        errors.append(f"Chapter {chapter} repetition schemaVersion must be 1")
+    if report.get("chapter") != chapter:
+        errors.append(f"Chapter {chapter} repetition chapter number does not match")
+    if report.get("reviewedTextSha256") != digest:
+        errors.append(f"Chapter {chapter} repetition hash does not match chapter text")
+    if report.get("claim") != "editorial-repetition-signals-not-authorship-detection":
+        errors.append(f"Chapter {chapter} repetition report has invalid claim")
+    scope = report.get("scopeFiles")
+    if not isinstance(scope, list) or any(not isinstance(item, str) for item in scope):
+        errors.append(f"Chapter {chapter} repetition scopeFiles must be a string array")
+        scope_set: set[str] = set()
+    else:
+        scope_set = set(scope)
+    for missing in sorted(required_scope - scope_set):
+        errors.append(f"Chapter {chapter} repetition scope is missing {missing}")
+    findings = report.get("findings")
+    if not isinstance(findings, list):
+        errors.append(f"Chapter {chapter} repetition findings must be an array")
+        return
+    dispositions = naturalness.get("repetitionExceptions", []) if isinstance(naturalness, dict) else []
+    if not isinstance(dispositions, list):
+        errors.append(f"Chapter {chapter} repetitionExceptions must be an array")
+        dispositions = []
+    approved: set[str] = set()
+    for index, item in enumerate(dispositions):
+        label = f"Chapter {chapter} repetition exception #{index + 1}"
+        if not isinstance(item, dict):
+            errors.append(f"{label} must be an object")
+            continue
+        if not is_concrete(item.get("findingId")) or not is_concrete(item.get("reason")):
+            errors.append(f"{label} needs findingId and concrete reason")
+        if item.get("reviewedTextSha256") != digest:
+            errors.append(f"{label} hash does not match chapter text")
+        if isinstance(item.get("findingId"), str):
+            approved.add(item["findingId"])
+    seen: set[str] = set()
+    for index, finding in enumerate(findings):
+        label = f"Chapter {chapter} repetition finding #{index + 1}"
+        if not isinstance(finding, dict):
+            errors.append(f"{label} must be an object")
+            continue
+        finding_id = finding.get("id")
+        if not is_concrete(finding_id) or finding_id in seen:
+            errors.append(f"{label} needs a unique id")
+            continue
+        seen.add(finding_id)
+        if finding.get("code") not in VALID_REPETITION_CODE:
+            errors.append(f"{label} has invalid code")
+        occurrences = finding.get("occurrences")
+        if not isinstance(occurrences, list) or len(occurrences) < 2:
+            errors.append(f"{label} needs at least two occurrences")
+        else:
+            includes_current = False
+            for occurrence_index, occurrence in enumerate(occurrences):
+                occurrence_label = f"{label} occurrence #{occurrence_index + 1}"
+                if not isinstance(occurrence, dict) or not is_concrete(occurrence.get("text")):
+                    errors.append(f"{occurrence_label} needs verbatim text")
+                    continue
+                relative_text = occurrence.get("file")
+                if not isinstance(relative_text, str):
+                    errors.append(f"{occurrence_label} needs a chapter file")
+                    continue
+                relative = Path(relative_text)
+                if (
+                    relative.is_absolute()
+                    or ".." in relative.parts
+                    or len(relative.parts) != 2
+                    or relative.parts[0] != "chapters"
+                ):
+                    errors.append(f"{occurrence_label} file must be inside chapters")
+                    continue
+                source = root / relative
+                if not source.is_file():
+                    errors.append(f"{occurrence_label} chapter file is missing")
+                    continue
+                if occurrence["text"] not in source.read_text(encoding="utf-8"):
+                    errors.append(f"{occurrence_label} text is not in its chapter file")
+                if source.resolve() == chapter_path.resolve():
+                    includes_current = True
+                for field in ("paragraph", "sentence"):
+                    value = occurrence.get(field)
+                    if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                        errors.append(f"{occurrence_label} {field} must be a positive integer")
+            if not includes_current:
+                errors.append(f"{label} must include the current chapter")
+        if finding_id not in approved:
+            errors.append(f"{label} needs a repetition disposition")
+    unknown = approved - seen
+    for finding_id in sorted(unknown):
+        errors.append(f"Chapter {chapter} repetition exception references unknown finding: {finding_id}")
+
+
 def validate_naturalness_reviews(
     root: Path,
     chapter_files: dict[int, Path],
     committed: int,
     gate: dict,
     decision_doc: dict,
+    mode: str,
     errors: list[str],
 ) -> None:
     if gate.get("naturalnessRequired") is not True:
@@ -265,6 +374,13 @@ def validate_naturalness_reviews(
     enforce_from = gate.get("naturalnessEnforceFromChapter")
     if not isinstance(enforce_from, int) or isinstance(enforce_from, bool) or enforce_from <= 0:
         return
+    repetition_enforce_from = gate.get("repetitionEnforceFromChapter")
+    repetition_enabled = (
+        gate.get("repetitionRequired") is True
+        and isinstance(repetition_enforce_from, int)
+        and not isinstance(repetition_enforce_from, bool)
+        and repetition_enforce_from > 0
+    )
 
     for chapter in range(enforce_from, committed + 1):
         chapter_path = chapter_files.get(chapter)
@@ -286,6 +402,21 @@ def validate_naturalness_reviews(
             errors.append(f"Chapter {chapter} review hash does not match chapter text")
 
         naturalness = review.get("naturalness")
+        if repetition_enabled and chapter >= repetition_enforce_from:
+            earlier = sorted((number, path) for number, path in chapter_files.items() if number < chapter)
+            compared = earlier if mode == "fanqie-short-story" else earlier[-5:]
+            required_scope = {f"chapters/{chapter_path.name}"} | {
+                f"chapters/{path.name}" for _, path in compared
+            }
+            validate_repetition_report(
+                root,
+                chapter,
+                chapter_path,
+                digest,
+                naturalness if isinstance(naturalness, dict) else {},
+                required_scope,
+                errors,
+            )
         if not isinstance(naturalness, dict):
             errors.append(f"Chapter {chapter} review needs naturalness object")
             continue
@@ -401,11 +532,28 @@ def validate_chapter_reviews(
         or naturalness_enforce_from <= 0
     ):
         errors.append("reviewGate.naturalnessEnforceFromChapter must be a positive integer")
+    if gate.get("repetitionRequired") is not True:
+        errors.append("reviewGate.repetitionRequired must be true")
+    repetition_enforce_from = gate.get("repetitionEnforceFromChapter")
+    if (
+        not isinstance(repetition_enforce_from, int)
+        or isinstance(repetition_enforce_from, bool)
+        or repetition_enforce_from <= 0
+    ):
+        errors.append("reviewGate.repetitionEnforceFromChapter must be a positive integer")
     if not isinstance(committed, int) or isinstance(committed, bool):
         return
 
     approved_ids = confirmed_decision_ids(decision_doc)
-    validate_naturalness_reviews(root, chapter_files, committed, gate, decision_doc, errors)
+    validate_naturalness_reviews(
+        root,
+        chapter_files,
+        committed,
+        gate,
+        decision_doc,
+        story_mode(project),
+        errors,
+    )
     for chapter in range(enforce_from, committed + 1):
         chapter_path = chapter_files.get(chapter)
         if chapter_path is None:

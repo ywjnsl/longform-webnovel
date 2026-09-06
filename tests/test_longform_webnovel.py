@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Integration checks for the staged longform-webnovel v7 skill."""
+"""Integration checks for the staged longform-webnovel v8 skill."""
 
 from __future__ import annotations
 
@@ -195,6 +195,33 @@ def prepare_stage(
         str(review_dir / f"第{chapter:04d}章-lint.json"),
     )
     digest = hashlib.sha256(chapter_text.encode("utf-8")).hexdigest()
+    previous = sorted(
+        (int(match.group(1)), path)
+        for path in (project_root / "chapters").glob("第*章-*.md")
+        if (match := re.match(r"^第(\d{4,})章-.+\.md$", path.name))
+        and int(match.group(1)) < chapter
+    )
+    compared = previous if project.get("storyMode") == "fanqie-short-story" else previous[-5:]
+    write_json(
+        review_dir / f"第{chapter:04d}章-repetition.json",
+        {
+            "schemaVersion": 1,
+            "chapter": chapter,
+            "reviewedTextSha256": digest,
+            "claim": "editorial-repetition-signals-not-authorship-detection",
+            "scopeFiles": [
+                f"chapters/{chapter_path.name}",
+                *(f"chapters/{path.name}" for _, path in compared),
+            ],
+            "thresholds": {
+                "exactMinChars": 14,
+                "nearMinChars": 18,
+                "nearJaccard": 0.82,
+            },
+            "status": "pass",
+            "findings": [],
+        },
+    )
     write_json(
         review_dir / f"第{chapter:04d}章-review.json",
         {
@@ -443,7 +470,7 @@ def test_committed_project_guards(base: Path) -> None:
 def test_style_profiles(base: Path) -> None:
     unselected = base / "style-unselected"
     run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(unselected), "--title", "待选风格")
-    assert read_json(unselected / "project.json")["schemaVersion"] == 7
+    assert read_json(unselected / "project.json")["schemaVersion"] == 8
     assert read_json(unselected / "project.json")["ensemble"]["protagonistId"] == "main"
     assert (unselected / "cast/main/SKILL.md").is_file()
     assert read_json(unselected / "project.json")["styleProfile"]["status"] == "unconfirmed"
@@ -1086,7 +1113,7 @@ def test_migration(base: Path) -> None:
     assert upgraded["fromVersion"] == 2 and upgraded["rewardsFromVersion"] == 2
     assert upgraded["legacyUnauditedThrough"] == 0
     upgraded_index = read_json(previous_v2 / "project.json")
-    assert upgraded_index["schemaVersion"] == 7
+    assert upgraded_index["schemaVersion"] == 8
     assert upgraded_index["ensemble"]["enabled"] is True
     assert upgraded_index["rewardCadence"]["enforceFromChapter"] == 1
     assert upgraded_index["styleProfile"]["status"] == "unconfirmed"
@@ -1101,7 +1128,7 @@ def test_migration(base: Path) -> None:
     (previous_v3 / "state/cast-arcs.json").unlink()
     upgraded_v3 = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(previous_v3)).stdout)
     assert upgraded_v3["fromVersion"] == 3 and upgraded_v3["castLegacyUnauditedThrough"] == 0
-    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 7
+    assert read_json(previous_v3 / "project.json")["schemaVersion"] == 8
     assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(previous_v3)).stdout)["ok"]
 
     previous_v4 = base / "previous-v4"
@@ -1398,7 +1425,7 @@ def main() -> None:
         test_migration(base)
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
-    print("longform-webnovel v7 integration checks passed")
+    print("longform-webnovel v8 integration checks passed")
 
 
 if __name__ == "__main__":

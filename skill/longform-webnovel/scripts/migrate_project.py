@@ -196,6 +196,11 @@ def main() -> int:
         )
     else:
         review_gate.setdefault("naturalnessEnforceFromChapter", 1)
+    review_gate["repetitionRequired"] = True
+    if old_version < 8:
+        review_gate["repetitionEnforceFromChapter"] = committed + 1 if committed else 1
+    else:
+        review_gate.setdefault("repetitionEnforceFromChapter", 1)
     project["reviewGate"] = review_gate
     ensemble = project.get("ensemble") if isinstance(project.get("ensemble"), dict) else {}
     ensemble.setdefault("enabled", True)

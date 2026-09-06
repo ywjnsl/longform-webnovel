@@ -320,6 +320,8 @@ def main() -> int:
             "lintRequired": True,
             "naturalnessRequired": True,
             "naturalnessEnforceFromChapter": 1,
+            "repetitionRequired": True,
+            "repetitionEnforceFromChapter": 1,
         },
         "ensemble": {
             "enabled": True,
