@@ -142,7 +142,9 @@ def analyze_paths(
     return {
         "schemaVersion": 1,
         "chapter": int(chapter_match.group(1)) if chapter_match else None,
-        "reviewedTextSha256": hashlib.sha256(primary.read_bytes()).hexdigest(),
+        "reviewedTextSha256": hashlib.sha256(
+            primary.read_text(encoding="utf-8").encode("utf-8")
+        ).hexdigest(),
         "claim": "editorial-repetition-signals-not-authorship-detection",
         "scopeFiles": [f"chapters/{path.name}" for path in paths],
         "thresholds": {

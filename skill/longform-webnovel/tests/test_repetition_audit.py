@@ -60,7 +60,7 @@ class RepetitionAuditTests(unittest.TestCase):
             )
             self.assertEqual(0, completed.returncode, completed.stderr)
             result = json.loads(output.read_text(encoding="utf-8"))
-            expected = hashlib.sha256(chapter.read_bytes()).hexdigest()
+            expected = hashlib.sha256(chapter.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
             self.assertEqual(expected, result["reviewedTextSha256"])
             self.assertEqual(1, result["chapter"])
 
