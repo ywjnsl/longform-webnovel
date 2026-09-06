@@ -20,6 +20,7 @@ CJK_ONLY_RE = re.compile(r"[^\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 DIALOGUE_RE = re.compile(r"[“「『](.*?)[”」』]", re.S)
 MICRO_ACTIONS = ("深吸一口气", "眼中闪过", "嘴角勾起", "心中一震", "瞳孔骤缩", "下意识地")
 EXPLANATION_MARKERS = ("显然", "这意味着", "换句话说", "他意识到", "她意识到", "可想而知", "毋庸置疑")
+MODIFIER_MARKERS = ("其实", "显然", "忽然", "突然", "缓缓", "轻轻", "微微", "默默", "下意识地", "终于", "只是", "竟然")
 SIMILE_MARKERS = ("仿佛", "犹如", "宛若", "如同", "像是")
 SUMMARY_ENDINGS = ("他终于明白", "她终于明白", "这一刻他明白", "这一刻她明白", "从这一刻起", "这意味着")
 CORRECTIVE_PATTERNS = (
@@ -40,6 +41,11 @@ THEME_CLOSURE_MARKERS = (
     "这才是",
 )
 REASONING_OPENING_RE = re.compile(r"^(?:我|他|她|他们|她们|这|那)(?:没有|不是|只是|终于|才发现|才明白)")
+SYMMETRY_PATTERNS = (
+    re.compile(r"[\u3400-\u9fff]{1,8}在[，,、][\u3400-\u9fff]{1,8}在"),
+    re.compile(r"([\u3400-\u9fff]{1,8})归\1[，,、]([\u3400-\u9fff]{1,8})归\2"),
+    re.compile(r"[一二两三四五六七八九十][\u3400-\u9fff]{1,6}[。！？][一二两三四五六七八九十][\u3400-\u9fff]{1,6}[。！？]"),
+)
 
 
 def mean(values: list[int]) -> float:
@@ -54,6 +60,18 @@ def coefficient_of_variation(values: list[int]) -> float:
     return math.sqrt(variance) / average
 
 
+def quantile(values: list[int], fraction: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * fraction
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return float(ordered[lower])
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
+
+
 def text_metrics(text: str) -> dict:
     body = strip_markdown(text)
     paragraphs = [line.strip() for line in body.splitlines() if line.strip()]
@@ -62,15 +80,24 @@ def text_metrics(text: str) -> dict:
     paragraph_lengths = [content_char_count(paragraph) for paragraph in paragraphs if content_char_count(paragraph)]
     dialogue_chars = sum(content_char_count(match) for match in DIALOGUE_RE.findall(body))
     total = content_char_count(text)
+    question_count = body.count("？") + body.count("?")
+    modifier_count = sum(body.count(marker) for marker in MODIFIER_MARKERS)
+    sentence_count = len(sentence_lengths)
+    unit = max(total / 1000, 1.0)
     return {
         "contentChars": total,
         "paragraphs": len(paragraphs),
         "sentences": len(sentence_lengths),
         "meanSentenceChars": round(mean(sentence_lengths), 2),
         "sentenceLengthCv": round(coefficient_of_variation(sentence_lengths), 3),
+        "sentenceLengthP25": round(quantile(sentence_lengths, 0.25), 2),
+        "sentenceLengthP50": round(quantile(sentence_lengths, 0.50), 2),
+        "sentenceLengthP75": round(quantile(sentence_lengths, 0.75), 2),
         "meanParagraphChars": round(mean(paragraph_lengths), 2),
         "paragraphLengthCv": round(coefficient_of_variation(paragraph_lengths), 3),
         "dialogueRatio": round(dialogue_chars / total, 3) if total else 0.0,
+        "questionRatio": round(question_count / sentence_count, 3) if sentence_count else 0.0,
+        "modifierRatePer1k": round(modifier_count / unit, 3),
     }
 
 
@@ -115,6 +142,40 @@ def repeated_ngrams(text: str, size: int = 8) -> list[tuple[str, int]]:
         if len(selected) == 3:
             break
     return selected
+
+
+def modifier_clusters(text: str) -> list[str]:
+    sentences = [item.strip() for item in SENTENCE_SPLIT_RE.split(strip_markdown(text)) if item.strip()]
+    evidence: list[str] = []
+    for index in range(max(0, len(sentences) - 2)):
+        window = sentences[index : index + 3]
+        joined = "。".join(window)
+        hits = [marker for marker in MODIFIER_MARKERS for _ in range(joined.count(marker))]
+        if len(hits) >= 5 and len(set(hits)) >= 3:
+            evidence.append(joined)
+    return list(dict.fromkeys(evidence))[:3]
+
+
+def rhetorical_symmetry(text: str) -> list[str]:
+    body = strip_markdown(text)
+    matches = [match.group(0) for pattern in SYMMETRY_PATTERNS for match in pattern.finditer(body)]
+    unique = list(dict.fromkeys(matches))
+    return unique[:4] if len(unique) >= 2 else []
+
+
+def cadence_packages(text: str) -> list[str]:
+    lines = [line.strip() for line in strip_markdown(text).splitlines() if line.strip()]
+    candidates: list[str] = []
+    conclusion_markers = (*EXPLANATION_MARKERS, "这说明", "所以", "原来")
+    for index in range(len(lines) - 2):
+        action, dialogue, conclusion = lines[index : index + 3]
+        if (
+            0 < content_char_count(action) <= 8
+            and DIALOGUE_RE.search(dialogue)
+            and any(marker in conclusion for marker in conclusion_markers)
+        ):
+            candidates.append(" / ".join((action, dialogue, conclusion)))
+    return candidates[:3] if len(candidates) >= 2 else []
 
 
 def analyze(text: str, baseline_texts: list[str]) -> dict:
@@ -196,6 +257,42 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
             }
         )
 
+    modifier_evidence = modifier_clusters(text)
+    if modifier_evidence:
+        findings.append(
+            {
+                "code": "modifier-cluster",
+                "severity": "review",
+                "count": len(modifier_evidence),
+                "evidence": modifier_evidence,
+                "message": "Modifier clusters recur across adjacent sentences; inspect whether they replace character-specific action rather than deleting modifiers by rule.",
+            }
+        )
+
+    symmetry_evidence = rhetorical_symmetry(text)
+    if symmetry_evidence:
+        findings.append(
+            {
+                "code": "rhetorical-symmetry",
+                "severity": "review",
+                "count": len(symmetry_evidence),
+                "evidence": symmetry_evidence,
+                "message": "Several symmetrical constructions appear together; inspect whether they create an unintended quotable cadence or serve a deliberate character voice.",
+            }
+        )
+
+    cadence_evidence = cadence_packages(text)
+    if cadence_evidence:
+        findings.append(
+            {
+                "code": "cadence-packaging",
+                "severity": "review",
+                "count": len(cadence_evidence),
+                "evidence": cadence_evidence,
+                "message": "Repeated action-dialogue-conclusion packages may pre-package reader response; inspect whether each three-beat unit follows the scene's specific pressure.",
+            }
+        )
+
     if metrics["sentences"] >= 12 and metrics["sentenceLengthCv"] < 0.28:
         findings.append(
             {
@@ -246,7 +343,18 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
     if baseline_metrics:
         baseline = {
             key: round(sum(item[key] for item in baseline_metrics) / len(baseline_metrics), 3)
-            for key in ("meanSentenceChars", "sentenceLengthCv", "meanParagraphChars", "paragraphLengthCv", "dialogueRatio")
+            for key in (
+                "meanSentenceChars",
+                "sentenceLengthCv",
+                "sentenceLengthP25",
+                "sentenceLengthP50",
+                "sentenceLengthP75",
+                "meanParagraphChars",
+                "paragraphLengthCv",
+                "dialogueRatio",
+                "questionRatio",
+                "modifierRatePer1k",
+            )
         }
         for key, label, threshold in (
             ("meanSentenceChars", "mean sentence length", 0.45),
@@ -267,6 +375,23 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                         "message": f"Draft {label} ({actual}) differs materially from the approved-project baseline ({expected}); treat this as a question, not an automatic defect.",
                     }
                 )
+        if len(baseline_metrics) >= 3:
+            for key, label, threshold in (
+                ("questionRatio", "question ratio", 0.18),
+                ("modifierRatePer1k", "modifier rate per 1,000 characters", 3.0),
+            ):
+                actual = metrics[key]
+                expected = baseline[key]
+                if abs(actual - expected) > threshold:
+                    findings.append(
+                        {
+                            "code": f"baseline-drift-{key}",
+                            "severity": "review",
+                            "count": 1,
+                            "evidence": [],
+                            "message": f"Draft {label} ({actual}) differs from the approved-project baseline ({expected}); inspect the cause rather than optimizing the number.",
+                        }
+                    )
 
     return {"status": "review" if findings else "pass", "metrics": metrics, "baseline": baseline, "findings": findings}
 

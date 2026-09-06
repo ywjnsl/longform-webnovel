@@ -984,6 +984,75 @@ def test_prose_lint(base: Path) -> None:
     assert "repeated-micro-actions" in codes and "summary-ending" in codes
     assert any(code.startswith("baseline-drift-") for code in codes)
 
+    single_modifier = base / "第0002章-单个副词.md"
+    single_modifier.write_text("# 第二章\n\n她忽然停住，听见楼下有人叫她。\n", encoding="utf-8")
+    single_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(single_modifier)).stdout
+        )["findings"]
+    }
+    assert "modifier-cluster" not in single_codes
+
+    modifier_cluster = base / "第0003章-副词簇.md"
+    modifier_cluster.write_text(
+        "# 第三章\n\n她忽然回头，微微皱眉。她轻轻关门，又缓缓坐下。她默默低头，终于开口。\n",
+        encoding="utf-8",
+    )
+    cluster_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(modifier_cluster)).stdout
+        )["findings"]
+    }
+    assert "modifier-cluster" in cluster_codes
+
+    symmetry = base / "第0004章-工整句.md"
+    symmetry.write_text(
+        "# 第四章\n\n合同在，镯子在。人情归人情，生意归生意。两张纸。两个签名。\n",
+        encoding="utf-8",
+    )
+    symmetry_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(symmetry)).stdout
+        )["findings"]
+    }
+    assert "rhetorical-symmetry" in symmetry_codes
+
+    cadence = base / "第0005章-包装节拍.md"
+    cadence.write_text(
+        "# 第五章\n\n他抬眼。\n“你说谎。”\n这意味着她已经输了。\n"
+        "她合上文件。\n“证据呢？”\n这说明他根本没有准备好。\n",
+        encoding="utf-8",
+    )
+    cadence_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(cadence)).stdout
+        )["findings"]
+    }
+    assert "cadence-packaging" in cadence_codes
+
+    baseline_paths: list[str] = []
+    for index in range(3):
+        path = base / f"第{index + 10:04d}章-人工基线.md"
+        path.write_text(
+            "# 基线\n\n“账对了吗？”她问。\n“还差多少？”他没抬头。\n",
+            encoding="utf-8",
+        )
+        baseline_paths.extend(("--baseline", str(path)))
+    drift_result = json.loads(
+        run(
+            sys.executable,
+            str(SCRIPTS / "prose_lint.py"),
+            str(modifier_cluster),
+            *baseline_paths,
+        ).stdout
+    )
+    drift_codes = {item["code"] for item in drift_result["findings"]}
+    assert "baseline-drift-modifierRatePer1k" in drift_codes
+
 
 def test_review_gate(base: Path) -> None:
     project = base / "review-gate"
