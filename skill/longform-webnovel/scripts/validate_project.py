@@ -114,6 +114,7 @@ VALID_NATURALNESS_CATEGORY = {
 }
 VALID_NATURALNESS_REVISION_ACTION = {"not-needed", "revised", "author-approved"}
 VALID_REPETITION_CODE = {"exact-sentence-duplicate", "near-sentence-duplicate"}
+VALID_EXTERNAL_ACTION = {"kept", "revised", "rejected"}
 FINAL_REVIEW_CHECKS = (
     "promise",
     "causality",
@@ -360,6 +361,74 @@ def validate_repetition_report(
         errors.append(f"Chapter {chapter} repetition exception references unknown finding: {finding_id}")
 
 
+def validate_external_naturalness(
+    root: Path,
+    chapter: int,
+    chapter_text: str,
+    digest: str,
+    value: object,
+    warnings: list[str],
+) -> None:
+    if value is None:
+        return
+    prefix = f"Chapter {chapter} externalNaturalness"
+    if not isinstance(value, dict):
+        warnings.append(f"{prefix} must be an object")
+        return
+    if value.get("provider") != "zhuque":
+        warnings.append(f"{prefix} provider must be zhuque")
+    if not is_concrete(value.get("checkedAt")):
+        warnings.append(f"{prefix} needs checkedAt")
+    if value.get("reviewedTextSha256") != digest:
+        warnings.append(f"{prefix} hash does not match chapter text")
+    if not is_concrete(value.get("overallSignal")):
+        warnings.append(f"{prefix} needs the original overallSignal")
+    artifacts = value.get("sourceArtifacts")
+    if not isinstance(artifacts, list):
+        warnings.append(f"{prefix} sourceArtifacts must be an array")
+        artifacts = []
+    for index, artifact in enumerate(artifacts):
+        label = f"{prefix} artifact #{index + 1}"
+        if not isinstance(artifact, str) or not artifact.strip():
+            warnings.append(f"{label} must be a non-empty relative path")
+            continue
+        relative = Path(artifact)
+        if (
+            relative.is_absolute()
+            or ".." in relative.parts
+            or len(relative.parts) < 3
+            or relative.parts[:2] != ("reviews", "evidence")
+        ):
+            warnings.append(f"{label} must be inside reviews/evidence")
+            continue
+        if not (root / relative).is_file():
+            warnings.append(f"{prefix} artifact is missing: {artifact}")
+    passages = value.get("flaggedPassages")
+    if not isinstance(passages, list):
+        warnings.append(f"{prefix} flaggedPassages must be an array")
+        return
+    for index, passage in enumerate(passages):
+        label = f"{prefix} passage #{index + 1}"
+        if not isinstance(passage, dict):
+            warnings.append(f"{label} must be an object")
+            continue
+        text = passage.get("text")
+        if not is_concrete(text) or text not in chapter_text:
+            warnings.append(f"{label} text must be copied verbatim from chapter text")
+        location = passage.get("location")
+        paragraph = location.get("paragraph") if isinstance(location, dict) else None
+        if not isinstance(paragraph, int) or isinstance(paragraph, bool) or paragraph <= 0:
+            warnings.append(f"{label} paragraph must be a positive integer")
+        if not is_concrete(passage.get("externalLabel")):
+            warnings.append(f"{label} needs the original externalLabel")
+        if passage.get("editorDiagnosis") not in VALID_NATURALNESS_CATEGORY:
+            warnings.append(f"{label} has invalid editorDiagnosis")
+        if passage.get("action") not in VALID_EXTERNAL_ACTION:
+            warnings.append(f"{label} has invalid action")
+        if not isinstance(passage.get("resolved"), bool):
+            warnings.append(f"{label} resolved must be boolean")
+
+
 def validate_naturalness_reviews(
     root: Path,
     chapter_files: dict[int, Path],
@@ -368,6 +437,7 @@ def validate_naturalness_reviews(
     decision_doc: dict,
     mode: str,
     errors: list[str],
+    warnings: list[str],
 ) -> None:
     if gate.get("naturalnessRequired") is not True:
         return
@@ -400,6 +470,14 @@ def validate_naturalness_reviews(
             errors.append(f"Chapter {chapter} review chapter number does not match")
         if review.get("reviewedTextSha256") != digest:
             errors.append(f"Chapter {chapter} review hash does not match chapter text")
+        validate_external_naturalness(
+            root,
+            chapter,
+            chapter_text,
+            digest,
+            review.get("externalNaturalness"),
+            warnings,
+        )
 
         naturalness = review.get("naturalness")
         if repetition_enabled and chapter >= repetition_enforce_from:
@@ -511,7 +589,9 @@ def validate_chapter_reviews(
     committed: object,
     decision_doc: dict,
     errors: list[str],
+    warnings: list[str] | None = None,
 ) -> None:
+    warnings = [] if warnings is None else warnings
     gate = project.get("reviewGate")
     if not isinstance(gate, dict):
         errors.append("project.json needs reviewGate")
@@ -553,6 +633,7 @@ def validate_chapter_reviews(
         decision_doc,
         story_mode(project),
         errors,
+        warnings,
     )
     for chapter in range(enforce_from, committed + 1):
         chapter_path = chapter_files.get(chapter)
@@ -1220,7 +1301,7 @@ def main() -> int:
             if short_status == "complete" and committed != planned_sections:
                 errors.append("Completed short story must commit exactly shortStory.plannedSections sections")
 
-    validate_chapter_reviews(root, project, chapter_files, committed, decision_doc, errors)
+    validate_chapter_reviews(root, project, chapter_files, committed, decision_doc, errors, warnings)
     validate_final_review(root, project, chapter_files, committed, mode, short_status, errors)
 
     seen: set[str] = set()

@@ -44,7 +44,11 @@ class NaturalnessGateTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
-    def write_review(self, naturalness: dict | None = None) -> None:
+    def write_review(
+        self,
+        naturalness: dict | None = None,
+        external_naturalness: dict | None = None,
+    ) -> None:
         review = {
             "schemaVersion": 1,
             "chapter": 1,
@@ -52,6 +56,8 @@ class NaturalnessGateTests(unittest.TestCase):
         }
         if naturalness is not None:
             review["naturalness"] = naturalness
+        if external_naturalness is not None:
+            review["externalNaturalness"] = external_naturalness
         self.review_path.write_text(
             json.dumps(review, ensure_ascii=False, indent=2),
             encoding="utf-8",
@@ -104,6 +110,39 @@ class NaturalnessGateTests(unittest.TestCase):
             errors,
         )
         return errors
+
+    def validate_with_warnings(self) -> tuple[list[str], list[str]]:
+        errors: list[str] = []
+        warnings: list[str] = []
+        validate_chapter_reviews(
+            self.root,
+            self.project,
+            {1: self.chapter_path},
+            1,
+            self.decisions,
+            errors,
+            warnings,
+        )
+        return errors, warnings
+
+    def valid_external_naturalness(self) -> dict:
+        return {
+            "provider": "zhuque",
+            "checkedAt": "2026-09-06T10:00:00+08:00",
+            "reviewedTextSha256": self.digest,
+            "overallSignal": "逐段报告已提供",
+            "sourceArtifacts": ["reviews/evidence/朱雀-第0001章.png"],
+            "flaggedPassages": [
+                {
+                    "text": "第二句又替读者总结了一遍。",
+                    "location": {"paragraph": 1},
+                    "externalLabel": "疑似 AI 生成",
+                    "editorDiagnosis": "over-explanation",
+                    "action": "revised",
+                    "resolved": True,
+                }
+            ],
+        }
 
     def test_requires_naturalness_gate_fields(self) -> None:
         del self.project["reviewGate"]["naturalnessRequired"]
@@ -213,6 +252,40 @@ class NaturalnessGateTests(unittest.TestCase):
         self.write_review(naturalness)
 
         self.assertEqual([], self.validate())
+
+    def test_accepts_valid_zhuque_passage_evidence_without_warning(self) -> None:
+        evidence_path = self.root / "reviews" / "evidence" / "朱雀-第0001章.png"
+        evidence_path.parent.mkdir()
+        evidence_path.write_bytes(b"test image placeholder")
+        self.write_review(self.valid_naturalness(), self.valid_external_naturalness())
+
+        errors, warnings = self.validate_with_warnings()
+
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_warns_on_stale_zhuque_hash_without_bypassing_repetition(self) -> None:
+        external = self.valid_external_naturalness()
+        external["reviewedTextSha256"] = "0" * 64
+        evidence_path = self.root / "reviews" / "evidence" / "朱雀-第0001章.png"
+        evidence_path.parent.mkdir()
+        evidence_path.write_bytes(b"test image placeholder")
+        self.write_review(self.valid_naturalness(), external)
+
+        errors, warnings = self.validate_with_warnings()
+
+        self.assertEqual([], errors)
+        self.assertTrue(any("externalNaturalness hash does not match" in item for item in warnings))
+        self.assertFalse(any("repetition" in item.lower() for item in errors))
+
+    def test_warns_on_missing_zhuque_artifact_without_bypassing_repetition(self) -> None:
+        self.write_review(self.valid_naturalness(), self.valid_external_naturalness())
+
+        errors, warnings = self.validate_with_warnings()
+
+        self.assertEqual([], errors)
+        self.assertTrue(any("externalNaturalness artifact is missing" in item for item in warnings))
+        self.assertFalse(any("repetition" in item.lower() for item in errors))
 
     def test_rejects_disabled_naturalness_gate(self) -> None:
         self.project["reviewGate"]["naturalnessRequired"] = False
