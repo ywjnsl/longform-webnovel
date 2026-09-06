@@ -46,7 +46,7 @@ def content_chars(text: str) -> int:
 
 
 def initialize(path: Path, title: str) -> None:
-    run("python3", str(SCRIPTS / "init_project.py"), "--path", str(path), "--title", title, "--style", "fanqie-clean")
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(path), "--title", title, "--style", "fanqie-clean")
     for relative in (
         "canon/story-contract.md",
         "canon/characters.md",
@@ -188,7 +188,7 @@ def prepare_stage(
     review_dir = stage / "reviews"
     review_dir.mkdir(parents=True, exist_ok=True)
     run(
-        "python3",
+        sys.executable,
         str(SCRIPTS / "prose_lint.py"),
         str(chapter_path),
         "--output",
@@ -313,7 +313,7 @@ def commit(
     allow_revision: bool = False,
     expect: int = 0,
 ) -> dict:
-    args = ["python3", str(SCRIPTS / "commit_chapter.py"), "--project", str(project), "--staging", str(stage)]
+    args = [sys.executable, str(SCRIPTS / "commit_chapter.py"), "--project", str(project), "--staging", str(stage)]
     if dry_run:
         args.append("--dry-run")
     if allow_revision:
@@ -329,13 +329,13 @@ def test_initialization_and_cadence(base: Path) -> None:
     assert (project / "performance/snapshots").is_dir()
     assert (project / "research/reference-adaptations").is_dir()
     assert read_json(project / "project.json")["performanceFeedback"]["status"] == "unrequested"
-    result = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    result = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert result["ok"]
-    dry = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--json").stdout)
+    dry = json.loads(run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--json").stdout)
     assert [row["chapter"] for row in dry["chapters"] if row["reward"]] == [3, 5, 6, 9, 10, 12, 15]
     assert dry["chapters"][14]["reward"] == "major"
     written = json.loads(
-        run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--write", "--json").stdout
+        run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--write", "--json").stdout
     )
     assert written["added"] == 7
     assert len(read_json(project / "state/rewards.json")["beats"]) == 7
@@ -344,7 +344,7 @@ def test_initialization_and_cadence(base: Path) -> None:
 def test_short_story_mode(base: Path) -> None:
     project = base / "short-story"
     run(
-        "python3",
+        sys.executable,
         str(SCRIPTS / "init_project.py"),
         "--path",
         str(project),
@@ -369,28 +369,28 @@ def test_short_story_mode(base: Path) -> None:
     }
     assert "短故事全文结构" in (project / "planning/current-volume.md").read_text(encoding="utf-8")
 
-    planned = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--json").stdout)
+    planned = json.loads(run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--json").stdout)
     assert planned["mode"] == "fanqie-short-story"
     assert planned["count"] == 5
     assert max(row["chapter"] for row in planned["chapters"]) == 5
     assert "结局收束" in planned["chapters"][-1]["role"]
     assert planned["chapters"][-1]["reward"] == "major"
     single = json.loads(
-        run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "1", "--json").stdout
+        run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "1", "--json").stdout
     )
     assert len(single["chapters"]) == 1
     assert "开局扰动" in single["chapters"][0]["role"] and "结局收束" in single["chapters"][0]["role"]
     assert single["chapters"][0]["reward"] == "major"
-    written = json.loads(run("python3", str(SCRIPTS / "plan_cadence.py"), str(project), "--write", "--json").stdout)
+    written = json.loads(run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--write", "--json").stdout)
     assert written["added"] >= 2
-    validation = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    validation = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert validation["ok"]
     assert not any("chapter 15" in warning.lower() for warning in validation["warnings"])
 
     index = read_json(project / "project.json")
     index["shortStory"]["status"] = "complete"
     write_json(project / "project.json", index)
-    incomplete = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    incomplete = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
     assert any("must commit exactly" in error for error in incomplete["errors"])
     index["shortStory"]["status"] = "planning"
     write_json(project / "project.json", index)
@@ -398,17 +398,17 @@ def test_short_story_mode(base: Path) -> None:
     index.pop("storyMode")
     index.pop("shortStory")
     write_json(project / "project.json", index)
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
     index["storyMode"] = "unknown-mode"
     write_json(project / "project.json", index)
-    invalid = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    invalid = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
     assert any("storyMode is invalid" in error for error in invalid["errors"])
 
 
 def test_committed_project_guards(base: Path) -> None:
     project = base / "guard-errors"
-    run("python3", str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "错误防线")
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "错误防线")
     chapter = project / "chapters" / "第0001章-未同步.md"
     chapter.write_text("# 第一章\n\n这里已经出现正文，但索引字数没有同步。\n", encoding="utf-8")
     index = read_json(project / "project.json")
@@ -432,7 +432,7 @@ def test_committed_project_guards(base: Path) -> None:
         }
     ]
     write_json(project / "state/threads.json", threads)
-    failed = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    failed = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
     joined = "\n".join(failed["errors"])
     assert "totalContentChars" in joined
     assert "unresolved marker" in joined
@@ -442,22 +442,22 @@ def test_committed_project_guards(base: Path) -> None:
 
 def test_style_profiles(base: Path) -> None:
     unselected = base / "style-unselected"
-    run("python3", str(SCRIPTS / "init_project.py"), "--path", str(unselected), "--title", "待选风格")
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(unselected), "--title", "待选风格")
     assert read_json(unselected / "project.json")["schemaVersion"] == 7
     assert read_json(unselected / "project.json")["ensemble"]["protagonistId"] == "main"
     assert (unselected / "cast/main/SKILL.md").is_file()
     assert read_json(unselected / "project.json")["styleProfile"]["status"] == "unconfirmed"
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
 
-    listed = json.loads(run("python3", str(SCRIPTS / "style_profile.py"), "--list").stdout)
+    listed = json.loads(run(sys.executable, str(SCRIPTS / "style_profile.py"), "--list").stdout)
     assert len(listed) == 8 and listed["fanqie-clean"] == "清晰推进"
-    shown = run("python3", str(SCRIPTS / "style_profile.py"), "--show", "suspense-tight").stdout
+    shown = run(sys.executable, str(SCRIPTS / "style_profile.py"), "--show", "suspense-tight").stdout
     assert "冷峻悬疑" in shown and "公平可见" in shown
 
     before = (unselected / "project.json").read_text(encoding="utf-8")
     preview = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "style_profile.py"),
             "--project",
             str(unselected),
@@ -471,7 +471,7 @@ def test_style_profiles(base: Path) -> None:
     assert preview["dryRun"] and (unselected / "project.json").read_text(encoding="utf-8") == before
     applied = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "style_profile.py"),
             "--project",
             str(unselected),
@@ -484,7 +484,7 @@ def test_style_profiles(base: Path) -> None:
     assert Path(applied["backup"]).is_dir()
     metadata = read_json(unselected / "project.json")["styleProfile"]
     assert metadata["primary"] == "suspense-tight" and metadata["secondary"] == "lyrical-restrained"
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
 
     technique = base / "technique-card.md"
     technique.write_text(
@@ -498,7 +498,7 @@ def test_style_profiles(base: Path) -> None:
     )
     custom = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "style_profile.py"),
             "--project",
             str(unselected),
@@ -512,13 +512,13 @@ def test_style_profiles(base: Path) -> None:
     )
     assert custom["primary"] == "custom:restrained-dialogue"
     assert "不复刻任何原句" in (unselected / "canon/style-profile.md").read_text(encoding="utf-8")
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(unselected)).stdout)["ok"]
 
     index = read_json(unselected / "project.json")
     index["lastCommittedChapter"] = 1
     write_json(unselected / "project.json", index)
     refused = run(
-        "python3",
+        sys.executable,
         str(SCRIPTS / "style_profile.py"),
         "--project",
         str(unselected),
@@ -529,7 +529,7 @@ def test_style_profiles(base: Path) -> None:
     assert "major decision" in refused.stderr
     confirmed = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "style_profile.py"),
             "--project",
             str(unselected),
@@ -543,10 +543,10 @@ def test_style_profiles(base: Path) -> None:
 
 def test_publishing_package(base: Path) -> None:
     project = base / "publishing"
-    run("python3", str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "暂定书名", "--style", "suspense-tight")
-    generic = json.loads(run("python3", str(SCRIPTS / "publishing_package.py"), "--check-title", "重生归来").stdout)
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "暂定书名", "--style", "suspense-tight")
+    generic = json.loads(run(sys.executable, str(SCRIPTS / "publishing_package.py"), "--check-title", "重生归来").stdout)
     assert not generic["ok"] and generic["requiresPublicExactSearch"]
-    distinctive = json.loads(run("python3", str(SCRIPTS / "publishing_package.py"), "--check-title", "雾城收件人").stdout)
+    distinctive = json.loads(run(sys.executable, str(SCRIPTS / "publishing_package.py"), "--check-title", "雾城收件人").stdout)
     assert distinctive["ok"]
 
     positioning = base / "positioning.txt"
@@ -569,7 +569,7 @@ def test_publishing_package(base: Path) -> None:
     negative.write_text("乱码文字，水印，平台标识，多余人物，主体裁切，过度霓虹，廉价素材拼贴，模仿具体艺术家。", encoding="utf-8")
     research.write_text("2026-08-21 检查通用搜索引擎与目标网文平台的完整标题及核心短语，未发现高热度同名作品；存在零散非小说用语，混淆风险低。", encoding="utf-8")
     args = (
-        "python3",
+        sys.executable,
         str(SCRIPTS / "publishing_package.py"),
         "--project",
         str(project),
@@ -595,7 +595,7 @@ def test_publishing_package(base: Path) -> None:
     package_text = (project / "canon/publishing-package.md").read_text(encoding="utf-8")
     assert "雨夜旧城区" in package_text
     assert "思源黑体 Heavy" in package_text and "书名排版与字体说明" in package_text
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
     styled_args = list(args)
     layout_flag = styled_args.index("--title-layout-file")
@@ -610,7 +610,7 @@ def test_publishing_package(base: Path) -> None:
     (project / "canon/publishing-package.md").write_text(
         package_text.replace("## 书名排版与字体说明", "## 排版说明"), encoding="utf-8"
     )
-    invalid_layout = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    invalid_layout = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
     assert any("title layout and typography" in error for error in invalid_layout["errors"])
     run(*args)
 
@@ -662,13 +662,13 @@ def test_market_research(base: Path) -> None:
     }
     snapshot_path = base / "valid-market.json"
     write_json(snapshot_path, snapshot)
-    args = ("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(snapshot_path))
+    args = (sys.executable, str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(snapshot_path))
     preview = json.loads(run(*args, "--dry-run").stdout)
     assert preview["dryRun"] and read_json(project / "project.json")["marketResearch"]["status"] == "unrequested"
     applied = json.loads(run(*args).stdout)
     assert applied["sourceCount"] == 2 and applied["sampleCount"] == 5
     assert "观察事实" in (project / "canon/market-brief.md").read_text(encoding="utf-8")
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
     invalid = dict(snapshot)
     invalid["sources"] = snapshot["sources"][:1]
@@ -679,7 +679,7 @@ def test_market_research(base: Path) -> None:
     ]
     invalid_path = base / "invalid-market.json"
     write_json(invalid_path, invalid)
-    failed = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(invalid_path), expect=1).stdout)
+    failed = json.loads(run(sys.executable, str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(invalid_path), expect=1).stdout)
     joined = "\n".join(failed["errors"])
     assert "at least 2 public sources" in joined and "at least 5 observed works" in joined and "confidence" in joined
 
@@ -687,7 +687,7 @@ def test_market_research(base: Path) -> None:
 def test_short_story_market_boundary(base: Path) -> None:
     project = base / "short-story-market"
     run(
-        "python3",
+        sys.executable,
         str(SCRIPTS / "init_project.py"),
         "--path",
         str(project),
@@ -731,21 +731,21 @@ def test_short_story_market_boundary(base: Path) -> None:
     }
     snapshot_path = base / "short-story-market.json"
     write_json(snapshot_path, snapshot)
-    args = ("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(snapshot_path))
+    args = (sys.executable, str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(snapshot_path))
     assert json.loads(run(*args, "--dry-run").stdout)["ok"]
 
     wrong_scope = json.loads(json.dumps(snapshot, ensure_ascii=False))
     wrong_scope["scope"]["contentForm"] = "longform"
     wrong_scope_path = base / "wrong-short-story-scope.json"
     write_json(wrong_scope_path, wrong_scope)
-    errors = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_scope_path), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_scope_path), expect=1).stdout)["errors"]
     assert any("scope.contentForm=short-story" in error for error in errors)
 
     wrong_source = json.loads(json.dumps(snapshot, ensure_ascii=False))
     wrong_source["sources"][0]["contentForm"] = "mixed"
     wrong_source_path = base / "wrong-short-story-source.json"
     write_json(wrong_source_path, wrong_source)
-    errors = json.loads(run("python3", str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_source_path), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "market_brief.py"), "--project", str(project), "--snapshot", str(wrong_source_path), expect=1).stdout)["errors"]
     assert any("source #1 must use contentForm=short-story" in error for error in errors)
 
 
@@ -782,7 +782,7 @@ def test_story_overlap(base: Path) -> None:
         encoding="utf-8",
     )
     similar_result = json.loads(
-        run("python3", str(SCRIPTS / "story_overlap.py"), "--candidate", str(similar), "--library", str(library), expect=1).stdout
+        run(sys.executable, str(SCRIPTS / "story_overlap.py"), "--candidate", str(similar), "--library", str(library), expect=1).stdout
     )
     assert similar_result["highestRisk"] == "high"
     assert similar_result["comparedProjectCount"] == 2
@@ -795,7 +795,7 @@ def test_story_overlap(base: Path) -> None:
         encoding="utf-8",
     )
     distinct_result = json.loads(
-        run("python3", str(SCRIPTS / "story_overlap.py"), "--candidate", str(distinct), "--library", str(library)).stdout
+        run(sys.executable, str(SCRIPTS / "story_overlap.py"), "--candidate", str(distinct), "--library", str(library)).stdout
     )
     assert distinct_result["highestRisk"] == "low"
 
@@ -817,7 +817,7 @@ def test_reference_guard(base: Path) -> None:
     copied.write_text("# 候选\n\n新人物走进院子。" + exact_block + "随后她决定继续调查。\n", encoding="utf-8")
     copied_result = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "reference_guard.py"),
             "--source",
             str(source),
@@ -838,7 +838,7 @@ def test_reference_guard(base: Path) -> None:
     )
     distinct_result = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "reference_guard.py"),
             "--source",
             str(source),
@@ -855,7 +855,7 @@ def test_reference_guard(base: Path) -> None:
     forbidden.write_text("# 候选\n\n林照晚在空间站修复了失控的氧气循环。\n", encoding="utf-8")
     forbidden_result = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "reference_guard.py"),
             "--source",
             str(source),
@@ -889,7 +889,7 @@ def test_performance_feedback(base: Path) -> None:
     }
     input_path = base / "performance-input.json"
     write_json(input_path, data)
-    args = ("python3", str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(input_path))
+    args = (sys.executable, str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(input_path))
     before = (project / "project.json").read_text(encoding="utf-8")
     dry = json.loads(run(*args, "--dry-run").stdout)
     assert dry["stage"] == "insufficient-exposure" and dry["readRate"] == 0.2353
@@ -908,7 +908,7 @@ def test_performance_feedback(base: Path) -> None:
     invalid.update({"windowStart": "2026-09-01", "windowEnd": "2026-08-31", "reads": 18})
     invalid_path = base / "invalid-performance.json"
     write_json(invalid_path, invalid)
-    failed = json.loads(run("python3", str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(invalid_path), expect=1).stdout)
+    failed = json.loads(run(sys.executable, str(SCRIPTS / "performance_feedback.py"), "--project", str(project), "--input", str(invalid_path), expect=1).stdout)
     joined = "\n".join(failed["errors"])
     assert "reads cannot exceed impressions" in joined and "windowStart cannot be after windowEnd" in joined
 
@@ -924,7 +924,7 @@ def test_opening_audit(base: Path) -> None:
     output = base / "opening-audit.json"
     result = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "opening_audit.py"),
             str(chapter),
             "--window",
@@ -950,7 +950,7 @@ def test_prose_lint(base: Path) -> None:
     baseline = base / "第0000章-基线.md"
     baseline.write_text("# 基线\n\n“走。”他说，“现在就走，不要回头。”\n“为什么？”她问，“门后到底有什么？”\n", encoding="utf-8")
     result = json.loads(
-        run("python3", str(SCRIPTS / "prose_lint.py"), str(risky), "--baseline", str(baseline)).stdout
+        run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(risky), "--baseline", str(baseline)).stdout
     )
     codes = {finding["code"] for finding in result["findings"]}
     assert result["claim"] == "editorial-risk-signals-not-authorship-detection"
@@ -1004,11 +1004,11 @@ def test_migration(base: Path) -> None:
     project = base / "legacy"
     create_legacy_project(project)
     before = (project / "project.json").read_text(encoding="utf-8")
-    preview = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(project), "--dry-run").stdout)
+    preview = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(project), "--dry-run").stdout)
     assert preview["changed"] and preview["dryRun"]
     assert (project / "project.json").read_text(encoding="utf-8") == before
 
-    migrated = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(project)).stdout)
+    migrated = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(project)).stdout)
     assert migrated["changed"] and Path(migrated["backup"]).is_dir()
     assert read_json(project / "project.json")["rewardCadence"]["enforceFromChapter"] == 4
     rewards = read_json(project / "state/rewards.json")
@@ -1016,7 +1016,7 @@ def test_migration(base: Path) -> None:
     assert read_json(project / "state/cast-arcs.json")["legacyUnauditedThrough"] == 3
     assert rewards["beats"][0]["status"] == "needs-review"
     assert rewards["beats"][0]["rewardType"] == "other"
-    validation = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    validation = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert validation["ok"] and any("Legacy chapters through 3" in warning for warning in validation["warnings"])
 
     legacy_revision_stage = base / "legacy-revision-stage"
@@ -1056,7 +1056,7 @@ def test_migration(base: Path) -> None:
     commit(project, legacy_revision_stage, allow_revision=True)
 
     backups_before = list((project / ".webnovel" / "backups").iterdir())
-    repeated = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(project)).stdout)
+    repeated = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(project)).stdout)
     backups_after = list((project / ".webnovel" / "backups").iterdir())
     assert not repeated["changed"]
     assert len(backups_before) == len(backups_after)
@@ -1067,7 +1067,7 @@ def test_migration(base: Path) -> None:
     hybrid_index["schemaVersion"] = 2
     hybrid_index["rewardCadence"].update({"supercycle": 15, "enforceFromChapter": 1})
     write_json(hybrid / "project.json", hybrid_index)
-    mixed = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(hybrid)).stdout)
+    mixed = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(hybrid)).stdout)
     assert mixed["fromVersion"] == 2 and mixed["rewardsFromVersion"] == 1
     assert read_json(hybrid / "project.json")["rewardCadence"]["enforceFromChapter"] == 4
     assert read_json(hybrid / "state/rewards.json")["legacyUnauditedThrough"] == 3
@@ -1082,7 +1082,7 @@ def test_migration(base: Path) -> None:
     (previous_v2 / "canon/style-profile.md").unlink()
     (previous_v2 / "canon/publishing-package.md").unlink()
     (previous_v2 / "state/cast-arcs.json").unlink()
-    upgraded = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(previous_v2)).stdout)
+    upgraded = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(previous_v2)).stdout)
     assert upgraded["fromVersion"] == 2 and upgraded["rewardsFromVersion"] == 2
     assert upgraded["legacyUnauditedThrough"] == 0
     upgraded_index = read_json(previous_v2 / "project.json")
@@ -1091,7 +1091,7 @@ def test_migration(base: Path) -> None:
     assert upgraded_index["rewardCadence"]["enforceFromChapter"] == 1
     assert upgraded_index["styleProfile"]["status"] == "unconfirmed"
     assert upgraded_index["publishingPackage"]["status"] == "unconfirmed"
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(previous_v2)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(previous_v2)).stdout)["ok"]
 
     previous_v3 = base / "previous-v3"
     initialize(previous_v3, "旧版配角迁移")
@@ -1099,10 +1099,10 @@ def test_migration(base: Path) -> None:
     previous_v3_index["schemaVersion"] = 3
     write_json(previous_v3 / "project.json", previous_v3_index)
     (previous_v3 / "state/cast-arcs.json").unlink()
-    upgraded_v3 = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(previous_v3)).stdout)
+    upgraded_v3 = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(previous_v3)).stdout)
     assert upgraded_v3["fromVersion"] == 3 and upgraded_v3["castLegacyUnauditedThrough"] == 0
     assert read_json(previous_v3 / "project.json")["schemaVersion"] == 7
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(previous_v3)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(previous_v3)).stdout)["ok"]
 
     previous_v4 = base / "previous-v4"
     initialize(previous_v4, "旧版审稿迁移")
@@ -1117,10 +1117,10 @@ def test_migration(base: Path) -> None:
     (previous_v4 / "canon/market-brief.md").unlink()
     shutil.rmtree(previous_v4 / "reviews")
     (previous_v4 / "reviews").mkdir()
-    upgraded_v4 = json.loads(run("python3", str(SCRIPTS / "migrate_project.py"), str(previous_v4)).stdout)
+    upgraded_v4 = json.loads(run(sys.executable, str(SCRIPTS / "migrate_project.py"), str(previous_v4)).stdout)
     assert upgraded_v4["fromVersion"] == 4
     assert read_json(previous_v4 / "project.json")["reviewGate"]["enforceFromChapter"] == 2
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(previous_v4)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(previous_v4)).stdout)["ok"]
 
 
 def test_cast_arcs(base: Path) -> None:
@@ -1173,7 +1173,7 @@ def test_cast_arcs(base: Path) -> None:
         },
     ]
     write_json(cast_path, cast_doc)
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
 
     non_romantic = read_json(cast_path)
     non_romantic["characters"][0]["relationships"][0].update(
@@ -1185,19 +1185,19 @@ def test_cast_arcs(base: Path) -> None:
         }
     )
     write_json(cast_path, non_romantic)
-    assert json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
     write_json(cast_path, cast_doc)
 
     unknown = read_json(cast_path)
     unknown["characters"][0]["relationships"][0]["targetId"] = "missing-person"
     write_json(cast_path, unknown)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("unknown targetId" in error for error in errors)
 
     missing_love_fields = read_json(cast_path)
     missing_love_fields["characters"][0]["relationships"][0].update({"targetId": "warden", "basis": "", "cost": ""})
     write_json(cast_path, missing_love_fields)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("concrete basis" in error for error in errors) and any("concrete cost" in error for error in errors)
 
     missing_goal = read_json(cast_path)
@@ -1206,7 +1206,7 @@ def test_cast_arcs(base: Path) -> None:
     )
     missing_goal["characters"][0]["independentGoal"] = ""
     write_json(cast_path, missing_goal)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("concrete independentGoal" in error for error in errors)
 
     missing_love_evidence = read_json(cast_path)
@@ -1214,7 +1214,7 @@ def test_cast_arcs(base: Path) -> None:
     missing_love_evidence["characters"][0]["independentGoal"] = "查清旧令来源"
     missing_love_evidence["characters"][0]["relationships"][0]["sinceChapter"] = 1
     write_json(cast_path, missing_love_evidence)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("needs evidenceChapters for love" in error for error in errors)
 
     missing_history = read_json(cast_path)
@@ -1223,7 +1223,7 @@ def test_cast_arcs(base: Path) -> None:
     missing_history["characters"][0]["lastAdvancedChapter"] = 1
     missing_history["characters"][0]["relationships"][0]["evidenceChapters"] = [1]
     write_json(cast_path, missing_history)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("matching choice/delta history evidence" in error for error in errors)
 
     no_anchor = read_json(cast_path)
@@ -1234,7 +1234,7 @@ def test_cast_arcs(base: Path) -> None:
     index["lastCommittedChapter"] = 5
     index["latestDraftChapter"] = 5
     write_json(project / "project.json", index)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("needs at least one anchor supporting character" in error for error in errors)
 
     no_anchor_progress = read_json(cast_path)
@@ -1261,7 +1261,7 @@ def test_cast_arcs(base: Path) -> None:
     index["lastCommittedChapter"] = 15
     index["latestDraftChapter"] = 15
     write_json(project / "project.json", index)
-    errors = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
     assert any("must advance by choice/consequence" in error for error in errors)
 
 
@@ -1290,7 +1290,7 @@ def test_commit_validation_and_restore(base: Path) -> None:
 
     restored = json.loads(
         run(
-            "python3",
+            sys.executable,
             str(SCRIPTS / "commit_chapter.py"),
             "--project",
             str(project),
@@ -1375,7 +1375,7 @@ def test_commit_validation_and_restore(base: Path) -> None:
         sys.path.remove(str(SCRIPTS))
     assert read_json(project / "project.json")["lastCommittedChapter"] == 9
     assert not (project / "chapters" / "第0010章-测试章.md").exists()
-    rollback_validation = json.loads(run("python3", str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    rollback_validation = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert rollback_validation["ok"]
 
 
