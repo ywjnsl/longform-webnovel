@@ -12,12 +12,12 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 1. 让故事长期扩展，但不给故事注水。每次扩展必须来自已有行动的后果。
 2. 长篇保持三层规划：当前章具体、未来 5–10 章清楚、当前卷稳定；更远内容只保留方向和选择。短故事让当前节具体、全部剩余分节可见、结局稳定。
 3. 每章至少改变两个状态维度：目标、关系、认知、资源/能力、世界局势、道德位置。
-4. 章节目标字数是节奏参考，不是硬性配额。正文不足时先补充能推进因果、揭示信息、迫使选择或交付回报的场景；若继续扩写会注水，就拆分或增加章节/分节，并同步更新章纲、爽点账本、状态快照和篇幅合同。
+4. 章节目标字数是节奏参考，不是硬性配额。本章两项状态变化和场景职责一旦落地，立即停笔；短章合法。禁止为凑 2500 字、过检测或制造“人味”而增加无关场面、回忆、闲聊、天气、家具巡游或第二现场。只有状态变化尚未落地时，才补充能推进因果、揭示信息、迫使选择或交付回报的场景；若继续写只会重复已有功能，就结束本章或拆成下一章，并同步更新章纲、爽点账本、状态快照和篇幅合同。
 5. 长篇每 3 章兑现一次小爽点或小高潮，每 5 章兑现一次大爽点或大高潮；短故事改用全文比例结构锚点，不机械补齐 3/5 章。所有兑现都必须造成真实状态变化。
 6. 不用单纯提高战力、扩大地图或复制反派来续命。升级必须同时增加代价、责任、限制或新的对抗方式。
 7. 重大决策询问作者，其余内容自主完成。按 [approval-policy.md](references/approval-policy.md) 判断。
 8. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
-9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化依靠作者确认样本、人物利益和定向修订，不靠随机句长、故意病句或“去 AI 词表”。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
+9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化先删后改、就地改句：删战术字幕和过齐因果，合并过碎段落；不靠扩写新场面、不把标红段改成更短更工整的功能金句，也不靠随机句长、故意病句或“去 AI 词表”。作者提供朱雀等逐段标红时，未标红段落冻结，只改标红段；不把总体百分比当优化目标，也不整章重写。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
 10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
 11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
 12. 每次写成或修改章节正文后，强制执行确定性重复审计、网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧报告、finding ID 和例外失效。
@@ -36,7 +36,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 - **增配角 / 群像仿真**：需要独立角色 skill、按需生成配角，或主角在未完成弧里自由探索。
 
-先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)。每次写成或修改任何章节正文后，必须读取 [webnovel-naturalness-review.md](references/webnovel-naturalness-review.md) 与 [review-system.md](references/review-system.md)，先执行自然度门禁再提交；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满，要求建立个人声音，或自然度审稿需要定向修改时，必须读取 [prose-naturalization.md](references/prose-naturalization.md)。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)。每次写成或修改任何章节正文后，必须读取 [webnovel-naturalness-review.md](references/webnovel-naturalness-review.md) 与 [review-system.md](references/review-system.md)，先执行自然度门禁再提交；迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满、朱雀大面积标红、章节只有少数段落可过、或写手在扩写无关场面时，必须读取 [prose-naturalization.md](references/prose-naturalization.md) 的长篇对标写法与朱雀段落合同。不要无差别加载全部参考资料。
 
 番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
@@ -103,7 +103,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
    `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](references/short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
-4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。三份报告与自然度对象都必须绑定当前正文 SHA-256。
+4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。作者提供朱雀逐段标红时，按 [prose-naturalization.md](references/prose-naturalization.md) 的段落合同执行：未标红段落原样保留；标红段只允许删除、合并或就地改写，禁止扩成新场面，也禁止改成更短的功能金句段。三份报告与自然度对象都必须绑定当前正文 SHA-256。
 5. 若重复、自然度或其他审稿存在阻断项，自动定向修改一次并重新运行指标、重复审计、语言扫描、自然度审稿、编辑审稿和读者模拟。仍有未处置重复、高优先级问题、`needs-revision` 或弃读风险时停止提交；只有符合对应门禁契约的明确例外才可保留。
 6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。

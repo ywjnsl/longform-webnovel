@@ -469,6 +469,50 @@ class NaturalnessGateTests(unittest.TestCase):
         self.assertEqual([], self.validate())
 
 
+    def test_accepts_padding_expansion_finding(self) -> None:
+        naturalness = self.valid_naturalness()
+        naturalness["status"] = "pass-with-notes"
+        naturalness["findings"] = [
+            {
+                "priority": "medium",
+                "category": "padding-expansion",
+                "evidence": ["第二句又替读者总结了一遍。"],
+                "readerCost": "新增场面不改变选择，只为凑字。",
+                "direction": "删除该场面，不改写成金句段。",
+                "resolved": True,
+            }
+        ]
+        self.write_review(naturalness)
+
+        self.assertEqual([], self.validate())
+
+    def test_accepts_deleted_zhuque_passage_action(self) -> None:
+        external = self.valid_external_naturalness()
+        external["flaggedPassages"][0]["action"] = "deleted"
+        evidence_path = self.root / "reviews" / "evidence" / "朱雀-第0001章.png"
+        evidence_path.parent.mkdir()
+        evidence_path.write_bytes(b"test image placeholder")
+        self.write_review(self.valid_naturalness(), external)
+
+        errors, warnings = self.validate_with_warnings()
+
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_warns_on_expanded_zhuque_action(self) -> None:
+        external = self.valid_external_naturalness()
+        external["flaggedPassages"][0]["action"] = "expanded"
+        evidence_path = self.root / "reviews" / "evidence" / "朱雀-第0001章.png"
+        evidence_path.parent.mkdir()
+        evidence_path.write_bytes(b"test image placeholder")
+        self.write_review(self.valid_naturalness(), external)
+
+        errors, warnings = self.validate_with_warnings()
+
+        self.assertEqual([], errors)
+        self.assertTrue(any("has invalid action" in item for item in warnings))
+
+
 class NaturalnessProjectLifecycleTests(unittest.TestCase):
     def run_script(self, script: str, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(

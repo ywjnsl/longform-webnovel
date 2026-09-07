@@ -137,7 +137,7 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 枚举值：
 
 - 自然度状态：`pass`、`pass-with-notes`、`needs-revision`。
-- 自然度类别：`echo-repetition`、`modifier-overuse`、`rhetorical-symmetry`、`cadence-packaging`、`over-explanation`、`corrective-syntax`、`expository-dialogue`、`same-voice`、`over-engineered-causality`、`generic-reaction`、`theme-closure`。
+- 自然度类别：`echo-repetition`、`modifier-overuse`、`rhetorical-symmetry`、`cadence-packaging`、`over-explanation`、`corrective-syntax`、`expository-dialogue`、`same-voice`、`over-engineered-causality`、`generic-reaction`、`theme-closure`、`padding-expansion`。
 - 自然度处理：`not-needed`、`revised`、`author-approved`。`revised` 必须记录与最终哈希不同的 `beforeTextSha256` 和非空 `changedCategories`；`author-approved` 必须关联已确认的 `naturalness-exception` 决策，该决策的 `chapter` 和 `reviewedTextSha256` 必须与本次最终正文一致。
 - 编辑状态：`pass`、`pass-with-notes`、`blocked`。
 - 优先级：`high`、`medium`、`low`。
@@ -146,7 +146,7 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 - 体验通道：`transportation`、`aesthetic`、`social`、`curiosity`、`flow`；倾向：`positive`、`negative`、`mixed`。
 - 处理结果：`accepted`、`revised`、`author-approved`。最后一种还需 `decisionId`。
 
-所有 `evidence` 必须是当前最终章节正文的逐字子串。不要把概括、推测、修改前已删除的句子或改写后的句子伪装成证据。`externalNaturalness` 是作者提供朱雀逐段报告时的可选顶层对象；过期哈希、缺失截图和无法对应正文的标红只告警，不替代内部审稿，也不按总体百分比自动触发修订。
+所有 `evidence` 必须是当前最终章节正文的逐字子串。不要把概括、推测、修改前已删除的句子或改写后的句子伪装成证据。`externalNaturalness` 是作者提供朱雀逐段报告时的可选顶层对象；过期哈希、缺失截图和无法对应正文的标红只告警，不替代内部审稿，也不按总体百分比自动触发修订。逐段 `action` 只允许 `kept`、`revised`、`deleted`、`rejected`：`revised` 指就地改写，`deleted` 指删段，禁止理解成扩写。
 
 ## 语言风险解释
 

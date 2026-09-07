@@ -115,10 +115,11 @@ VALID_NATURALNESS_CATEGORY = {
     "over-engineered-causality",
     "generic-reaction",
     "theme-closure",
+    "padding-expansion",
 }
 VALID_NATURALNESS_REVISION_ACTION = {"not-needed", "revised", "author-approved"}
 VALID_REPETITION_CODE = {"exact-sentence-duplicate", "near-sentence-duplicate"}
-VALID_EXTERNAL_ACTION = {"kept", "revised", "rejected"}
+VALID_EXTERNAL_ACTION = {"kept", "revised", "deleted", "rejected"}
 FINAL_REVIEW_CHECKS = (
     "promise",
     "causality",
