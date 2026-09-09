@@ -22,6 +22,7 @@
 - 为追妻、追夫、火葬场、破镜重圆和追而不得题材检查旧情基础、伤害累积、醒悟触发、补偿代价与最终选择，不强制复合或新增伴侣。
 - 保存发布后展现、阅读、完读与互动窗口，按样本量诊断流量漏斗，不把本地阈值冒充平台规则。
 - 每次新写或修改章节都强制执行语言风险扫描、自然度审稿、编辑审稿和目标读者模拟，并在改稿后重新绑定正文哈希。
+- 番茄短故事默认按公开签约质量检查空转、机制是否运行和收口是否做完；人物按角色卡核对选择一致性、胜利代价、身体情绪和对白辨识。
 - 使用正文 SHA-256、隔离预览、备份与回滚保证章节和状态原子提交。
 
 语言风险扫描只提供编辑调查信号，不判断文本是否由 AI 创作，也不输出作者身份概率。
@@ -33,6 +34,8 @@
 ```bash
 git clone https://github.com/ywjnsl/longform-webnovel.git
 cp -R longform-webnovel/skill/longform-webnovel ~/.codex/skills/
+mkdir -p ~/.cursor/skills/longform-webnovel
+cp longform-webnovel/cursor-skill/SKILL.md ~/.cursor/skills/longform-webnovel/SKILL.md
 ```
 
 重新打开 Codex 任务后，可直接调用：
@@ -44,7 +47,8 @@ $longform-webnovel 帮我策划一部可以长期连载但不注水的中文网�
 ## 仓库结构
 
 ```text
-skill/longform-webnovel/   可安装的 Skill
+skill/longform-webnovel/   可安装的 Codex Skill
+cursor-skill/              Cursor 发现用入口，指向 Codex 目录
 tests/                     集成与结构测试
 .github/workflows/         GitHub Actions
 ```

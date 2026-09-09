@@ -29,7 +29,7 @@
 }
 ```
 
-写手不得让角色说出 `wouldNeverSay`。配角按自己的欲望反对、利用或离开，不默认帮主角。主角可以绕路、失败，但不能空转。
+写手不得让角色说出 `wouldNeverSay`。配角按自己的欲望反对、利用或离开，不默认帮主角。主角可以绕路、失败，但不能空转。番茄短故事写节时，关键选择还要按 [fanqie-character-craft.md](fanqie-character-craft.md) 能从经历、性格、欲望、当场处境解释；赢了要把代价写进 `cost` / `state.json`，不能只口头说付出。
 
 ## state.json
 

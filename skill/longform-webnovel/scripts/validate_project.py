@@ -95,7 +95,7 @@ VALID_REWARD_TYPE = {
 }
 VALID_EDITOR_STATUS = {"pass", "pass-with-notes", "blocked"}
 VALID_EDITOR_PRIORITY = {"high", "medium", "low"}
-VALID_EDITOR_DIMENSION = {"promise", "causality", "structure", "character", "voice", "continuity", "line"}
+VALID_EDITOR_DIMENSION = {"promise", "causality", "structure", "character", "voice", "continuity", "line", "originality", "padding", "ending"}
 VALID_READER_STATUS = {"engaged", "mixed", "drop-risk"}
 VALID_COMPLETION_INTENT = {"continue", "uncertain", "stop"}
 VALID_READER_CHANNEL = {"transportation", "aesthetic", "social", "curiosity", "flow"}
@@ -116,6 +116,7 @@ VALID_NATURALNESS_CATEGORY = {
     "generic-reaction",
     "theme-closure",
     "padding-expansion",
+    "truncated-ending",
 }
 VALID_NATURALNESS_REVISION_ACTION = {"not-needed", "revised", "author-approved"}
 VALID_REPETITION_CODE = {"exact-sentence-duplicate", "near-sentence-duplicate"}

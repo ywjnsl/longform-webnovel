@@ -10,7 +10,7 @@
 
 有可用子代理时，让自然度审稿、编辑与读者模拟分别读取本章、必要正史和风格档案，避免互相锚定。没有子代理时，在同一代理内依次执行三个上下文隔离的角色通道：先让自然度审稿定位模式簇，再让编辑诊断因果、结构和修订方向，最后让读者只报告在哪里产生了什么体验。读者不替作者改稿，编辑不伪装成目标读者投票。
 
-- 编辑检查：读者承诺、因果、结构、人物、声音、连续性、行文执行。
+- 编辑检查：读者承诺、因果、结构、人物、声音、连续性、行文执行。番茄短故事的 `character` 还要覆盖人设漂移、无代价胜利、情绪硬喊、新人难认；细则见 [fanqie-character-craft.md](fanqie-character-craft.md)。
 - 自然度审稿：回声重复、副词过密、工整修辞、机械节拍、解释过满、纠正式骨架、对白播设定、人物同声、因果过度装配、通用反应和主题封口。
 - 读者模拟：以具体目标读者 persona 记录逐点反应、继续阅读意愿、好奇与卡顿位置。
 - 三者可以意见不同。保留分歧，不用平均分消解它。
@@ -41,7 +41,7 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 
 番茄短故事第一节在第 2 步后另运行 `opening_audit.py --window 300`。目标读者先只看脚本截出的前 300 字，复述人物关系、当前事件、主角选择、具体风险与下一问；编辑再检查这些信息是否形成因果链。复述需要作者补充背景、主角到 300 字仍无主动选择、风险只有抽象情绪，或下一问无法由后文回答时，至少记为 `high` 入口问题并阻断提交，修订后重新生成窗口。脚本指标本身不形成通过或阻断结论。
 
-番茄短故事的最后一节还要执行全文终审：核对单一主承诺是否兑现、主要线索是否闭合、关键铺垫是否回收、配角选择是否产生后果、结局是否同时具备因果必然性与初读意外感，并检查结尾是否在矛盾解决后继续替读者概括主题。对于后文保留未知或纠正主角判断的事实，从揭示点回查首次陈述：前文只能确认当时可知的路径和结果，不能由叙述者提前给出与后文疑点冲突的确定答案。这里的外部读者视角不是把正文改成第三人称，而是暂时放下作者身份，按普通读者顺序通读全文。开放结尾只允许保留作者已确认的余韵，不能遗漏主要矛盾的处理；去除总结句也不能牺牲结局因果。
+番茄短故事的写节审稿与最后一节全文终审，还要按 [fanqie-signing-quality.md](fanqie-signing-quality.md) 与 [fanqie-character-craft.md](fanqie-character-craft.md) 检查：不套用他人结构与核心剧情、不靠机械扩写拉长、大段必须推动情节、人物行为对得上角色卡、重要胜利有真实代价、情绪落到身体而非旁白硬喊、新人出场能认、对白能区分，以及收口完整。最后一节终审：核对单一主承诺是否兑现、主要线索是否闭合、关键铺垫是否回收、配角选择是否产生后果、结局是否同时具备因果必然性与初读意外感；结尾既不能在矛盾解决后继续替读者概括主题，也不能把最后一场已起手的动作切成半句。对于后文保留未知或纠正主角判断的事实，从揭示点回查首次陈述：前文只能确认当时可知的路径和结果，不能由叙述者提前给出与后文疑点冲突的确定答案。这里的外部读者视角不是把正文改成第三人称，而是暂时放下作者身份，按普通读者顺序通读全文。开放结尾只允许保留作者已确认的余韵，不能遗漏主要矛盾的处理；去除总结句也不能牺牲结局因果。
 
 终审必须写入 `reviews/final-review.json`，并绑定按章节顺序计算的全文 SHA-256。最小结构如下：
 
@@ -137,11 +137,11 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 枚举值：
 
 - 自然度状态：`pass`、`pass-with-notes`、`needs-revision`。
-- 自然度类别：`echo-repetition`、`modifier-overuse`、`rhetorical-symmetry`、`cadence-packaging`、`over-explanation`、`corrective-syntax`、`expository-dialogue`、`same-voice`、`over-engineered-causality`、`generic-reaction`、`theme-closure`、`padding-expansion`。
+- 自然度类别：`echo-repetition`、`modifier-overuse`、`rhetorical-symmetry`、`cadence-packaging`、`over-explanation`、`corrective-syntax`、`expository-dialogue`、`same-voice`、`over-engineered-causality`、`generic-reaction`、`theme-closure`、`padding-expansion`、`truncated-ending`。
 - 自然度处理：`not-needed`、`revised`、`author-approved`。`revised` 必须记录与最终哈希不同的 `beforeTextSha256` 和非空 `changedCategories`；`author-approved` 必须关联已确认的 `naturalness-exception` 决策，该决策的 `chapter` 和 `reviewedTextSha256` 必须与本次最终正文一致。
 - 编辑状态：`pass`、`pass-with-notes`、`blocked`。
 - 优先级：`high`、`medium`、`low`。
-- 编辑维度：`promise`、`causality`、`structure`、`character`、`voice`、`continuity`、`line`。
+- 编辑维度：`promise`、`causality`、`structure`、`character`、`voice`、`continuity`、`line`、`originality`、`padding`、`ending`。`character` 在番茄短故事中至少覆盖：选择能否从角色卡解释、重要胜利有无真实代价、情绪是否落到身体、对白能否辨认说话人。
 - 读者状态：`engaged`、`mixed`、`drop-risk`；完成意愿：`continue`、`uncertain`、`stop`。
 - 体验通道：`transportation`、`aesthetic`、`social`、`curiosity`、`flow`；倾向：`positive`、`negative`、`mixed`。
 - 处理结果：`accepted`、`revised`、`author-approved`。最后一种还需 `decisionId`。

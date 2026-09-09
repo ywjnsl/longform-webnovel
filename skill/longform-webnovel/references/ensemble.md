@@ -8,7 +8,7 @@
 
 ## 何时读
 
-写下一章、发合同、扮演角色、按需生成配角时读本文和 [ensemble-character.md](ensemble-character.md)。不要因此跳过 [chapter-craft.md](chapter-craft.md)、[reward-system.md](reward-system.md)、[review-system.md](review-system.md)。
+写下一章、发合同、扮演角色、按需生成配角时读本文和 [ensemble-character.md](ensemble-character.md)。不要因此跳过 [chapter-craft.md](chapter-craft.md)、[reward-system.md](reward-system.md)、[review-system.md](review-system.md)。番茄短故事还要按 [fanqie-character-craft.md](fanqie-character-craft.md) 核对选择一致性、胜利代价和对白辨识。
 
 ## 三层
 
