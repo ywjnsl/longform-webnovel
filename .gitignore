@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .coverage
+
+# leftover agent implementation plans
+docs/superpowers/
