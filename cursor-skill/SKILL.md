@@ -9,4 +9,4 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 
 `~/.codex/skills/longform-webnovel/`
 
-**立刻读取该目录的 `SKILL.md` 并按其执行。** 当前为 schema v8。番茄短故事写节、审稿、完结时还要读同目录 `references/fanqie-signing-quality.md` 与 `references/fanqie-character-craft.md`。长篇自然化先删战术字幕、合并过碎段落，禁止为凑字或过检扩写无关场面，也禁止把正文改成独句功能金句墙。作者提供朱雀逐段标红时：未标红段落冻结，标红段就地改或删除。群像仿真、未完成弧、角色 skill 已并入同一套连载引擎，不要再用独立的 `sandbox-serial-novel` 流程。
+**立刻读取该目录的 `SKILL.md` 并按其执行。** 当前为 schema v8。写章必须先读参考、填完写前卡再动笔，禁止先写后补读。改已提交正文前先读 `references/fanqie-revision.md`，分清不改、小改还是请示大改。番茄短故事写节、审稿、完结时还要读同目录 `references/fanqie-signing-quality.md`、`references/fanqie-character-craft.md` 与 `references/fanqie-consistency.md`。新建、定名、第一节或长篇前三章还要读 `references/fanqie-new-book.md`。长篇写章审稿默认读一致性文件。长篇自然化先删战术字幕、合并过碎段落，禁止为凑字或过检扩写无关场面，也禁止把正文改成独句功能金句墙。作者提供朱雀逐段标红时：未标红段落冻结，标红段就地改或删除。群像仿真、未完成弧、角色 skill 已并入同一套连载引擎，不要再用独立的 `sandbox-serial-novel` 流程。

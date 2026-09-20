@@ -23,6 +23,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 12. 每次写成或修改章节正文后，强制执行确定性重复审计、网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧报告、finding ID 和例外失效。
 13. 角色是项目内 skill（`cast/{id}/`），不是全局 Cursor skill。写章前先隔离收意图，再由法则裁判否决，最后写手成章；角色不得写正文。
 14. 章不是收束单位，弧才是。每章必须改变状态，但开篇目标可以跨多章才兑现或彻底失败。失败、改路、暴露都算交付；空转非法。
+15. **写章必须先参考再动笔。** 未读完本章必读参考、未填写前卡、未对齐法则库与上场角色卡之前，不得写正文。禁止先写一稿再补读课堂文件。
 
 ## 识别任务
 
@@ -31,23 +32,26 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 - **参考短故事再创作**：用户提供样稿并要求仿写、借结构、换题材重写或生成相似阅读体验。
 - **继续连载**：项目结构存在，用户要求下一章、若干章或继续写。
 - **规划扩展**：用户要求卷纲、章纲、新地图、新阶段或长期方向。
-- **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真、战力失控、收口像没写完，或要求按番茄签约标准改稿。
+- **修订诊断**：用户指出注水、崩设定、节奏慢、人物失真、战力失控、出戏、收口像没写完、越改越乱，或要求按番茄签约标准改稿。
+- **番茄改稿自检**：用户给出自检/越改越乱课，或要求稳住节奏与大纲、不知道改哪、怕改乱。
 - **番茄签约质量**：用户给出作家课堂签约说明、询问能否签约，或要求按番茄评估规则写正文/审稿。
 - **番茄人物刻画**：用户给出人物课、纸片人/工具人/千人一面反馈，或要求把角色写出活人感。
+- **番茄新书抓人**：用户给出爆款新书/拉新课、抱怨开篇劝退、设定撞车、看点稀或读着枯燥。
+- **番茄出戏与质感**：用户给出出戏感/质感课，或指出战力崩、金钱跳、规则对主角失效、瞬移、人设降智、配角工具人。
 - **发布后诊断**：用户提供展现、阅读、完读、解锁或互动数据，要求判断低展现或低完读原因。
 - **导入旧稿**：用户已有正文，但没有本 Skill 的项目状态。
 - **增配角 / 群像仿真**：需要独立角色 skill、按需生成配角，或主角在未完成弧里自由探索。
 
-先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时读 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)。每次写成或修改任何章节正文后，必须读取 [webnovel-naturalness-review.md](references/webnovel-naturalness-review.md) 与 [review-system.md](references/review-system.md)，先执行自然度门禁再提交。`fanqie-short-story` 写节、审稿或完结时还要读 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md)；`serial` 仅在作者按番茄投稿/签约来写时读。迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满、朱雀大面积标红、章节只有少数段落可过、或写手在扩写无关场面时，必须读取 [prose-naturalization.md](references/prose-naturalization.md) 的长篇对标写法与朱雀段落合同。不要无差别加载全部参考资料。
+先读取 [project-system.md](references/project-system.md)，并按 [length-modes.md](references/length-modes.md) 确定篇幅模式。用户要求仿写、借鉴样稿或换题材重写时读 [reference-adaptation.md](references/reference-adaptation.md)；需要公开市场研究时读 [market-research.md](references/market-research.md)；新书定名或准备封面时读 [publishing-package.md](references/publishing-package.md)；设计配角、群像、人物弧或关系网络时读 [supporting-cast.md](references/supporting-cast.md) 与 [ensemble-character.md](references/ensemble-character.md)；写下一章或跑角色意图时读 [ensemble.md](references/ensemble.md)；涉及新卷或长期扩展时再读 [continuation-engine.md](references/continuation-engine.md)；规划爽点时读 [reward-system.md](references/reward-system.md)；选择、组合或更换文风以及参考作者手法时读 [style-system.md](references/style-system.md)；写正文时**先读** [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md)，填完写前卡后再动笔；每次写成或修改任何章节正文后，必须读取 [webnovel-naturalness-review.md](references/webnovel-naturalness-review.md) 与 [review-system.md](references/review-system.md)，先执行自然度门禁再提交。`fanqie-short-story` 写节、审稿或完结时还要读 [fanqie-signing-quality.md](references/fanqie-signing-quality.md)、[fanqie-character-craft.md](references/fanqie-character-craft.md) 与 [fanqie-consistency.md](references/fanqie-consistency.md)；新建、定名、短故事第一节或长篇前三章还要读 [fanqie-new-book.md](references/fanqie-new-book.md)。`serial` 写章、审稿默认读一致性文件；仅在作者按番茄投稿/签约来写时另读签约与人物文件；前三章默认仍读新书抓人文件。迁移、提交或恢复项目时读 [operations.md](references/operations.md)；判断题材写法时读 [genre-routing.md](references/genre-routing.md)。故事以追妻、追夫、火葬场、破镜重圆、旧爱追悔或“追而不得”为主要承诺时，还要读取 [relationship-regret.md](references/relationship-regret.md)；纯离婚清算、资产追偿或复仇故事不因存在前任自动套用。用户指出“AI 味”、机械、模板腔、对白太正确、解释过满、朱雀大面积标红、章节只有少数段落可过、或写手在扩写无关场面时，必须读取 [prose-naturalization.md](references/prose-naturalization.md) 的长篇对标写法与朱雀段落合同。用户要求改已提交正文、自检章节、或说越改越乱时，先读 [fanqie-revision.md](references/fanqie-revision.md)，再决定不改、小改还是请示大改。不要无差别加载全部参考资料。
 
-番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
+番茄短故事或 `serial` 长篇开篇做信息流标题、前 300 字、黄金三章、试读节点或入口审稿时，读取 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md)。用户提供发布数据时读取 [performance-feedback.md](references/performance-feedback.md)，用 `performance_feedback.py` 保存原始统计并按漏斗定位；需要按统一口径截取首屏时运行 `scripts/opening_audit.py`。不要无差别加载全部参考资料。
 
 ## 新建项目
 
 1. 若用户未指定项目路径，在当前工作目录下使用安全的作品名创建项目文件夹。
 2. 只询问无法合理推断且会改变作品方向的信息。通常一次收集：故事种子、希望避免的内容、主角初始困境。题材可以由故事种子推导，也可以给出 3 个差异明显的方案让作者选择。
 3. 确认 `serial` 或 `fanqie-short-story`，提出简短的故事合同，并按 [style-system.md](references/style-system.md) 给出 2–4 个适配的语言风格选项。用户指定作者时先做手法转译卡；用户提供亲手改稿或原创样本时，按 [prose-naturalization.md](references/prose-naturalization.md) 提取有逐字证据的个人声音规则。短故事还需确认目标总长度、预计分节和结尾类型。
-4. 用户要求市场定位或题材竞争不明时，按 [market-research.md](references/market-research.md) 研究公开来源；正式建项前先把快照保存在项目外的临时工作目录，不能成为迟迟不写的借口。短故事必须以短故事专属样本为主要证据，长篇榜只能作为旁证，不能据此宣称短故事热门。
+4. 用户要求市场定位或题材竞争不明时，按 [market-research.md](references/market-research.md) 研究公开来源；正式建项前先把快照保存在项目外的临时工作目录，不能成为迟迟不写的借口。短故事必须以短故事专属样本为主要证据，长篇榜只能作为旁证，不能据此宣称短故事热门。新书设定按 [fanqie-new-book.md](references/fanqie-new-book.md) 核对：有先例就要写出可观察的微创新，读者不能预判后文每一拍。
 5. 按 [publishing-package.md](references/publishing-package.md) 生成 8–12 个非公式化书名，筛出 3 个做公开精确检索；为推荐书名提供封面主提示词、负面提示词，并按 [cover-typography.md](references/cover-typography.md) 给出 3 个结构明显不同的书名字效方向，推荐其中 1 个，写清断行、字形骨架、笔画性格、材质、描边层、投影/立体深度、占比、安全区和主体遮挡关系。将候选合同或项目运行 `story_overlap.py`，与作者同一作品库中的历史项目比较；高风险时重做人物、关系、核心危机或解决机制，除非作者确认是同世界观续作。
 6. 将故事合同、第一卷重大设计、语言风格、终选书名和封面提示词一起交给作者确认。不要在确认前批量写正文。
 7. 运行：
@@ -70,9 +74,8 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 
 - 一个短故事是一个有终点的作品，不是缩短版无限连载。只保留一个主承诺、一个主要矛盾和能在结局前闭合的少量副线。
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。
-- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
+- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
-- 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。终审收口必须主承诺兑现且最后一场动作做完，细则见 [fanqie-signing-quality.md](references/fanqie-signing-quality.md)。人物选择一致性、胜利代价、情绪身体反应与对白辨识见 [fanqie-character-craft.md](references/fanqie-character-craft.md)。
 - 发布后不要从一次小流量测试反推永久结论。保存推荐状态和完整漏斗数据；下一个故事的选题与包装可以吸收数据，但不能把无样本的猜测写成平台规则。
@@ -88,9 +91,10 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
-8. 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判，再按 [chapter-craft.md](references/chapter-craft.md) 与 [scene-craft.md](references/scene-craft.md) 写正文。先写空间、身体和动作过程，再写对白。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。本章只推进或加压一格，不要求把弧写完。确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点。
-9. 按 [review-system.md](references/review-system.md) 运行确定性重复审计、语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
-10. 按“章节提交事务”更新全部状态文件，再向作者报告。
+8. **先参考。** 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判。动笔前必须当场读取（不能凭上一章记忆跳过）：[chapter-craft.md](references/chapter-craft.md)、[scene-craft.md](references/scene-craft.md)、[fanqie-consistency.md](references/fanqie-consistency.md)、`canon/laws.md`、`canon/timeline.md`、上场角色 `cast/{id}/SKILL.md`。`fanqie-short-story` 或作者按番茄投稿来写时，还要读 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md)。短故事第一节或长篇前三章还要读 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md)。填完写前卡：目标、冲突、转折、结尾钩子、两项状态变化，并核对战力/金钱/规则、人设会不会做、开篇有没有看点。写前卡填不出来就还没准备好，不得开写。
+9. **再写正文。** 按写前卡与场面四行写：先空间、身体和动作过程，再对白。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置判断本节职责。本章只推进或加压一格，不要求把弧写完。确认目的、状态变化、兑现内容、结尾推动力和五个风格锚点。
+10. 按 [review-system.md](references/review-system.md) 运行确定性重复审计、语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
+11. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
 ## 章节提交事务
 
@@ -106,9 +110,9 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
    `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](references/short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
-4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。番茄短故事的编辑诊断必须按 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md) 回答空转、人物动机、机制是否运行、胜利代价、情绪是否落到身体、最后一节收口是否做完。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。作者提供朱雀逐段标红时，按 [prose-naturalization.md](references/prose-naturalization.md) 的段落合同执行：未标红段落原样保留；标红段只允许删除、合并或就地改写，禁止扩成新场面，也禁止改成更短的功能金句段。三份报告与自然度对象都必须绑定当前正文 SHA-256。
+4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](references/review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。番茄短故事的编辑诊断必须按 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md) 回答空转、人物动机、机制是否运行、胜利代价、情绪是否落到身体、最后一节收口是否做完。第一节与长篇前三章另按 [fanqie-new-book.md](references/fanqie-new-book.md) 回答设定微创新、首屏看点、无效开篇花活和枯燥句。写章还要按 [fanqie-consistency.md](references/fanqie-consistency.md) 回答战力/金钱/规则是否对上法则库、时间地点是否接得上、有没有为爽点降智。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。作者提供朱雀逐段标红时，按 [prose-naturalization.md](references/prose-naturalization.md) 的段落合同执行：未标红段落原样保留；标红段只允许删除、合并或就地改写，禁止扩成新场面，也禁止改成更短的功能金句段。三份报告与自然度对象都必须绑定当前正文 SHA-256。
 5. 若重复、自然度或其他审稿存在阻断项，自动定向修改一次并重新运行指标、重复审计、语言扫描、自然度审稿、编辑审稿和读者模拟。仍有未处置重复、高优先级问题、`needs-revision` 或弃读风险时停止提交；只有符合对应门禁契约的明确例外才可保留。
-6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。
+6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。有时间跳跃、换地点、新伤、新钱或新规则时，同步更新 `canon/timeline.md` 与 `canon/laws.md`。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
 9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
@@ -142,14 +146,15 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
 ## 修订与诊断
 
-先从高层到低层检查：故事承诺 → 卷结构 → 人物弧 → 章节因果 → 场景 → 句子。不要用润色掩盖结构问题。
+先从高层到低层检查：故事承诺 → 卷结构 → 人物弧 → 章节因果 → 场景 → 句子。不要用润色掩盖结构问题。改已有正文前先读 [fanqie-revision.md](references/fanqie-revision.md)：分清问题类型与范围，能不改就不动；把握不了后文衔接时停止，等作者选择往下写或推倒该段。
 
 修改既有正史前：
 
 1. 列出改动会影响的角色、时间线、伏笔、后续章节和世界规则。
-2. 若改动属于重大决策，等待作者确认。
-3. 修改正文与所有受影响状态，记录到 `state/decisions.json`。
-4. 运行项目校验，并抽查受影响章节的前后衔接。
+2. 若改动属于重大决策，等待作者确认。连续数章的大剧情、已发表后文会接不上的改动，一律先确认。
+3. 大改前把该区间已抛出的设定、伏笔和关键信息记入法则库、时间线与线索账本；重写时填回去。
+4. 修改正文与所有受影响状态，记录到 `state/decisions.json`。
+5. 运行项目校验，并抽查受影响章节的前后衔接。改开篇时不得把后期人设灌进早期。
 
 用户只指出“AI 味重”“不自然”时，不直接全篇改写。先按 [prose-naturalization.md](references/prose-naturalization.md) 区分结构问题、人物同声、对白工具化、解释过密、程序展示过满和主题封口，列出逐字证据与修订范围；保留故事事实和已经成立的个人声音，只对有证据的问题做一次定向修订。
 

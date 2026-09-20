@@ -4,7 +4,7 @@
 
 本模块依据番茄小说网作家课堂《告别千人一面：带你写出有血有肉的人物》。平台口径可能调整；作者提供更新课时以更新页为准，改本文件要点，不整段搬官方例文。
 
-适用：`fanqie-short-story` 写节、审稿默认执行。`serial` 在作者按番茄投稿来写时同样执行。与 [fanqie-signing-quality.md](fanqie-signing-quality.md) 一起用：签约看合规与收口，本文件看人是不是活人。
+适用：`fanqie-short-story` 写节、审稿默认执行。`serial` 在作者按番茄投稿来写时同样执行。与 [fanqie-signing-quality.md](fanqie-signing-quality.md) 一起用：签约看合规与收口，本文件看人是不是活人。新书开篇能否留人见 [fanqie-new-book.md](fanqie-new-book.md)。
 
 已有角色隔离、意图 JSON、配角弧光账本仍有效。本文件补的是：**选择要解释得通、赢要有代价、情绪落到身体、新人出场能认、对白能听出是谁。**
 
@@ -29,7 +29,7 @@
 3. 欲望（`wantNow`、`ownWant`）
 4. 当下处境（谁在场、手里有什么、制度允许什么）
 
-对不上就记为试图失败，或让角色付代价后才改变；禁止为推进把人改成万能工具。
+对不上就记为试图失败，或让角色付代价后才改变；禁止为推进把人改成万能工具。为制造冲突让高智商角色犯低级错误，按 [fanqie-consistency.md](fanqie-consistency.md) 先改剧情，不改人。
 
 长篇每隔一个小兑现窗口回看一次 `cast-arcs.json` 的最近选择。短故事每节结束核对上场人：有没有做出完全不像此人的事。
 

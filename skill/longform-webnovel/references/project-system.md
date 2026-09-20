@@ -86,7 +86,7 @@
 
 `project.json.reviewGate` 保存普通审稿开始强制执行的章号，以及编辑、读者模拟和语言扫描开关。`naturalnessRequired` 在 v7 必须为 `true`，`naturalnessEnforceFromChapter` 保存其独立生效章号。新项目从第 1 章执行；迁移到 v7 的旧项目只从下一未提交章强制自然度审稿，但历史章一经修订也必须补做，不伪造历史报告。完整格式见 [review-system.md](review-system.md)。
 
-`story-state.json` 只保存当前有效状态和最近变化，不复制整部小说。每项重要事实包含来源章号；推测必须标成 `uncertain`，不能伪装成正史。
+`story-state.json` 只保存当前有效状态和最近变化，不复制整部小说。每项重要事实包含来源章号；推测必须标成 `uncertain`，不能伪装成正史。`canon/timeline.md` 只记推动故事的节点（时间/地点跳跃、伤势、钱与关键物变化），不记无信息量的过渡；写章前后按 [fanqie-consistency.md](fanqie-consistency.md) 与法则库核对，避免战力、金钱、规则和人设对不上。
 
 长篇用 `project.json.rewardCadence` 保存节拍：`smallEvery: 3`、`majorEvery: 5`、`supercycle: 15`、`overlapPolicy: "major-absorbs-small"` 和开始强制执行的章号。短故事保留该字段以兼容项目工具，但不执行章号周期，改用全文比例结构锚点。改变模式或节拍属于故事合同级决定，必须由作者确认。
 

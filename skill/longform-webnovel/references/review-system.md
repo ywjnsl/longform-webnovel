@@ -12,7 +12,7 @@
 
 - 编辑检查：读者承诺、因果、结构、人物、声音、连续性、行文执行。番茄短故事的 `character` 还要覆盖人设漂移、无代价胜利、情绪硬喊、新人难认；细则见 [fanqie-character-craft.md](fanqie-character-craft.md)。
 - 自然度审稿：回声重复、副词过密、工整修辞、机械节拍、解释过满、纠正式骨架、对白播设定、人物同声、因果过度装配、通用反应和主题封口。
-- 读者模拟：以具体目标读者 persona 记录逐点反应、继续阅读意愿、好奇与卡顿位置。
+- 读者模拟：以具体目标读者 persona 记录逐点反应、继续阅读意愿、好奇与卡顿位置。作者看不出章节问题时，冷读者至少能回答：他叫什么、他想干什么、他正在做什么；答不上来记入入口或本章目标问题。细则见 [fanqie-revision.md](fanqie-revision.md)。
 - 三者可以意见不同。保留分歧，不用平均分消解它。
 
 ## 执行顺序
@@ -39,9 +39,9 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 6. 每轮最多自动修订一次；正文变化后必须重跑指标、重复审计、语言扫描、自然度审稿、编辑诊断和读者模拟，因为旧哈希、finding ID、例外和证据已经失效。执行过自然度修改时，在最终报告保存修改前哈希和处理类别；最终 finding 只引用修改后正文仍存在的逐字证据。
 7. 重复报告中每个仍保留的 exact/near finding 都必须在 `naturalness.repetitionExceptions` 中按 finding ID 和最终正文哈希记录具体编辑理由，否则阻断提交。自然度 `needs-revision`、自然度或编辑未解决的 `high` 问题、编辑 `blocked`、读者 `drop-risk` 或 `stop` 也会阻断提交。若作者明确接受自然度风险，先把确认写入 `state/decisions.json`，其中 `kind` 为 `naturalness-exception`，并绑定具体 `chapter` 与最终正文 `reviewedTextSha256`；再使用 `author-approved` 和对应 `decisionId`。
 
-番茄短故事第一节在第 2 步后另运行 `opening_audit.py --window 300`。目标读者先只看脚本截出的前 300 字，复述人物关系、当前事件、主角选择、具体风险与下一问；编辑再检查这些信息是否形成因果链。复述需要作者补充背景、主角到 300 字仍无主动选择、风险只有抽象情绪，或下一问无法由后文回答时，至少记为 `high` 入口问题并阻断提交，修订后重新生成窗口。脚本指标本身不形成通过或阻断结论。
+番茄短故事第一节在第 2 步后另运行 `opening_audit.py --window 300`。目标读者先只看脚本截出的前 300 字，复述人物关系、当前事件、主角选择、具体风险与下一问；并指出前三行有没有看点、哪句想滑走。编辑再检查这些信息是否形成因果链，以及开篇花活是否进入主线。复述需要作者补充背景、主角到 300 字仍无主动选择、风险只有抽象情绪，或下一问无法由后文回答时，至少记为 `high` 入口问题并阻断提交，修订后重新生成窗口。脚本指标本身不形成通过或阻断结论。细则见 [fanqie-new-book.md](fanqie-new-book.md)。
 
-番茄短故事的写节审稿与最后一节全文终审，还要按 [fanqie-signing-quality.md](fanqie-signing-quality.md) 与 [fanqie-character-craft.md](fanqie-character-craft.md) 检查：不套用他人结构与核心剧情、不靠机械扩写拉长、大段必须推动情节、人物行为对得上角色卡、重要胜利有真实代价、情绪落到身体而非旁白硬喊、新人出场能认、对白能区分，以及收口完整。最后一节终审：核对单一主承诺是否兑现、主要线索是否闭合、关键铺垫是否回收、配角选择是否产生后果、结局是否同时具备因果必然性与初读意外感；结尾既不能在矛盾解决后继续替读者概括主题，也不能把最后一场已起手的动作切成半句。对于后文保留未知或纠正主角判断的事实，从揭示点回查首次陈述：前文只能确认当时可知的路径和结果，不能由叙述者提前给出与后文疑点冲突的确定答案。这里的外部读者视角不是把正文改成第三人称，而是暂时放下作者身份，按普通读者顺序通读全文。开放结尾只允许保留作者已确认的余韵，不能遗漏主要矛盾的处理；去除总结句也不能牺牲结局因果。
+番茄短故事的写节审稿与最后一节全文终审，还要按 [fanqie-signing-quality.md](fanqie-signing-quality.md) 与 [fanqie-character-craft.md](fanqie-character-craft.md) 检查：不套用他人结构与核心剧情、不靠机械扩写拉长、大段必须推动情节、人物行为对得上角色卡、重要胜利有真实代价、情绪落到身体而非旁白硬喊、新人出场能认、对白能区分，以及收口完整。第一节与长篇前三章另按 [fanqie-new-book.md](fanqie-new-book.md) 检查设定微创新、首屏看点和无效开篇花活。写章还要按 [fanqie-consistency.md](fanqie-consistency.md) 检查战力/金钱/规则前后一致、时空不瞬移、不为爽点降智。最后一节终审：核对单一主承诺是否兑现、主要线索是否闭合、关键铺垫是否回收、配角选择是否产生后果、结局是否同时具备因果必然性与初读意外感；结尾既不能在矛盾解决后继续替读者概括主题，也不能把最后一场已起手的动作切成半句。对于后文保留未知或纠正主角判断的事实，从揭示点回查首次陈述：前文只能确认当时可知的路径和结果，不能由叙述者提前给出与后文疑点冲突的确定答案。这里的外部读者视角不是把正文改成第三人称，而是暂时放下作者身份，按普通读者顺序通读全文。开放结尾只允许保留作者已确认的余韵，不能遗漏主要矛盾的处理；去除总结句也不能牺牲结局因果。
 
 终审必须写入 `reviews/final-review.json`，并绑定按章节顺序计算的全文 SHA-256。最小结构如下：
 
@@ -141,7 +141,7 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 - 自然度处理：`not-needed`、`revised`、`author-approved`。`revised` 必须记录与最终哈希不同的 `beforeTextSha256` 和非空 `changedCategories`；`author-approved` 必须关联已确认的 `naturalness-exception` 决策，该决策的 `chapter` 和 `reviewedTextSha256` 必须与本次最终正文一致。
 - 编辑状态：`pass`、`pass-with-notes`、`blocked`。
 - 优先级：`high`、`medium`、`low`。
-- 编辑维度：`promise`、`causality`、`structure`、`character`、`voice`、`continuity`、`line`、`originality`、`padding`、`ending`。`character` 在番茄短故事中至少覆盖：选择能否从角色卡解释、重要胜利有无真实代价、情绪是否落到身体、对白能否辨认说话人。
+- 编辑维度：`promise`、`causality`、`structure`、`character`、`voice`、`continuity`、`line`、`originality`、`padding`、`ending`。`character` 在番茄短故事中至少覆盖：选择能否从角色卡解释、重要胜利有无真实代价、情绪是否落到身体、对白能否辨认说话人。`continuity` 至少覆盖战力/金钱/规则是否对上法则库、时间地点是否接上时间线、有没有为爽点降智；细则见 [fanqie-consistency.md](fanqie-consistency.md)。
 - 读者状态：`engaged`、`mixed`、`drop-risk`；完成意愿：`continue`、`uncertain`、`stop`。
 - 体验通道：`transportation`、`aesthetic`、`social`、`curiosity`、`flow`；倾向：`positive`、`negative`、`mixed`。
 - 处理结果：`accepted`、`revised`、`author-approved`。最后一种还需 `decisionId`。

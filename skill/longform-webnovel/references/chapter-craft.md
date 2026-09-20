@@ -4,6 +4,20 @@
 
 `serial` 默认把 2500 个有效内容字符作为起始估算和节奏异常信号，2250–2850 只是建议区间，不是硬性范围。长篇章节可因场景职责自然短或长；如果一个章节承载两个不适合压缩的动作，应拆成两章并让每章拥有独立的入口、推进和结尾。`fanqie-short-story` 按已确认的全文与分节职责决定单节长度，可在不注水的前提下合理增加分节；单篇不分节时直接使用全文目标。平台统计口径可能不同；首次发布后以平台显示值校准。正文需要快，但不能把“快”误解为持续吵闹或机械反转。
 
+## 先参考再写
+
+禁止先写正文再补读参考。写前卡填完之前不得开写。
+
+当场读取，不能凭聊天记忆代替：
+
+1. [scene-craft.md](scene-craft.md) 的场面四行；
+2. [fanqie-consistency.md](fanqie-consistency.md) 与 `canon/laws.md`、`canon/timeline.md`；
+3. 上场角色 `cast/{id}/SKILL.md` 与 `state.json`；
+4. `fanqie-short-story` 或番茄投稿：[fanqie-signing-quality.md](fanqie-signing-quality.md)、[fanqie-character-craft.md](fanqie-character-craft.md)；
+5. 第一节或长篇前三章：[short-story-information-flow.md](short-story-information-flow.md)、[fanqie-new-book.md](fanqie-new-book.md)。
+
+读完后才填下面的写前卡。卡填不出来就还没准备好。
+
 ## 写前卡片
 
 动笔前用六行确定：
@@ -15,6 +29,8 @@
 - 至少两项状态变化；
 - 兑现的旧承诺或推进的线索；
 - 结尾形成的下一步行动、代价或新判断；若是短故事最后一节，写明最后一场动作怎样才算做完。
+
+番茄出戏课的「目标 / 冲突 / 转折 / 钩子」对上上面几行，不另写一套章纲。写战力、花钱、违禁前先对 [fanqie-consistency.md](fanqie-consistency.md) 与 `canon/laws.md`。
 
 如果删掉本章不会影响后续状态，本章尚无存在价值。写前先完成 [ensemble.md](ensemble.md) 的合同与裁定；写手不得发明角色没打算做的关键选择，也不得要求本章把当前弧写完。
 
@@ -33,7 +49,7 @@
 
 ## 节奏建议
 
-- 前 300 字完成入口动作链：正在发生的处境、可辨认的关系/冲突、主角的主动选择，以及由选择产生的具体代价或下一问。前 100 字优先出现事件和压力，但不要求每 100 字固定一个反转。
+- 前 300 字完成入口动作链：正在发生的处境、可辨认的关系/冲突、主角的主动选择，以及由选择产生的具体代价或下一问。前 100 字优先出现事件和压力，但不要求每 100 字固定一个反转。番茄开篇另按 [fanqie-new-book.md](fanqie-new-book.md)：第一屏要有功能看点，开篇花活必须进入主线。
 - 中段至少发生一次因果升级：角色行动引出更难的新局面，而非作者凭空加事。
 - 后段给予一种实质回报：答案、胜负、关系变化、资源变化、能力验证或情绪释放。
 - 结尾推动下一步。钩子可以是必须采取的行动、代价落地、认知翻转或新冲突，不必每次隐瞒信息。
@@ -55,7 +71,7 @@
 
 黄金三章是功能合同，不是三章字数合同。章节可以自然短或长；若一个章节同时承载两个不能压缩的动作，拆章并写清新增职责，不能靠背景、重复对白或无后果反转填量。前三章完成后再接入长篇的 3/5 章爽点节拍。
 
-番茄短故事还要在动笔前检查信息流入口：标题、前 300 字、主情绪发动机和试读节点必须指向同一个主承诺。按 [short-story-information-flow.md](short-story-information-flow.md) 做入口合同；需要精确截取时运行 `opening_audit.py`。不把固定反转频率、短段落数量或冲突词命中当成硬指标。
+番茄短故事还要在动笔前检查信息流入口：标题、前 300 字、主情绪发动机和试读节点必须指向同一个主承诺。按 [short-story-information-flow.md](short-story-information-flow.md) 与 [fanqie-new-book.md](fanqie-new-book.md) 做入口合同；需要精确截取时运行 `opening_audit.py`。不把固定反转频率、短段落数量或冲突词命中当成硬指标。看点密度只当枯燥信号，禁止为凑点注水。
 
 ## 人物与语言
 
@@ -89,15 +105,15 @@
 
 ## 七项审查
 
-1. **因果**：事件是否由人物行动、既有规则或明确外力导致？
+1. **因果**：事件是否由人物行动、既有规则或明确外力导致？战力、金钱、规则、时间地点是否与法则库和时间线对得上？番茄投稿按 [fanqie-consistency.md](fanqie-consistency.md) 核对。
 2. **人物**：主角与核心配角的关键选择是否符合各自欲望、恐惧、信息和成长阶段？配角是否拥有不依附主角的行动理由？情绪是旁白标签还是会改变下一步的身体反应？多人说话能否不用名字区分？番茄短故事按 [fanqie-character-craft.md](fanqie-character-craft.md) 核对。
 3. **推进**：至少两项状态是否真实变化？
 4. **回报**：本章或本节是否兑现了读者等待的某件事？若命中长篇 3/5 节拍或短故事结构锚点，回报级别是否达标并写入账本？
 5. **新鲜度**：冲突、解法和钩子是否重复近期章节？
 6. **语言**：是否符合风格档案的五个锚点，具体、易读、有角色声音，且没有无意的模板化表达？主要场面是否能回答「人站在哪、凭什么认出他、动作有没有过程与代价」？只剩对白和结果摘要时，先按 [scene-craft.md](scene-craft.md) 补场面。打斗场若仍能一句收胜负，必须加厚过程，不得用路人惊叹充数。
-7. **签约质量**（番茄短故事默认；按番茄投稿的长篇同样执行）：本节有无空转或不推情节的大段？人物行为是否对得上意图？独特机制有没有真正运行？重要胜利有没有真实代价？最后一节的最后一场动作是否做完、有没有主题金句？细则见 [fanqie-signing-quality.md](fanqie-signing-quality.md)、[fanqie-character-craft.md](fanqie-character-craft.md)。
+7. **签约质量**（番茄短故事默认；按番茄投稿的长篇同样执行）：本节有无空转或不推情节的大段？人物行为是否对得上意图？独特机制有没有真正运行？重要胜利有没有真实代价？最后一节的最后一场动作是否做完、有没有主题金句？第一节/前三章另查设定是否可预判、首屏有无看点、有无无效开篇花活。细则见 [fanqie-signing-quality.md](fanqie-signing-quality.md)、[fanqie-character-craft.md](fanqie-character-craft.md)、[fanqie-new-book.md](fanqie-new-book.md)。
 
-先修因果、人物和推进，再修句子。每次写成或修改本章后，按 [webnovel-naturalness-review.md](webnovel-naturalness-review.md) 执行强制自然度审稿，再按 [review-system.md](review-system.md) 分离执行编辑审稿和目标读者模拟；番茄短故事同时执行签约质量检查与人物刻画四问。一次自动修订后仍有结构问题，报告并调整滚动章纲。
+先修因果、人物和推进，再修句子。每次写成或修改本章后，按 [webnovel-naturalness-review.md](webnovel-naturalness-review.md) 执行强制自然度审稿，再按 [review-system.md](review-system.md) 分离执行编辑审稿和目标读者模拟；番茄短故事同时执行签约质量检查与人物刻画四问。开篇另执行新书抓人四问。一次自动修订后仍有结构问题，报告并调整滚动章纲。
 
 ## 指标解释
 

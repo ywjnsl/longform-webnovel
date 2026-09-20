@@ -36,12 +36,19 @@ def main() -> None:
     assert (SKILL / "references" / "webnovel-naturalness-review.md").is_file()
     assert (SKILL / "references" / "fanqie-signing-quality.md").is_file()
     assert (SKILL / "references" / "fanqie-character-craft.md").is_file()
+    assert (SKILL / "references" / "fanqie-new-book.md").is_file()
+    assert (SKILL / "references" / "fanqie-consistency.md").is_file()
+    assert (SKILL / "references" / "fanqie-revision.md").is_file()
     assert (SKILL / "templates" / "character" / "SKILL.md").is_file()
     assert "ensemble.md" in text
     assert "scene-craft.md" in text
     assert "webnovel-naturalness-review.md" in text
     assert "fanqie-signing-quality.md" in text
     assert "fanqie-character-craft.md" in text
+    assert "fanqie-new-book.md" in text
+    assert "fanqie-consistency.md" in text
+    assert "fanqie-revision.md" in text
+    assert "先参考再动笔" in text or "先读" in text
     assert (SKILL / "scripts" / "validate_project.py").is_file()
     assert (SKILL / "scripts" / "prose_lint.py").is_file()
     assert (SKILL / "scripts" / "market_brief.py").is_file()
@@ -57,8 +64,14 @@ def main() -> None:
     assert "truncated-ending" in review_text
     signing_text = (SKILL / "references" / "fanqie-signing-quality.md").read_text(encoding="utf-8")
     character_text = (SKILL / "references" / "fanqie-character-craft.md").read_text(encoding="utf-8")
+    new_book_text = (SKILL / "references" / "fanqie-new-book.md").read_text(encoding="utf-8")
+    consistency_text = (SKILL / "references" / "fanqie-consistency.md").read_text(encoding="utf-8")
+    revision_text = (SKILL / "references" / "fanqie-revision.md").read_text(encoding="utf-8")
     assert "最后一场" in signing_text
     assert "真实代价" in character_text
+    assert "微创新" in new_book_text
+    assert "法则库" in consistency_text
+    assert "不改" in revision_text
     assert "relationship-regret.md" in text
     assert "relationship-regret.md" in (SKILL / "references" / "genre-routing.md").read_text(encoding="utf-8")
     print("Skill structure is valid")
