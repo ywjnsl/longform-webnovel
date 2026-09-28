@@ -15,10 +15,10 @@
 | 层 | 管什么 | 多长 |
 |---|---|---|
 | 拍 | 意图、情绪、一次行动 | 章内 2–4 拍 |
-| 章 | 至少两个状态维度变化；可失败、留钩子 | 1 章 |
+| 章/节 | 至少两个状态维度变化；可失败、跨节或自然收束 | 1 章或 1 节 |
 | 弧 | `planning/current-arc.md` 的目标兑现或彻底失败 | 多章 |
 
-合法章结局：`progress` / `setback` / `reroute` / `expose` / `pause-with-scar`。`pause-with-scar` 必须留下不可撤销痕迹。非法：`status-quo`。弧默认保持 `open`。
+合法章/节结局：`progress` / `setback` / `reroute` / `expose` / `pause-with-scar`。短故事另记录 `eventStage`（`single` / `opening` / `middle` / `turn` / `closing`）和 `endingType`；前四种阶段不要求事件结案。`pause-with-scar` 必须留下不可撤销痕迹。非法：`status-quo`。弧默认保持 `open`。
 
 ## 未完成合同
 
@@ -30,6 +30,10 @@
   "arcId": "steal-fragment",
   "arcGoal": "拿到残卷",
   "arcStatus": "open",
+  "eventId": "theft-at-dock",
+  "eventStage": "middle",
+  "sectionDelivery": "拿到半枚印记，但暴露了入口",
+  "endingType": "cost-landed",
   "estimatedChapters": [4, 9],
   "thisChapterMust": "推进或加压一格",
   "legalOutcomes": ["progress", "setback", "reroute", "expose", "pause-with-scar"],
