@@ -99,6 +99,8 @@ TEXT_FILES = {
 
 ## 卷初与卷末的状态差
 
+先写卷末谁的状态不可逆地变了，再倒推必须先发生的选择。升级、调查、经营是做法，不是主线。
+
 待确认。
 
 ## 主要对抗与代价
@@ -115,7 +117,7 @@ TEXT_FILES = {
 """,
     "planning/rolling-outline.md": """# 滚动章纲
 
-保持未来 5–10 章。每章写明：事件线 ID 与阶段（`single`/`opening`/`middle`/`turn`/`closing`）、目的、阻碍、至少两项状态变化、阶段性兑现内容、结尾收束类型和预计事件兑现窗口。当前要写的章节另按 `references/chapter-outline.md` 列出 3–5 个场景拍；滚动章纲不替代章节细纲。
+保持未来 5–10 章。每一章先用一句话写它让哪件已有的事变得更难，或付清哪一笔旧账；再写事件线 ID 与阶段（`single`/`opening`/`middle`/`turn`/`closing`）、阻碍、至少两项状态变化、阶段性兑现内容和结尾收束类型。当前要写的章节另按 `references/chapter-outline.md` 列出场景拍；滚动章纲不替代章节细纲，也不写台词。
 
 先标记节拍锚点：第 3 章倍数为 `small`，第 5 章倍数为 `major`；重合章只标 `major`。
 
@@ -170,7 +172,7 @@ SHORT_STORY_PLANNING_FILES = {
 """,
     "planning/rolling-outline.md": """# 短故事分节纲
 
-覆盖全部剩余分节。每节写明：事件线 ID 与阶段（`single`/`opening`/`middle`/`turn`/`closing`）、目的、阻碍、状态变化、阶段性揭示或兑现、结尾收束类型，以及它如何逼近结局。当前要写的分节另按 `references/chapter-outline.md` 列出场景拍；分节纲不替代章节细纲。
+覆盖全部剩余分节。每一节先用一句话写它如何逼近结局，再写事件线 ID 与阶段（`single`/`opening`/`middle`/`turn`/`closing`）、阻碍、状态变化、阶段性揭示或兑现和结尾收束类型。当前要写的分节另按 `references/chapter-outline.md` 列出场景拍；分节纲不替代章节细纲，也不写台词。
 
 按全文比例标记开局扰动、不可逆选择、中点翻转、决定性对抗和结局收束；分节较少时允许同节承担多个结构职责。
 
