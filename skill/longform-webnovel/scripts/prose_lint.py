@@ -18,11 +18,33 @@ CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
 SENTENCE_SPLIT_RE = re.compile(r"[。！？!?]+")
 CJK_ONLY_RE = re.compile(r"[^\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 DIALOGUE_RE = re.compile(r"[“「『](.*?)[”」』]", re.S)
-MICRO_ACTIONS = ("深吸一口气", "眼中闪过", "嘴角勾起", "心中一震", "瞳孔骤缩", "下意识地")
-EXPLANATION_MARKERS = ("显然", "这意味着", "换句话说", "他意识到", "她意识到", "可想而知", "毋庸置疑")
+MICRO_ACTIONS = (
+    "深吸一口气",
+    "眼中闪过",
+    "嘴角勾起",
+    "心中一震",
+    "瞳孔骤缩",
+    "下意识地",
+    "不禁",
+    "心中暗道",
+    "映入眼帘",
+    "脸色一变",
+)
+EXPLANATION_MARKERS = ("显然", "这意味着", "换句话说", "他意识到", "她意识到", "可想而知", "毋庸置疑", "之所以")
+NARRATOR_INTRUSION = ("她不知道的是", "他不知道的是", "殊不知", "多年以后", "仿佛预示")
+DIALOGUE_TAGS = ("说道", "问道", "笑道", "冷声道", "沉声道", "淡淡地说", "缓缓开口")
 MODIFIER_MARKERS = ("其实", "显然", "忽然", "突然", "缓缓", "轻轻", "微微", "默默", "下意识地", "终于", "只是", "竟然")
 SIMILE_MARKERS = ("仿佛", "犹如", "宛若", "如同", "像是")
-SUMMARY_ENDINGS = ("他终于明白", "她终于明白", "这一刻他明白", "这一刻她明白", "从这一刻起", "这意味着")
+SUMMARY_ENDINGS = (
+    "他终于明白",
+    "她终于明白",
+    "这一刻他明白",
+    "这一刻她明白",
+    "从这一刻起",
+    "这意味着",
+    "他不知道的是",
+    "她不知道的是",
+)
 CORRECTIVE_PATTERNS = (
     ("不是…而是/只是…", re.compile(r"不是[^。！？!?\n]{0,48}(?:而是|只是)")),
     ("没有…而是/只是…", re.compile(r"没有[^。！？!?\n]{0,48}(?:而是|只是)")),
@@ -46,6 +68,12 @@ SYMMETRY_PATTERNS = (
     re.compile(r"([\u3400-\u9fff]{1,8})归\1[，,、]([\u3400-\u9fff]{1,8})归\2"),
     re.compile(r"[一二两三四五六七八九十][\u3400-\u9fff]{1,6}[。！？][一二两三四五六七八九十][\u3400-\u9fff]{1,6}[。！？]"),
 )
+TRIAD_PATTERNS = (
+    re.compile(r"不是[^，,。！？!?\n]{1,20}[，,](?:也)?不是[^，,。！？!?\n]{1,20}[，,](?:而)?是"),
+    re.compile(r"没有[^，,。！？!?\n]{1,16}[，,]没有[^，,。！？!?\n]{1,16}[，,](?:只|唯)?有"),
+    re.compile(r"既不[^，,。！？!?\n]{1,16}[，,]也不[^，,。！？!?\n]{1,16}[，,]"),
+)
+DASH_CHAIN_RE = re.compile(r"(?:——|—)(?:[^。！？!?\n]{0,48}(?:——|—))+")
 
 
 def mean(values: list[int]) -> float:
@@ -208,6 +236,30 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
             }
         )
 
+    intrusion_count, intrusion_evidence = count_markers(body, NARRATOR_INTRUSION)
+    if intrusion_count >= 2:
+        findings.append(
+            {
+                "code": "narrator-intrusion",
+                "severity": "review",
+                "count": intrusion_count,
+                "evidence": intrusion_evidence[:4],
+                "message": "The narrator may be previewing facts outside the current viewpoint; keep a character's own judgment, cut authorial spoilers.",
+            }
+        )
+
+    tag_count, tag_evidence = count_markers(body, DIALOGUE_TAGS)
+    if tag_count >= 4 and tag_count / unit > 3:
+        findings.append(
+            {
+                "code": "dialogue-tag-density",
+                "severity": "review",
+                "count": tag_count,
+                "evidence": tag_evidence[:4],
+                "message": "Dialogue tags recur densely; a plain 说 can stay, but a tag wall may replace action and distinct voices.",
+            }
+        )
+
     corrective_count, corrective_evidence = count_regex_patterns(body, CORRECTIVE_PATTERNS)
     if corrective_count >= 3 or (corrective_count >= 2 and corrective_count / unit > 0.7):
         findings.append(
@@ -217,6 +269,30 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": corrective_count,
                 "evidence": corrective_evidence[:4],
                 "message": "Corrective constructions recur densely; inspect whether they repeatedly pre-package conclusions or create a uniform quotable cadence.",
+            }
+        )
+
+    triad_count, triad_evidence = count_regex_patterns(body, tuple((pattern.pattern, pattern) for pattern in TRIAD_PATTERNS))
+    if triad_count >= 2:
+        findings.append(
+            {
+                "code": "classic-triad",
+                "severity": "review",
+                "count": triad_count,
+                "evidence": triad_evidence[:4],
+                "message": "Classic three-part sentences recur; keep a triad only when each item changes the choice, otherwise state the landing point.",
+            }
+        )
+
+    dash_chains = [match.group(0) for match in DASH_CHAIN_RE.finditer(body)]
+    if len(dash_chains) >= 2:
+        findings.append(
+            {
+                "code": "dash-reveal-chain",
+                "severity": "review",
+                "count": len(dash_chains),
+                "evidence": dash_chains[:3],
+                "message": "Narration uses dash chains to stage a reveal; a single interrupted line of dialogue can stay, stacked dashes should become a comma, period, or next action.",
             }
         )
 

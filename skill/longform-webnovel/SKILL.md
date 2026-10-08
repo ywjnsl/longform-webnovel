@@ -17,7 +17,7 @@ description: 创建、规划、连载、续写和修订中文长篇网文或番�
 6. 不用单纯提高战力、扩大地图或复制反派来续命。升级必须同时增加代价、责任、限制或新的对抗方式。
 7. 重大决策询问作者，其余内容自主完成。按 [approval-policy.md](references/approval-policy.md) 判断。
 8. 正文完成后再抽取事实并更新状态。不能把计划中的内容提前写成既定事实。
-9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化先删后改、就地改句：删战术字幕和过齐因果，合并过碎段落；不靠扩写新场面、不把标红段改成更短更工整的功能金句，也不靠随机句长、故意病句或“去 AI 词表”。作者提供朱雀等逐段标红时，未标红段落冻结，只改标红段；不把总体百分比当优化目标，也不整章重写。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
+9. 把语言风格保存为可描述参数。可以参考作者手法，不复刻标志性表达；人物声音和故事清晰度优先于表面仿写。自然化先删后改、就地改句：删战术字幕、过齐因果、上帝预告和套话反应，合并过碎段落和同一瞬间的三层复述；不靠扩写新场面、不把标红段改成更短更工整的功能金句，也不靠随机句长、故意病句、语气词或“去 AI 词表”。外壳成簇才改，边界见 [prose-naturalization.md](references/prose-naturalization.md)。作者提供朱雀等逐段标红时，未标红段落冻结，只改标红段；不把总体百分比当优化目标，也不整章重写。作者确认当前版本已达目标后停止自然化循环，后续只由明确的节奏、重复、连续性、完读问题或新的可比发布数据触发正常编辑。
 10. 第一章正文前先确认有辨识度的书名和封面提示词；公开检索降低撞名风险，但不承诺绝对唯一。
 11. 让少量核心配角拥有独立欲望、选择和后果。弧光可由事业、信仰、责任、亲情、友情、师徒、竞争、债务、复仇、求生、归属或爱情驱动；爱情只是可选项，不把配角弧光默认写成感情线，也不把所有关系写成主角奖励。
 12. 每次写成或修改章节正文后，强制执行确定性重复审计、网文自然度审稿、编辑审稿与目标读者模拟；模板化语言扫描只提示编辑风险，不判断文本是否由 AI 创作。正文哈希变化会让全部旧报告、finding ID 和例外失效。
@@ -92,7 +92,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
 8. **先参考。** 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判。动笔前必须当场读取（不能凭上一章记忆跳过）：[chapter-craft.md](references/chapter-craft.md)、[chapter-outline.md](references/chapter-outline.md)、[dialogue-craft.md](references/dialogue-craft.md)、[scene-craft.md](references/scene-craft.md)、[fanqie-consistency.md](references/fanqie-consistency.md)、`canon/laws.md`、`canon/timeline.md`、上场角色 `cast/{id}/SKILL.md`。`fanqie-short-story` 或作者按番茄投稿来写时，还要读 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md)。短故事第一节或长篇前三章还要读 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md)。填完写前卡和章节细纲：目标、冲突、转折、事件阶段、局部交付、两项状态变化及自然收束类型。跨节事件不要求本节结案，也不要求额外制造悬念。写前卡或细纲填不出来就还没准备好，不得开写。
-9. **再写正文。** 按章节细纲与场面四行写：先空间、身体和动作过程，再对白。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置和本节事件阶段判断职责。本章/本节只推进或加压一格，不要求把事件线或弧写完；结尾停在动作、选择、代价、合理中断或余波即可。确认目的、状态变化、兑现内容、结尾收束类型和五个风格锚点。
+9. **再写正文。** 按章节细纲逐拍推进，但细纲是规格不是句子形状：一个情节点不要原样写成一段。按场面四行落地：先空间、身体和动作过程，再对白。情绪和设定只落一处；上章没做完的动作要在第一拍接上。密处写具体几下，疏处一两句；断段按镜头；给镜头前先问这个人在保什么。细则见 [chapter-craft.md](references/chapter-craft.md) 的「正文落地」和「疏密、断段与在场的人」。人物若作出新反应导致后续拍失效，先重排细纲再继续。长篇按章号判断普通章、小爽点章或大爽点章；短故事按全文结构位置和本节事件阶段判断职责。本章/本节只推进或加压一格，不要求把事件线或弧写完；结尾停在动作、选择、代价、合理中断或余波即可。确认目的、状态变化、兑现内容、结尾收束类型和五个风格锚点。
 10. 按 [review-system.md](references/review-system.md) 运行确定性重复审计、语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
 11. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
@@ -115,7 +115,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。有时间跳跃、换地点、新伤、新钱或新规则时，同步更新 `canon/timeline.md` 与 `canon/laws.md`。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
 8. 在 staging 中更新 `state/threads.json`：推进、兑现、转化或延期剧情线；延期必须记录原因和新的兑现窗口。
-9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式。
+9. 在 staging 中更新 `state/rewards.json`。按 [reward-system.md](references/reward-system.md) 填写回报类型、铺垫章、正文证据、代价、状态变化和冲突/解法模式，并回答「释放与归属」四问：结果是否由承诺对象挣来、收益有没有被无交换拿走、有没有提前打光终局底牌、旧期待有没有付利息。
 10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。同步更新上场角色的 `cast/{id}/state.json`、`contracts/chapter-NNNN.json`、`intents/chapter-NNNN/` 与 `planning/current-arc.md`。弧未闭环则保持 `open`。
 11. 在 staging 中更新 `planning/rolling-outline.md`：长篇删除已完成章并保持 5–10 章窗口，用 `plan_cadence.py` 补齐 15 章节拍；短故事删除已完成分节并保持全部剩余结构可见，不向结局之后补新锚点。
 12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。短故事最后一节若要标记 `complete`，同时暂存 `reviews/final-review.json`。
@@ -156,7 +156,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 4. 修改正文与所有受影响状态，记录到 `state/decisions.json`。
 5. 运行项目校验，并抽查受影响章节的前后衔接。改开篇时不得把后期人设灌进早期。
 
-用户只指出“AI 味重”“不自然”时，不直接全篇改写。先按 [prose-naturalization.md](references/prose-naturalization.md) 区分结构问题、人物同声、对白工具化、解释过密、程序展示过满和主题封口，列出逐字证据与修订范围；保留故事事实和已经成立的个人声音，只对有证据的问题做一次定向修订。
+用户只指出“AI 味重”“不自然”时，不直接全篇改写。先按 [prose-naturalization.md](references/prose-naturalization.md) 区分结构问题、人物同声、对白工具化、解释过密、上帝预告、套话反应、标签墙、程序展示过满和主题封口，列出逐字证据与修订范围；保留故事事实和已经成立的个人声音，只对有证据的问题做一次定向修订。
 
 结构级自然化优先检查四件事：主角的非最优选择是否真正改变后续价格、信任、机会或关系；证据缺口是否改变结论边界，而非最后仍证明主角全面正确；人物声音是否来自不同利益与回避方式；流程删减是否保留了会造成延迟、失败或代价的必要手续。修订后还要对照前后章节和正史，检查叙述者是否在前文把后文仍未知的事实提前说死。
 
