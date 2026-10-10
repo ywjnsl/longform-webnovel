@@ -73,8 +73,10 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 ### 番茄短故事差异
 
 - 一个短故事是一个有终点的作品，不是缩短版无限连载。只保留一个主承诺、一个主要矛盾和能在结局前闭合的少量副线。
+- 短故事若采用规则反噬型现实爽文，必须走“真实让步 → 规则/权势反咬 → 主角合法收回人情 → 依赖关系瓦解 → 对方按自己的逻辑承受后果”的因果链；写前卡补充 `goodwillGiven`、`betrayalMechanism`、`lawfulExit`、`dependencyChain`，报应若与前面建立的依赖无关，视为假反转。详见 [length-modes.md](references/length-modes.md) 的“规则反噬型现实爽文”。
+- 短故事必须有情绪曲线：建项时确定一个主情绪发动机；每节写明进入情绪、方向变化、具体代价和离场余波。至少一次让希望被事实打断、至少一次让主角为主动选择付出不可撤回的损失，最后用行动释放情绪。连续三节情绪方向和强度没有变化，或只能用“很生气/很难过/更紧张”概括，先重排章纲再写正文。具体格式见 [length-modes.md](references/length-modes.md) 的“情绪曲线”。
 - 正文可以是一个完整文本或少量连续分节；每节仍执行指标、语言扫描、编辑审稿、读者模拟和状态提交。分节不是事件结案单位：先标记事件线 ID、`opening`/`middle`/`turn`/`closing` 阶段和本节局部交付，前面阶段允许把行动和答案交给下一节。
-- 短故事动笔前建立入口合同；标题、前 300 字、主情绪、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
+- 短故事动笔前建立入口合同；标题、前 300 字、主情绪发动机、情绪波形、主动选择和试读节点按 [short-story-information-flow.md](references/short-story-information-flow.md)、[fanqie-new-book.md](references/fanqie-new-book.md) 与 [length-modes.md](references/length-modes.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。终审收口必须主承诺兑现且最后一场动作做完，细则见 [fanqie-signing-quality.md](references/fanqie-signing-quality.md)。人物选择一致性、胜利代价、情绪身体反应与对白辨识见 [fanqie-character-craft.md](references/fanqie-character-craft.md)。
