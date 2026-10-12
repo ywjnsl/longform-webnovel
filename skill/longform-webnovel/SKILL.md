@@ -90,7 +90,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 2. 若 `schemaVersion` 旧于当前版本，缺少 v6 群像文件、v7 自然度门禁或 v8 重复门禁，先按 [operations.md](references/operations.md) 运行 `migrate_project.py`。
 3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`canon/laws.md`、`planning/current-volume.md`、`planning/rolling-outline.md`、`planning/current-arc.md`。
 4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`，以及上场角色的 `cast/{id}/state.json`。
-5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；只在需要时查询更早章节。
+5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；读取 `canon/style-profile.md` 中作者确认的声音证据和适用于本章场景的朱雀候选样本（若存在）。只在需要时查询更早章节。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
 8. **先参考。** 若无阻断，按 [ensemble.md](references/ensemble.md) 写未完成合同、隔离收意图、法则裁判。动笔前必须当场读取（不能凭上一章记忆跳过）：[chapter-craft.md](references/chapter-craft.md)、[chapter-outline.md](references/chapter-outline.md)、[dialogue-craft.md](references/dialogue-craft.md)、[scene-craft.md](references/scene-craft.md)、[fanqie-consistency.md](references/fanqie-consistency.md)、`canon/laws.md`、`canon/timeline.md`、上场角色 `cast/{id}/SKILL.md`。`fanqie-short-story` 或作者按番茄投稿来写时，还要读 [fanqie-signing-quality.md](references/fanqie-signing-quality.md) 与 [fanqie-character-craft.md](references/fanqie-character-craft.md)。短故事第一节或长篇前三章还要读 [short-story-information-flow.md](references/short-story-information-flow.md) 与 [fanqie-new-book.md](references/fanqie-new-book.md)。填完写前卡和章节细纲：目标、冲突、转折、事件阶段、局部交付、两项状态变化及自然收束类型。跨节事件不要求本节结案，也不要求额外制造悬念。写前卡或细纲填不出来就还没准备好，不得开写。
@@ -98,7 +98,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 10. 按 [review-system.md](references/review-system.md) 运行确定性重复审计、语言风险扫描、[网文自然度强制审稿](references/webnovel-naturalness-review.md)、独立编辑审稿和目标读者模拟。自然度审稿对每个新写或修改过的章节都必须执行，不以 lint 通过、普通审稿通过、改动很小或作者催交为跳过理由；命中问题簇时按 [prose-naturalization.md](references/prose-naturalization.md) 只定向修改证据段，最多自动修改一次，并基于最终正文重新执行全部审稿。
 11. 按“章节提交事务”更新全部状态文件，再向作者报告。
 
-**正文完成后的必经后处理：** 第 9 步完成后、第 10 步审稿前，必须读取并执行 [prose-naturalization.md](references/prose-naturalization.md) 的“正文后的真人感改写阶段”。保存原稿、冻结故事事实，定位具体问题后做一轮局部改写，记录改前/改后有效字数并执行 90% 字数护栏，再对照原稿核验因果、人物声音、情绪回报和实际字数。无问题时保留原文并记录理由；不等待朱雀报告，不用 lint 通过代替后处理。用户明确要求停止润色时遵从。初稿不得直接作为最终交付；没有朱雀报告时也执行，已有逐段标红时冻结未标红段。完成后处理后才进入第 10 步审稿，审稿阻断项最多再修订一次，不反复循环。
+**正文完成后的必经后处理：** 第 9 步完成后、第 10 步审稿前，必须读取并执行 [prose-naturalization.md](references/prose-naturalization.md) 的“正文后的真人感改写阶段”。这条规则适用于 `serial` 长篇的每一章、`fanqie-short-story` 的每一节或单篇全文；继续连载时只处理本次新写章节，已经提交的旧章不会被自动批量重写。保存原稿、冻结故事事实，定位具体问题后做一轮局部改写，记录改前/改后有效字数并执行 90% 字数护栏，再对照原稿核验因果、人物声音、情绪回报和实际字数。无问题时保留原文并记录理由；不等待朱雀报告，不用 lint 通过代替后处理。用户明确要求停止润色时遵从。初稿不得直接作为最终交付；没有朱雀报告时也执行，已有逐段标红时冻结未标红段。完成后处理后才进入第 10 步审稿，审稿阻断项最多再修订一次，不反复循环。
 
 ## 章节提交事务
 
@@ -162,7 +162,7 @@ python3 <skill-dir>/scripts/chapter_metrics.py <章节文件> --target 2500
 
 用户只指出“AI 味重”“不自然”时，不直接全篇改写。先按 [prose-naturalization.md](references/prose-naturalization.md) 区分结构问题、人物同声、对白工具化、解释过密、上帝预告、套话反应、标签墙、程序展示过满和主题封口，列出逐字证据与修订范围；保留故事事实和已经成立的个人声音，只对有证据的问题做一次定向修订。
 
-用户提供朱雀 PDF、截图或分段结果时，先读同一文件的“朱雀分段报告的使用”，核对送检版本、报告哈希与片段范围后再局部处理；正式外部证据按 [review-system.md](references/review-system.md) 保存。复测按文本锚点重新对齐，不按同号片段硬比较；没有新报告就记录未复测。
+用户提供朱雀 PDF、截图或分段结果时，先读同一文件的“朱雀分段报告的使用”和“从朱雀低 AIGC 片段建立候选声音样本”，核对送检版本、报告哈希与片段范围后再局部处理。最低值片段只有在作者确认读感后，才可作为当前项目的候选声音样本；长篇按章或场景类型调用，不自动覆盖整本书。正式外部证据按 [review-system.md](references/review-system.md) 保存。复测按文本锚点重新对齐，不按同号片段硬比较；没有新报告就记录未复测。
 
 结构级自然化优先检查四件事：主角的非最优选择是否真正改变后续价格、信任、机会或关系；证据缺口是否改变结论边界，而非最后仍证明主角全面正确；人物声音是否来自不同利益与回避方式；流程删减是否保留了会造成延迟、失败或代价的必要手续。修订后还要对照前后章节和正史，检查叙述者是否在前文把后文仍未知的事实提前说死。
 
