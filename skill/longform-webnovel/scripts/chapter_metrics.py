@@ -25,17 +25,30 @@ def metrics(text: str, target: int) -> dict[str, object]:
     long_paragraphs = sum(1 for p in normalized if len(p) > 180)
     lower = round(target * 0.9)
     upper = round(target * 1.14)
+    if content_chars < lower:
+        length_signal = "continue"
+        length_action = "write-the-event"
+        note = f"未到切章字数。事情还没完结，就接着写这件事，写到约 {target} 再切下一章。不要回头补回合、物件或手续。事情已经完结，就停在完结处，不要补字。"
+    elif content_chars <= upper:
+        length_signal = "cut"
+        length_action = "next-chapter"
+        note = "已到切章字数。本章停在这里。事情未完结就新开下一章接着写，不要把后文补回本章，也不要补字。"
+    else:
+        length_signal = "overflow"
+        length_action = "move-excess"
+        note = "超过切章字数。多出来的后文放进下一章。不要为了留在本章再加字。"
     return {
         "contentChars": content_chars,
         "target": target,
-        "recommendedRange": [lower, upper],
-        "lengthSignal": "pass" if lower <= content_chars <= upper else ("short" if content_chars < lower else "long"),
+        "cutRange": [lower, upper],
+        "lengthSignal": length_signal,
+        "lengthAction": length_action,
         "paragraphs": len(paragraphs),
         "longParagraphsOver180Chars": long_paragraphs,
         "dialogueRatio": round(dialogue_chars / content_chars, 3) if content_chars else 0,
         "repeatedParagraphCount": len(repeated),
         "repeatedParagraphSamples": repeated[:3],
-        "note": "Metrics are review signals, not a quality score.",
+        "note": note,
     }
 
 

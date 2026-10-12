@@ -88,7 +88,7 @@
 
 `story-state.json` 只保存当前有效状态和最近变化，不复制整部小说。每项重要事实包含来源章号；推测必须标成 `uncertain`，不能伪装成正史。`canon/timeline.md` 只记推动故事的节点（时间/地点跳跃、伤势、钱与关键物变化），不记无信息量的过渡；写章前后按 [fanqie-consistency.md](fanqie-consistency.md) 与法则库核对，避免战力、金钱、规则和人设对不上。
 
-长篇用 `project.json.rewardCadence` 保存节拍：`smallEvery: 3`、`majorEvery: 5`、`supercycle: 15`、`overlapPolicy: "major-absorbs-small"` 和开始强制执行的章号。短故事保留该字段以兼容项目工具，但不执行章号周期，改用全文比例结构锚点。改变模式或节拍属于故事合同级决定，必须由作者确认。
+长篇用 `project.json.rewardCadence` 保存贯穿线段序：`smallEvery: 3`、`majorEvery: 5`、`supercycle: 15`。这两个间隔只数贯穿线段，支流不计入，除非该段付的是贯穿线的账。不按文件章号强制第 3 章或第 5 章兑现。短故事保留该字段以兼容项目工具，但不执行这段序，改用全文比例结构锚点。改变模式或节拍属于故事合同级决定，必须由作者确认。
 
 `rewards.json` 的完整结构和证据规则见 [reward-system.md](reward-system.md)。长篇每 3 章需要 `small` 以上兑现、每 5 章需要 `major`；短故事只在不可逆选择、中点翻转、决定性对抗和结局等有限结构位置记录兑现。
 

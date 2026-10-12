@@ -49,6 +49,29 @@ def main() -> None:
     assert "fanqie-consistency.md" in text
     assert "fanqie-revision.md" in text
     assert "先参考再动笔" in text or "先读" in text
+    assert "接下去发生的这一件事" in text
+    assert "贯穿线" in text
+    assert "不自动写下一卷" in text
+    assert "不锁在第 3、5、15 章" in text
+    assert "presence" in text
+    assert "细纲最后一拍" not in text
+    assert "lengthSignal" in text and "continue" in text
+    length_text = (SKILL / "references" / "length-modes.md").read_text(encoding="utf-8")
+    craft_text = (SKILL / "references" / "chapter-craft.md").read_text(encoding="utf-8")
+    outline_text = (SKILL / "references" / "chapter-outline.md").read_text(encoding="utf-8")
+    naturalization_text = (SKILL / "references" / "prose-naturalization.md").read_text(encoding="utf-8")
+    assert "场景拍细纲" not in length_text or "不写场景拍细纲" in length_text
+    assert "切下一章" in craft_text
+    assert "不写场景拍细纲" in outline_text
+    assert "像人在场" in craft_text
+    assert "不是正文的四段" in (SKILL / "references" / "scene-craft.md").read_text(encoding="utf-8")
+    assert "同一张嘴" in (SKILL / "references" / "dialogue-craft.md").read_text(encoding="utf-8")
+    assert "支流" in outline_text
+    engine_text = (SKILL / "references" / "continuation-engine.md").read_text(encoding="utf-8")
+    assert "一卷一条贯穿线" in engine_text
+    assert "不占章号" in engine_text
+    assert "最后一段必须是贯穿线落地" in engine_text
+    assert "短于章节篇幅合同" in naturalization_text
     assert (SKILL / "scripts" / "validate_project.py").is_file()
     assert (SKILL / "scripts" / "prose_lint.py").is_file()
     assert (SKILL / "scripts" / "market_brief.py").is_file()

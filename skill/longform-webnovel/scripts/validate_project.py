@@ -50,6 +50,8 @@ VALID_REWARD_STATUS = {"planned", "delivered", "needs-review"}
 VALID_CAST_TIER = {"anchor", "recurring", "cameo"}
 VALID_CAST_ROLE = {"ally", "rival", "antagonist", "foil", "mentor", "family", "romantic", "civilian", "other"}
 VALID_CAST_STATUS = {"active", "deferred", "resolved", "departed", "dead"}
+VALID_PRESENCE_STATE = {"onstage", "offline"}
+VALID_PRESENCE_RETURN = {"continues", "later-volume", "closed"}
 VALID_ARC_PHASE = {"none", "setup", "pressure", "choice", "consequence", "changed", "closed"}
 VALID_RELATION_KIND = {
     "love",
@@ -989,6 +991,30 @@ def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: lis
             errors.append(f"Cast character {label} has invalid narrativeRole: {role}")
         if status not in VALID_CAST_STATUS:
             errors.append(f"Cast character {label} has invalid status: {status}")
+        presence = character.get("presence")
+        if presence is not None:
+            if not isinstance(presence, dict):
+                errors.append(f"Cast character {label} presence must be an object")
+            else:
+                presence_state = presence.get("state")
+                presence_return = presence.get("return")
+                if presence_state not in VALID_PRESENCE_STATE:
+                    errors.append(f"Cast character {label} has invalid presence.state: {presence_state}")
+                elif presence_state == "offline":
+                    if presence_return not in VALID_PRESENCE_RETURN:
+                        errors.append(
+                            f"Cast character {label} offline presence needs return continues, later-volume, or closed"
+                        )
+                    elif presence_return == "continues" and (
+                        not is_concrete(presence.get("returnWhen")) or not is_concrete(presence.get("returnThread"))
+                    ):
+                        errors.append(
+                            f"Cast character {label} will return and needs returnWhen plus returnThread"
+                        )
+                    elif presence_return == "later-volume" and not is_concrete(presence.get("returnVolume")):
+                        errors.append(f"Cast character {label} later-volume presence needs returnVolume")
+                    elif presence_return == "closed" and not is_concrete(presence.get("closedBecause")):
+                        errors.append(f"Cast character {label} closed presence needs closedBecause")
         if phase not in VALID_ARC_PHASE:
             errors.append(f"Cast character {label} has invalid arcPhase: {phase}")
         elif tier != "cameo" and phase == "none":
@@ -1526,28 +1552,15 @@ def main() -> int:
         for value in (small_every, major_every, enforce_from)
     )
     if mode == "serial" and isinstance(committed, int) and cadence_valid:
-        for chapter in range(enforce_from, committed + 1):
-            required = "major" if chapter % major_every == 0 else ("small" if chapter % small_every == 0 else None)
-            if required is None:
-                continue
-            beat = beat_by_chapter.get(chapter)
-            if not beat or beat.get("status") != "delivered":
-                errors.append(f"Chapter {chapter} is missing its delivered {required} reward beat")
-            elif required == "major" and beat.get("level") != "major":
-                errors.append(f"Chapter {chapter} requires a major reward beat")
-            elif required == "small" and beat.get("level") not in {"small", "major"}:
-                errors.append(f"Chapter {chapter} requires at least a small reward beat")
-
-        future_start = max(committed + 1, enforce_from)
-        for chapter in range(future_start, future_start + 10):
-            required = "major" if chapter % major_every == 0 else ("small" if chapter % small_every == 0 else None)
-            if required is None:
-                continue
-            beat = beat_by_chapter.get(chapter)
-            if not beat:
-                warnings.append(f"Rolling outline has no planned {required} reward beat for chapter {chapter}")
-            elif required == "major" and beat.get("level") != "major":
-                warnings.append(f"Planned reward for chapter {chapter} must be major")
+        for chapter, beat in beat_by_chapter.items():
+            if (
+                beat.get("lane") == "side"
+                and beat.get("level") in {"small", "major"}
+                and beat.get("paysSpine") is not True
+            ):
+                warnings.append(
+                    f"Chapter {chapter} is a side stream and does not count toward the spine cadence; set paysSpine only when it pays the through-line"
+                )
     elif mode == "fanqie-short-story" and isinstance(committed, int) and isinstance(planned_sections, int):
         anchors = short_story_anchors(planned_sections)
         for chapter, anchor in anchors.items():

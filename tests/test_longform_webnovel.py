@@ -359,13 +359,15 @@ def test_initialization_and_cadence(base: Path) -> None:
     result = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert result["ok"]
     dry = json.loads(run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--json").stdout)
-    assert [row["chapter"] for row in dry["chapters"] if row["reward"]] == [3, 5, 6, 9, 10, 12, 15]
-    assert dry["chapters"][14]["reward"] == "major"
+    assert dry["chapters"] == []
+    assert dry["spineCadence"]["smallEverySpineSegments"] == 3
+    assert dry["spineCadence"]["majorEverySpineSegments"] == 5
+    assert dry["spineCadence"]["sideExcludedUnlessPaysSpine"] is True
     written = json.loads(
         run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(project), "--count", "15", "--write", "--json").stdout
     )
-    assert written["added"] == 7
-    assert len(read_json(project / "state/rewards.json")["beats"]) == 7
+    assert written["added"] == 0
+    assert read_json(project / "state/rewards.json")["beats"] == []
 
 
 def test_short_story_mode(base: Path) -> None:
@@ -1265,11 +1267,26 @@ def test_cast_arcs(base: Path) -> None:
             "privateConstraint": "他必须维持下属对制度的信任",
             "nextTurnWindow": [1, 8],
             "history": [],
-            "relationships": [],
+            "relationships": [            ],
         },
     ]
     write_json(cast_path, cast_doc)
     assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+
+    offline = read_json(cast_path)
+    offline["characters"][0]["presence"] = {"state": "offline", "return": "continues"}
+    write_json(cast_path, offline)
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    assert any("returnWhen" in error for error in errors)
+    offline["characters"][0]["presence"] = {
+        "state": "offline",
+        "return": "continues",
+        "returnWhen": "档案室开门之后",
+        "returnThread": "失踪案旧令",
+    }
+    write_json(cast_path, offline)
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+    write_json(cast_path, cast_doc)
 
     non_romantic = read_json(cast_path)
     non_romantic["characters"][0]["relationships"][0].update(
@@ -1475,6 +1492,50 @@ def test_commit_validation_and_restore(base: Path) -> None:
     assert rollback_validation["ok"]
 
 
+def test_chapter_metrics_cuts_by_length_without_padding() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        short = Path(temporary) / "short.md"
+        short.write_text("# 第一章\n\n他放下笔。\n", encoding="utf-8")
+        short_report = json.loads(
+            run(
+                sys.executable,
+                str(SCRIPTS / "chapter_metrics.py"),
+                str(short),
+                "--target",
+                "2500",
+            ).stdout
+        )
+        ready = Path(temporary) / "ready.md"
+        ready.write_text("# 第一章\n\n" + ("他推开门，把欠条放到桌上。\n\n" * 230), encoding="utf-8")
+        ready_report = json.loads(
+            run(
+                sys.executable,
+                str(SCRIPTS / "chapter_metrics.py"),
+                str(ready),
+                "--target",
+                "2500",
+            ).stdout
+        )
+        long = Path(temporary) / "long.md"
+        long.write_text("# 第一章\n\n" + ("他推开门，把欠条放到桌上。\n\n" * 320), encoding="utf-8")
+        long_report = json.loads(
+            run(
+                sys.executable,
+                str(SCRIPTS / "chapter_metrics.py"),
+                str(long),
+                "--target",
+                "2500",
+            ).stdout
+        )
+    assert short_report["lengthSignal"] == "continue"
+    assert short_report["lengthAction"] == "write-the-event"
+    assert "不要回头补" in short_report["note"]
+    assert ready_report["lengthSignal"] == "cut"
+    assert ready_report["lengthAction"] == "next-chapter"
+    assert long_report["lengthSignal"] == "overflow"
+    assert long_report["lengthAction"] == "move-excess"
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="longform-webnovel-v2-") as temporary:
         base = Path(temporary)
@@ -1494,6 +1555,7 @@ def main() -> None:
         test_migration(base)
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
+    test_chapter_metrics_cuts_by_length_without_padding()
     print("longform-webnovel v8 integration checks passed")
 
 

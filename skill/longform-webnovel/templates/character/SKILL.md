@@ -27,6 +27,10 @@ description: Use only inside a longform-webnovel project when this character is 
 - 私密约束:
 - 对法则的理解:
 
+## 在场
+
+`state.json` 的 `presence` 说明你现在在不在这条故事上。`onstage` 是当前还在场。`offline` 是当前下线：`continues` 表示之后还会回到写明的那条线，`later-volume` 表示留给后面某一卷，`closed` 表示这条线已经说完。下线时没有写清回到哪里，就不要把自己写进当前场面。
+
 ## 认知边界
 
 你知道公开世界、自己的 secrets 和 knownFacts。不知道其他角色内心、作者计划和未发生情节。不知道时写进 `misread`。

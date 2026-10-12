@@ -111,6 +111,17 @@
 
 `history` 只记录真正推进弧光的选择与结果，不记录每次露面。`lastAdvancedChapter` 必须有同章 `history` 证据；普通出场不算弧光推进。
 
+## 在场状态
+
+`presence` 记这个人此刻在不在当前故事上，和上面的弧光 `status` 分开。弧光仍可以是 `active`，人已经不在场。角色卡 `cast/{id}/state.json` 与 `state/cast-arcs.json` 使用同一份：
+
+- `state: onstage`：当前这段还在场。
+- `state: offline`，`return: continues`：当前下线，本卷之后还会出现。必须写 `returnWhen`（哪件事之后）和 `returnThread`（回到哪条线）。
+- `state: offline`，`return: later-volume`：本卷不再出场，留给后面某一卷。必须写 `returnVolume`。
+- `state: offline`，`return: closed`：这条线已经说完。必须写 `closedBecause`。
+
+人离开当前这段之前先改卡。卡上是 `closed` 或 `later-volume` 的，本卷正文不再让他上场，除非先改卡并写明为什么提前回来。卡上是 `continues` 的，到了 `returnWhen` 还没回来，就按原来的线让他回来，或改时间并写原因。不能把人忘掉，也不能无故再拉回来。
+
 ## 写章检查
 
 涉及配角的场景至少回答三个问题：他进场前想完成什么；如果主角不在，他会怎么做；离场时他的可选项发生了什么变化。若答案始终只是“帮助主角、爱慕主角、夸主角、向主角解释”，该角色仍是工具人。

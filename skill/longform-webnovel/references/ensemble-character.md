@@ -33,9 +33,9 @@
 
 ## state.json
 
-章末更新上场角色：`emotion`、`wantNow`、`knownFacts`、`memory`、`relationships`。`secrets` 仅自己与作者可见。`memory` 可只保留最近 8 条。
+章末更新上场或刚离开的角色：`emotion`、`wantNow`、`knownFacts`、`memory`、`relationships`、`presence`。`secrets` 仅自己与作者可见。`memory` 可只保留最近 8 条。`presence` 用 `onstage`，或 `offline` 并写明之后还会回到哪条线、哪一卷，或这条线已经结束。见 [supporting-cast.md](supporting-cast.md) 的「在场状态」。
 
-`cast-arcs.json` 仍按 [supporting-cast.md](supporting-cast.md) 记录选择与后果。两边都要有的是 `anchor`/`recurring`：账本记弧光，这里记此刻知道什么、情绪是什么。
+`cast-arcs.json` 仍按 [supporting-cast.md](supporting-cast.md) 记录选择与后果。两边都要有的是 `anchor`/`recurring`：账本记弧光和在场状态，这里记此刻知道什么、情绪是什么。同一角色的 `presence` 两边保持一致。
 
 ## 按需生成
 

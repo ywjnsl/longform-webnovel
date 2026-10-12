@@ -13,5 +13,13 @@
   "secrets": [],
   "relationships": {},
   "scars": [],
-  "memory": []
+  "memory": [],
+  "presence": {
+    "state": "onstage",
+    "return": "",
+    "returnWhen": "",
+    "returnThread": "",
+    "returnVolume": "",
+    "closedBecause": ""
+  }
 }

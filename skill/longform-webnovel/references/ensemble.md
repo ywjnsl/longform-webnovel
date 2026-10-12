@@ -45,7 +45,7 @@
 }
 ```
 
-`payoffLevel` 仍服从 3/5 章账本：`none` | `small` | `major`。`small`/`major` 可以是失败。`onStage` 人数 ≤ `project.json.ensemble.maxOnStage`。普通章探索拍默认 `explorationBeatsDefault`；`small` 减 1；`major` 只留 1–2 拍。配额用完仍无合法结局时，导演给出两个不可回避选项。
+`payoffLevel` 按贯穿线段序填写：`none` | `small` | `major`。支流章默认不占用 small/major 位置，除非这段付的是贯穿线的账。`small`/`major` 可以是失败。`onStage` 人数 ≤ `project.json.ensemble.maxOnStage`。普通章探索拍默认 `explorationBeatsDefault`；`small` 减 1；`major` 只留 1–2 拍。配额用完仍无合法结局时，导演给出两个不可回避选项。
 
 ## 写章循环
 

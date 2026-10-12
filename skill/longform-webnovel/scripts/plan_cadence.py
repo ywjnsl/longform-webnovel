@@ -11,9 +11,7 @@ from webnovel_io import (
     CURRENT_PROJECT_SCHEMA,
     backup_files,
     blank_beat,
-    chapter_role,
     load_json,
-    required_reward,
     short_story_anchors,
     story_mode,
     write_json_atomic,
@@ -51,11 +49,13 @@ def main() -> int:
         raise SystemExit("Refusing to write planned beats into already committed chapters")
 
     cadence = project.get("rewardCadence", {})
+    spine_cadence = {
+        "smallEverySpineSegments": cadence.get("smallEvery", 3),
+        "majorEverySpineSegments": cadence.get("majorEvery", 5),
+        "sideExcludedUnlessPaysSpine": True,
+    }
     rows = []
-    if mode == "serial":
-        for chapter in range(start, start + count):
-            rows.append({"chapter": chapter, "role": chapter_role(chapter), "reward": required_reward(chapter, cadence)})
-    else:
+    if mode != "serial":
         anchors = short_story_anchors(count)
         for chapter in range(start, count + 1):
             anchor = anchors.get(chapter)
@@ -84,9 +84,26 @@ def main() -> int:
             write_json_atomic(rewards_path, rewards)
 
     if args.as_json:
-        print(json.dumps({"mode": mode, "start": start, "count": count, "added": added, "backup": str(backup) if backup else None, "chapters": rows}, ensure_ascii=False, indent=2))
+        payload = {
+            "mode": mode,
+            "start": start,
+            "count": count,
+            "added": added,
+            "backup": str(backup) if backup else None,
+            "chapters": rows,
+        }
+        if mode == "serial":
+            payload["spineCadence"] = spine_cadence
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    elif mode == "serial":
+        small = spine_cadence["smallEverySpineSegments"]
+        major = spine_cadence["majorEverySpineSegments"]
+        print(f"贯穿线段序：大约每 {small} 段一次小兑现，每 {major} 段一次大兑现。")
+        print("支流不计入段序，除非该段付的是贯穿线的账。不按章号预排情节或兑现。")
+        if args.write:
+            print("\nAdded 0 reward anchor(s). Future chapter numbers were left unassigned.")
     else:
-        phase_label = "15章相位" if mode == "serial" else "全文结构位置"
+        phase_label = "全文结构位置"
         print(f"| 章号/分节 | {phase_label} | 节拍 |")
         print("|---:|---|---|")
         for row in rows:
