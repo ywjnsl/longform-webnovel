@@ -35,6 +35,8 @@
 
 章末更新上场或刚离开的角色：`emotion`、`wantNow`、`knownFacts`、`memory`、`relationships`、`presence`。`secrets` 仅自己与作者可见。`memory` 可只保留最近 8 条。`presence` 用 `onstage`，或 `offline` 并写明之后还会回到哪条线、哪一卷，或这条线已经结束。见 [supporting-cast.md](supporting-cast.md) 的「在场状态」。
 
+`memory` 若做压缩，保留仍影响当前关系、目标或选择的重要前因，不把最近 8 条当作删除旧转折的硬上限。`relationships` 沿用既有结构，描述已成立的信任、戒备或依赖及其依据；正式加入、受到照顾和被信任不必同时成立。一次情绪不写成稳定人设，角色自述和他人评价不写成已证实事实。具体取舍见 [narrative-continuity.md](narrative-continuity.md)，不增加字段或逐章关系变化配额。
+
 `cast-arcs.json` 仍按 [supporting-cast.md](supporting-cast.md) 记录选择与后果。两边都要有的是 `anchor`/`recurring`：账本记弧光和在场状态，这里记此刻知道什么、情绪是什么。同一角色的 `presence` 两边保持一致。
 
 ## 按需生成
