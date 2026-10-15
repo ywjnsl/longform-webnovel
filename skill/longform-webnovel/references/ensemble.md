@@ -15,7 +15,7 @@
 | 层 | 管什么 | 多长 |
 |---|---|---|
 | 拍 | 意图、情绪、一次行动 | 章内 2–4 拍 |
-| 章/节 | 至少两个状态维度变化；可失败、跨节或自然收束 | 1 章或 1 节 |
+| 章/节 | 推进当前行动、理解或关系；状态变化按事件或阶段核对，可跨章落定，不凑两项变化 | 1 章或 1 节 |
 | 弧 | `planning/current-arc.md` 的目标兑现或彻底失败 | 多章 |
 
 合法章/节结局：`progress` / `setback` / `reroute` / `expose` / `pause-with-scar`。短故事另记录 `eventStage`（`single` / `opening` / `middle` / `turn` / `closing`）和 `endingType`；前四种阶段不要求事件结案。`pause-with-scar` 必须留下不可撤销痕迹。非法：`status-quo`。弧默认保持 `open`。
