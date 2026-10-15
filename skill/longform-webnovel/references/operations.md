@@ -1,5 +1,7 @@
 # 项目迁移、暂存、提交与恢复
 
+`novella` 短中篇复用同一套暂存、校验、提交和恢复流程；建项与全书阶段见 [novella.md](novella.md)。原有 v8 项目无需为此改模式或迁移字段。短中篇第一次提交前更新 `finiteStory.status = drafting`；完结时一并暂存 `reviews/final-review.json`，以全文终审和实际字数下限收口，不要求固定章数。重复审计与长篇相同，默认最近 5 章。
+
 ## 迁移旧项目
 
 先运行：

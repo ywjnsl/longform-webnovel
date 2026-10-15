@@ -12,7 +12,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from webnovel_io import backup_files, copy_file_atomic, load_json, restore_backup, utc_now, write_json_atomic
+from webnovel_io import backup_files, copy_file_atomic, finite_story_settings, load_json, restore_backup, story_mode, utc_now, write_json_atomic
 from validate_project import validate_chapter_reviews
 
 
@@ -128,14 +128,17 @@ def validate_transition(root: Path, staged: dict[str, Path], allow_revision: boo
         raise ValueError("Invalid project chapter counters")
     if new_committed != new_draft:
         raise ValueError("A chapter commit must align latestDraftChapter and lastCommittedChapter")
-    current_story = current.get("shortStory") if isinstance(current.get("shortStory"), dict) else {}
-    proposed_story = proposed.get("shortStory") if isinstance(proposed.get("shortStory"), dict) else {}
+    current_story = finite_story_settings(current)
+    proposed_story = finite_story_settings(proposed)
+    if story_mode(current) == "novella" and current_story.get("status") == "complete":
+        if not allow_revision or new_committed != old_committed or proposed_story.get("status") != "complete":
+            raise ValueError("Completed novella cannot continue automatically; only explicit revision is allowed")
     if (
         proposed_story.get("status") == "complete"
         and current_story.get("status") != "complete"
         and "reviews/final-review.json" not in staged
     ):
-        raise ValueError("Completing a short story requires staged reviews/final-review.json")
+        raise ValueError("Completing a finite story requires staged reviews/final-review.json")
     if allow_revision:
         if new_committed not in {old_committed, old_committed + 1}:
             raise ValueError("Revision mode may keep the current chapter or advance by one")

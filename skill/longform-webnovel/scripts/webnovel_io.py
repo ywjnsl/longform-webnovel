@@ -17,7 +17,8 @@ from pathlib import Path
 CURRENT_PROJECT_SCHEMA = 8
 CURRENT_REWARD_SCHEMA = 2
 CURRENT_CAST_SCHEMA = 1
-VALID_STORY_MODES = {"serial", "fanqie-short-story"}
+VALID_STORY_MODES = {"serial", "fanqie-short-story", "novella"}
+FINITE_STORY_MODES = {"fanqie-short-story", "novella"}
 CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 ASCII_WORD_RE = re.compile(r"[A-Za-z0-9]+")
 
@@ -163,6 +164,26 @@ def chapter_role(chapter: int) -> str:
 def story_mode(project: dict) -> str:
     """Treat pre-mode projects as serial projects for backward compatibility."""
     return project.get("storyMode", "serial")
+
+
+def finite_story_settings(project: dict) -> dict:
+    """Read finite-work settings without migrating legacy short-story projects."""
+    if story_mode(project) not in FINITE_STORY_MODES:
+        return {}
+    key = "shortStory" if story_mode(project) == "fanqie-short-story" else "finiteStory"
+    value = project.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def novella_stages() -> list[dict]:
+    """Story stages are causal responsibilities, never chapter assignments."""
+    return [
+        {"id": "entry", "role": "困境与进入：欲望、关系和现实压力迫使主角行动"},
+        {"id": "commitment", "role": "不可逆投入：主动选择带来第一笔代价，必要副线进入主线"},
+        {"id": "reversal", "role": "局势改写：新事实或选择改变目标、关系或胜负条件"},
+        {"id": "confrontation", "role": "决定性对抗：此前选择和副线汇入最终代价"},
+        {"id": "ending", "role": "结局与归宿：兑现主承诺，交代副线、人物归宿与可见后果"},
+    ]
 
 
 def short_story_anchors(total_sections: int) -> dict[int, dict]:

@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from webnovel_io import CURRENT_CAST_SCHEMA, CURRENT_PROJECT_SCHEMA, CURRENT_REWARD_SCHEMA
+from webnovel_io import CURRENT_CAST_SCHEMA, CURRENT_PROJECT_SCHEMA, CURRENT_REWARD_SCHEMA, novella_stages
 from webnovel_style import PRESETS, render_profile, render_unselected_profile
 
 
@@ -194,6 +194,37 @@ SHORT_STORY_PLANNING_FILES = {
 """,
 }
 
+NOVELLA_PLANNING_FILES = {
+    "planning/series-map.md": """# 短中篇全书终点
+
+## 主承诺与主要矛盾
+
+待确认。
+
+## 最终选择、代价与人物归宿
+
+先锁定结局，再倒推必须发生的选择。开放结尾也要完成主行动。
+
+待确认。
+
+## 必要副线与回收
+
+每条副线写明如何改变主线选择、信息或代价，以及在哪里闭合；不为续作留坑。
+
+待规划。
+""",
+    "planning/current-volume.md": "# 短中篇全书阶段\n\n阶段不绑定章号，可跨章；不要求每章反转或结案。\n\n"
+    + "\n".join(f"## {stage['role']}\n\n待确认。\n" for stage in novella_stages()),
+    "planning/rolling-outline.md": """# 短中篇滚动事件纲
+
+保留全书结局和剩余阶段，只细化接下来这件事：从哪里接起、发生什么、怎样才算结束、服务哪个阶段或副线。阶段不平均分配字数，不预排每章事件。
+
+正文顺着因果连续写，到约 2500 个有效字时在完整句子或动作拍之间切章，下一章直接承接。事情未完不为章末收尾；事情已完可以短章。阶段完成后，在任务范围内继续其后果，不自动把阶段边界当成任务结束。全书终点落地才完结。
+
+待规划。
+""",
+}
+
 PUBLISHING_TEMPLATE = """# 书名与封面包装
 
 ## 状态
@@ -246,9 +277,10 @@ def main() -> int:
     parser.add_argument("--path", required=True, help="Project directory to create")
     parser.add_argument("--title", required=True, help="Novel title")
     parser.add_argument("--style", choices=sorted(PRESETS), help="Optional initial language style preset")
-    parser.add_argument("--mode", choices=("serial", "fanqie-short-story"), default="serial")
-    parser.add_argument("--target-total-chars", type=int, help="Optional short-story total content-character target")
-    parser.add_argument("--sections", type=int, default=5, help="Planned short-story sections (default: 5)")
+    parser.add_argument("--mode", choices=("serial", "fanqie-short-story", "novella"), default="serial")
+    parser.add_argument("--target-total-chars", type=int, help="Finite-work target; novella defaults to 50000")
+    parser.add_argument("--min-total-chars", type=int, help="Explicit novella minimum, enforced at completion")
+    parser.add_argument("--sections", type=int, help="Planned short-story sections (default: 5); not a novella chapter quota")
     parser.add_argument("--force-empty", action="store_true", help="Allow an existing empty directory")
     parser.add_argument("--protagonist-id", default="main", help="Protagonist cast id (not the reserved cast-arcs id protagonist)")
     parser.add_argument("--protagonist-name", default="主角")
@@ -257,11 +289,18 @@ def main() -> int:
         raise SystemExit("--protagonist-id cannot be empty or 'protagonist'")
 
     if args.mode == "serial" and args.target_total_chars is not None:
-        raise SystemExit("--target-total-chars is only valid with --mode fanqie-short-story")
+        raise SystemExit("--target-total-chars is only valid with a finite-work mode")
     if args.target_total_chars is not None and args.target_total_chars <= 0:
         raise SystemExit("--target-total-chars must be positive")
-    if not 1 <= args.sections <= 300:
+    if args.sections is not None and not 1 <= args.sections <= 300:
         raise SystemExit("--sections must be between 1 and 300")
+    if args.mode == "novella" and args.sections is not None:
+        raise SystemExit("--sections is not valid for novella; chapters emerge from continuous writing")
+    if args.min_total_chars is not None:
+        if args.mode != "novella" or args.min_total_chars <= 0:
+            raise SystemExit("--min-total-chars requires novella and a positive value")
+        if args.min_total_chars > (args.target_total_chars or 50000):
+            raise SystemExit("--min-total-chars cannot exceed --target-total-chars")
 
     root = Path(args.path).expanduser().resolve()
     if root.exists():
@@ -356,7 +395,14 @@ def main() -> int:
     if args.mode == "fanqie-short-story":
         project["shortStory"] = {
             "targetTotalChars": args.target_total_chars,
-            "plannedSections": args.sections,
+            "plannedSections": args.sections or 5,
+            "status": "planning",
+            "endingType": "closed",
+        }
+    elif args.mode == "novella":
+        project["finiteStory"] = {
+            "targetTotalChars": args.target_total_chars or 50000,
+            "minTotalChars": args.min_total_chars,
             "status": "planning",
             "endingType": "closed",
         }
@@ -386,6 +432,8 @@ def main() -> int:
     text_files = dict(TEXT_FILES)
     if args.mode == "fanqie-short-story":
         text_files.update(SHORT_STORY_PLANNING_FILES)
+    elif args.mode == "novella":
+        text_files.update(NOVELLA_PLANNING_FILES)
     for relative, content in text_files.items():
         (root / relative).write_text(content, encoding="utf-8")
     style_content = render_profile(args.style) if args.style else render_unselected_profile()

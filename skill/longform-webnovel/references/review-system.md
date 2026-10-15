@@ -2,6 +2,8 @@
 
 ## 目的
 
+`novella` 短中篇同样逐章执行本文件的全部检查、真人感后处理和提交门禁。阶段转折按实际发生判断，不要求每章收束或机械安排 3/5 章高潮。完结细则见 [novella.md](novella.md)。
+
 每章在正式提交前完成五种互补检查：确定性重复审计、语言风险扫描、网文自然度审稿、编辑诊断、目标读者体验模拟。扫描只发现值得复核的模式，不能判断作者身份，也不能输出“AI 概率”。项目已确认正文和 `canon/style-profile.md` 始终是声音基线。
 
 网文自然度审稿按 [webnovel-naturalness-review.md](webnovel-naturalness-review.md) 执行。它对所有新写或修改过的章节强制生效，不因 lint 无 finding、普通审稿已通过、作者要求停止润色或正文只改一句而省略。
@@ -74,6 +76,8 @@ python3 <skill-dir>/scripts/prose_lint.py <章节文件> \
 ```
 
 只有全部 `checks` 为 `pass`、哈希覆盖所有已提交章节且 `completionIntent` 为 `complete` 时，才可把 `shortStory.status` 改为 `complete`。
+
+`novella` 复用以上全文终审结构，`storyMode` 改为 `novella`，并在 `checks` 增加 `subplots`（副线闭合）、`characterDestinations`（人物归宿）及 `lengthContract`（篇幅合同）三项。通过后更新 `finiteStory.status`，与最后一章一起暂存终审。章数不作为完结配额；明确字数下限、线程闭合和最后一章的结局级 `major` 回报仍须满足。
 
 ## 审稿文件
 

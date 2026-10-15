@@ -12,6 +12,9 @@ from webnovel_io import (
     backup_files,
     blank_beat,
     load_json,
+    VALID_STORY_MODES,
+    finite_story_settings,
+    novella_stages,
     short_story_anchors,
     story_mode,
     write_json_atomic,
@@ -34,8 +37,30 @@ def main() -> int:
     if project.get("schemaVersion", 1) < CURRENT_PROJECT_SCHEMA:
         raise SystemExit("Project schema is old; run migrate_project.py first")
     mode = story_mode(project)
-    if mode not in {"serial", "fanqie-short-story"}:
+    if mode not in VALID_STORY_MODES:
         raise SystemExit(f"Unsupported storyMode: {mode}")
+    if mode == "novella":
+        if args.count is not None or args.start is not None:
+            raise SystemExit("Novella stages do not accept --count or --from-chapter chapter assignments")
+        settings = finite_story_settings(project)
+        payload = {
+            "mode": mode,
+            "targetTotalChars": settings.get("targetTotalChars"),
+            "stages": novella_stages(),
+            "chapters": [],
+            "added": 0,
+            "backup": None,
+        }
+        if args.as_json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            print("短中篇全书阶段（不绑定章号或平均字数）：")
+            for stage in payload["stages"]:
+                print(f"- {stage['role']}")
+            print("在 planning/current-volume.md 填写阶段选择、代价和副线回收；兑现记在实际发生的章节。")
+            if args.write:
+                print("Added 0 reward anchor(s). No chapter numbers were preassigned.")
+        return 0
     default_count = 15 if mode == "serial" else project.get("shortStory", {}).get("plannedSections", 5)
     count = args.count if args.count is not None else default_count
     if not isinstance(count, int) or isinstance(count, bool) or count <= 0 or count > 300:

@@ -16,8 +16,10 @@ from webnovel_io import (
     CURRENT_CAST_SCHEMA,
     CURRENT_PROJECT_SCHEMA,
     CURRENT_REWARD_SCHEMA,
+    FINITE_STORY_MODES,
     VALID_STORY_MODES,
     content_char_count,
+    finite_story_settings,
     short_story_anchors,
     story_mode,
 )
@@ -806,21 +808,22 @@ def validate_final_review(
     short_status: object,
     errors: list[str],
 ) -> None:
-    """Require an external-reader full-story review before a short story is complete."""
-    if mode != "fanqie-short-story" or short_status != "complete":
+    """Share the full-story completion gate across finite-work modes."""
+    if mode not in FINITE_STORY_MODES or short_status != "complete":
         return
     if not isinstance(committed, int) or committed <= 0:
+        errors.append("Completed finite story must contain at least one committed chapter")
         return
 
     path = root / "reviews" / "final-review.json"
     if not path.is_file():
-        errors.append("Completed short story needs reviews/final-review.json")
+        errors.append("Completed finite story needs reviews/final-review.json")
         return
     review = load_json(path, errors)
     if review.get("schemaVersion") != 1:
         errors.append("Full-story review schemaVersion must be 1")
-    if review.get("storyMode") != "fanqie-short-story":
-        errors.append("Full-story review storyMode must be fanqie-short-story")
+    if review.get("storyMode") != mode:
+        errors.append(f"Full-story review storyMode must be {mode}")
     if review.get("reviewedThroughChapter") != committed:
         errors.append("Full-story review must cover every committed chapter")
     if review.get("perspective") != "external-reader":
@@ -842,6 +845,10 @@ def validate_final_review(
         for check in FINAL_REVIEW_CHECKS:
             if checks.get(check) != "pass":
                 errors.append(f"Full-story review check {check} must be pass")
+        if mode == "novella":
+            for check in ("subplots", "characterDestinations", "lengthContract"):
+                if checks.get(check) != "pass":
+                    errors.append(f"Full-story review check {check} must be pass")
     if not is_concrete(review.get("resolution")):
         errors.append("Full-story review needs a concrete resolution")
 
@@ -1194,6 +1201,24 @@ def main() -> int:
             errors.append(f"shortStory.status is invalid: {short_status}")
         if short_story.get("endingType") not in {"closed", "open"}:
             errors.append("shortStory.endingType must be closed or open")
+    elif mode == "novella":
+        finite = finite_story_settings(project)
+        if not isinstance(project.get("finiteStory"), dict):
+            errors.append("novella project needs finiteStory settings")
+        target_total = finite.get("targetTotalChars")
+        if not isinstance(target_total, int) or isinstance(target_total, bool) or target_total <= 0:
+            errors.append("finiteStory.targetTotalChars must be a positive integer")
+        minimum = finite.get("minTotalChars")
+        if minimum is not None:
+            if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum <= 0:
+                errors.append("finiteStory.minTotalChars must be null or a positive integer")
+            elif isinstance(target_total, int) and minimum > target_total:
+                errors.append("finiteStory.minTotalChars cannot exceed targetTotalChars")
+        short_status = finite.get("status")
+        if short_status not in {"planning", "drafting", "complete"}:
+            errors.append(f"finiteStory.status is invalid: {short_status}")
+        if finite.get("endingType") not in {"closed", "open"}:
+            errors.append("finiteStory.endingType must be closed or open")
 
     style = project.get("styleProfile")
     style_primary = None
@@ -1306,10 +1331,13 @@ def main() -> int:
         if draft > 0 and draft not in chapter_files:
             errors.append(f"latestDraftChapter {draft} has no matching chapter file")
         total_content_chars = project.get("totalContentChars")
+        measured_total = None if missing else sum(
+            content_char_count(chapter_files[number].read_text(encoding="utf-8"))
+            for number in range(1, committed + 1)
+        )
         if not isinstance(total_content_chars, int) or isinstance(total_content_chars, bool) or total_content_chars < 0:
             errors.append("project.json totalContentChars must be a non-negative integer")
         elif not missing:
-            measured_total = sum(content_char_count(chapter_files[number].read_text(encoding="utf-8")) for number in range(1, committed + 1))
             if total_content_chars != measured_total:
                 errors.append(f"project.json totalContentChars is {total_content_chars}, but committed chapters contain {measured_total}")
         if committed > 0:
@@ -1332,6 +1360,15 @@ def main() -> int:
                 errors.append("Committed short-story sections exceed shortStory.plannedSections")
             if short_status == "complete" and committed != planned_sections:
                 errors.append("Completed short story must commit exactly shortStory.plannedSections sections")
+        elif mode == "novella":
+            if short_status == "planning" and committed > 0:
+                errors.append("finiteStory.status must change from planning to drafting before the first chapter is committed")
+            if short_status == "complete" and not missing:
+                minimum = finite_story_settings(project).get("minTotalChars")
+                if isinstance(minimum, int) and measured_total < minimum:
+                    errors.append(f"Completed novella contains {measured_total} characters, below finiteStory.minTotalChars {minimum}")
+                if isinstance(target_total, int) and measured_total < target_total * 0.9:
+                    warnings.append("Completed novella is below 90% of targetTotalChars; review its length contract without adding padding")
 
     validate_chapter_reviews(root, project, chapter_files, committed, decision_doc, errors, warnings)
     validate_final_review(root, project, chapter_files, committed, mode, short_status, errors)
@@ -1383,11 +1420,11 @@ def main() -> int:
             if isinstance(committed, int) and isinstance(last, int) and committed - last > 8:
                 warnings.append(f"Thread {thread_id} has not advanced for {committed - last} chapters")
 
-    active_limit = 3 if mode == "fanqie-short-story" else 8
+    active_limit = 3 if mode == "fanqie-short-story" else (5 if mode == "novella" else 8)
     if active > active_limit:
         warnings.append(f"High active-thread load: {active}; resolve, merge, or defer before opening more")
-    if mode == "fanqie-short-story" and short_status == "complete" and active:
-        errors.append("Completed short story cannot retain open, advanced, or deferred threads")
+    if mode in FINITE_STORY_MODES and short_status == "complete" and active:
+        errors.append("Completed finite story cannot retain open, advanced, or deferred threads")
 
     validate_cast_arcs(cast_doc, committed, mode, errors, warnings)
     validate_ensemble(root, project, committed, errors)
@@ -1579,6 +1616,11 @@ def main() -> int:
                 warnings.append(f"Short-story outline has no planned {required} reward beat for structural section {chapter}")
             elif required == "major" and beat.get("level") != "major":
                 warnings.append(f"Planned short-story reward for section {chapter} must be major")
+
+    if mode == "novella" and short_status == "complete" and isinstance(committed, int):
+        ending_beat = beat_by_chapter.get(committed)
+        if not ending_beat or ending_beat.get("status") != "delivered" or ending_beat.get("level") != "major":
+            errors.append("Completed novella requires a delivered major ending reward in its final chapter")
 
     decisions = decision_doc.get("decisions", [])
     if not isinstance(decisions, list):

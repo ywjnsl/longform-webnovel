@@ -72,7 +72,9 @@
 
 ## 状态规则
 
-`project.json` 是提交索引。`storyMode` 使用 `serial` 或 `fanqie-short-story`；旧项目缺失时按 `serial`。`ensemble` 保存群像仿真：`enabled`、`protagonistId`、探索配额、同时上场上限，以及从哪一章开始强制合同/意图。短故事另以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
+`project.json` 是提交索引。`storyMode` 使用 `serial`、`fanqie-short-story` 或 `novella`；旧项目缺失时按 `serial`。`ensemble` 保存群像仿真：`enabled`、`protagonistId`、探索配额、同时上场上限，以及从哪一章开始强制合同/意图。短故事另以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。短中篇以 `finiteStory` 保存目标总字数、可选最低字数、状态和结尾类型，详见 [novella.md](novella.md)，不设置必须写满的章节数。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
+
+短中篇沿用这些目录：`series-map.md` 存全书终点、副线与人物归宿，`current-volume.md` 存全书阶段，`rolling-outline.md` 保留剩余阶段并只细化当前事件。阶段不绑定章号，不执行长篇 3/5 段周期或短故事的分节编号锚点；结局交付才允许完结。完成状态和全文终审的公共检查在有限篇幅模式间共用，旧短故事字段保持兼容。
 
 `totalContentChars` 必须等于全部已提交正文的有效字符总数，口径与 `chapter_metrics.py` 一致：忽略 Markdown 标题和代码块，中文按字、连续英文或数字按词计数。正式提交后，故事合同、人物、世界、语言风格、当前卷和滚动章纲不得仍残留初始化模板中的“待填写”“待确认”“待规划”。
 

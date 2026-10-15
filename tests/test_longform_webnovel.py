@@ -45,8 +45,8 @@ def content_chars(text: str) -> int:
     return len(CJK_RE.findall(body)) + len(ASCII_WORD_RE.findall(body))
 
 
-def initialize(path: Path, title: str) -> None:
-    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(path), "--title", title, "--style", "fanqie-clean")
+def initialize(path: Path, title: str, *, mode: str = "serial") -> None:
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(path), "--title", title, "--style", "fanqie-clean", "--mode", mode)
     for relative in (
         "canon/story-contract.md",
         "canon/characters.md",
@@ -433,6 +433,105 @@ def test_short_story_mode(base: Path) -> None:
     write_json(project / "project.json", index)
     invalid = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
     assert any("storyMode is invalid" in error for error in invalid["errors"])
+
+
+def test_novella_mode(base: Path) -> None:
+    raw = base / "novella-raw"
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(raw), "--title", "短中篇建项", "--mode", "novella")
+    index = read_json(raw / "project.json")
+    assert index["storyMode"] == "novella"
+    assert index["finiteStory"] == {
+        "targetTotalChars": 50000, "minTotalChars": None,
+        "status": "planning", "endingType": "closed",
+    }
+    assert "shortStory" not in index
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(raw)).stdout)["ok"]
+    rewards_before = (raw / "state/rewards.json").read_bytes()
+    plan = json.loads(run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(raw), "--write", "--json").stdout)
+    assert plan["mode"] == "novella" and len(plan["stages"]) == 5
+    assert plan["chapters"] == [] and plan["added"] == 0
+    assert (raw / "state/rewards.json").read_bytes() == rewards_before
+    run(sys.executable, str(SCRIPTS / "plan_cadence.py"), str(raw), "--count", "20", expect=1)
+    rejected = base / "novella-invalid"
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(rejected), "--title", "错误参数", "--mode", "novella", "--sections", "20", expect=1)
+    assert not rejected.exists()
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(rejected), "--title", "错误下限", "--mode", "novella", "--target-total-chars", "30000", "--min-total-chars", "40000", expect=1)
+    assert not rejected.exists()
+
+    project = base / "novella-commit"
+    initialize(project, "有限小说测试", mode="novella")
+    index = read_json(project / "project.json")
+    index["finiteStory"]["status"] = "drafting"
+    write_json(project / "project.json", index)
+    stage = base / "novella-stage"
+    # Ordinary chapters, including chapter 3, need no numbered structural reward.
+    for chapter in range(1, 4):
+        prepare_stage(project, stage, chapter)
+        assert commit(project, stage)["ok"]
+    prepare_stage(project, stage, 4, make_beat(4, "major", "exposure", "evidence-reversal"))
+    candidate = read_json(stage / "project.json")
+    candidate["finiteStory"]["status"] = "complete"
+    write_json(stage / "project.json", candidate)
+    before = (project / "project.json").read_bytes()
+    missing = commit(project, stage, expect=1)
+    assert "final-review.json" in str(missing)
+    assert (project / "project.json").read_bytes() == before
+
+    digest = hashlib.sha256()
+    for chapter in range(1, 5):
+        parent = stage if chapter == 4 else project
+        path = parent / "chapters" / f"第{chapter:04d}章-测试章.md"
+        digest.update(f"chapter:{chapter:04d}:{path.name}\n".encode("utf-8"))
+        digest.update(path.read_bytes())
+    final = {
+        "schemaVersion": 1, "storyMode": "novella", "reviewedThroughChapter": 4,
+        "reviewedTextSha256": digest.hexdigest(), "perspective": "external-reader",
+        "editorStatus": "pass", "readerStatus": "engaged", "completionIntent": "complete",
+        "checks": {name: "pass" for name in (
+            "promise", "causality", "continuity", "setupPayoff", "characterConsequences",
+            "titleResonance", "endingBoundary", "subplots", "characterDestinations", "lengthContract",
+        )},
+        "resolution": "主承诺与人物归宿已收束，副线已闭合；测试未设置最低字数。",
+    }
+    write_json(stage / "reviews/final-review.json", final)
+    candidate["finiteStory"]["minTotalChars"] = candidate["totalContentChars"] + 1
+    write_json(stage / "project.json", candidate)
+    too_short = commit(project, stage, expect=1)
+    assert "below finiteStory.minTotalChars" in str(too_short)
+    assert (project / "project.json").read_bytes() == before
+    candidate["finiteStory"]["minTotalChars"] = 1
+    write_json(stage / "project.json", candidate)
+    final["checks"]["subplots"] = "fail"
+    write_json(stage / "reviews/final-review.json", final)
+    assert "subplots must be pass" in str(commit(project, stage, expect=1))
+    final["checks"]["subplots"] = "pass"
+    write_json(stage / "reviews/final-review.json", final)
+    assert commit(project, stage)["ok"]
+    assert read_json(project / "project.json")["lastCommittedChapter"] == 4
+    assert json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)["ok"]
+
+    # Ending evidence, full-text version, mode and thread closure all remain gates.
+    rewards = read_json(project / "state/rewards.json")
+    write_json(project / "state/rewards.json", {**rewards, "beats": []})
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    assert any("major ending reward" in error for error in errors)
+    write_json(project / "state/rewards.json", rewards)
+    bad_final = {**final, "storyMode": "fanqie-short-story", "reviewedTextSha256": "0" * 64}
+    write_json(project / "reviews/final-review.json", bad_final)
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    assert any("storyMode must be novella" in error for error in errors)
+    assert any("hash does not match" in error for error in errors)
+    write_json(project / "reviews/final-review.json", final)
+    threads = read_json(project / "state/threads.json")
+    write_json(project / "state/threads.json", {**threads, "threads": [{
+        "id": "unclosed", "kind": "main", "status": "open", "summary": "尚未找到的证据",
+        "introducedChapter": 1, "lastAdvancedChapter": 4, "dueWindow": [1, 4],
+    }]})
+    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
+    assert any("cannot retain open" in error for error in errors)
+    write_json(project / "state/threads.json", threads)
+    prepare_stage(project, stage, 5)
+    assert "cannot continue automatically" in str(commit(project, stage, expect=1))
 
 
 def test_committed_project_guards(base: Path) -> None:
@@ -1541,6 +1640,7 @@ def main() -> None:
         base = Path(temporary)
         test_initialization_and_cadence(base)
         test_short_story_mode(base)
+        test_novella_mode(base)
         test_committed_project_guards(base)
         test_style_profiles(base)
         test_publishing_package(base)
