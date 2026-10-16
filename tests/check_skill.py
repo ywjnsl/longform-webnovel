@@ -63,7 +63,6 @@ def main() -> None:
     length_text = (SKILL / "references" / "length-modes.md").read_text(encoding="utf-8")
     craft_text = (SKILL / "references" / "chapter-craft.md").read_text(encoding="utf-8")
     outline_text = (SKILL / "references" / "chapter-outline.md").read_text(encoding="utf-8")
-    naturalization_text = (SKILL / "references" / "prose-naturalization.md").read_text(encoding="utf-8")
     assert "场景拍细纲" not in length_text or "不写场景拍细纲" in length_text
     assert "切下一章" in craft_text
     assert "不写场景拍细纲" in outline_text
@@ -75,7 +74,6 @@ def main() -> None:
     assert "一卷一条贯穿线" in engine_text
     assert "不占章号" in engine_text
     assert "最后一段必须是贯穿线落地" in engine_text
-    assert "短于章节篇幅合同" in naturalization_text
     assert (SKILL / "scripts" / "validate_project.py").is_file()
     assert (SKILL / "scripts" / "prose_lint.py").is_file()
     assert (SKILL / "scripts" / "market_brief.py").is_file()

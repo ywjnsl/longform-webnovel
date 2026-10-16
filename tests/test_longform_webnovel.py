@@ -1446,8 +1446,9 @@ def test_cast_arcs(base: Path) -> None:
     index["lastCommittedChapter"] = 5
     index["latestDraftChapter"] = 5
     write_json(project / "project.json", index)
-    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
-    assert any("needs at least one anchor supporting character" in error for error in errors)
+    report = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("No anchor supporting character" in warning for warning in report["warnings"])
+    assert not any("anchor supporting character" in error for error in report["errors"])
 
     no_anchor_progress = read_json(cast_path)
     no_anchor_progress["asOfChapter"] = 15
@@ -1473,8 +1474,29 @@ def test_cast_arcs(base: Path) -> None:
     index["lastCommittedChapter"] = 15
     index["latestDraftChapter"] = 15
     write_json(project / "project.json", index)
-    errors = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)["errors"]
-    assert any("must advance by choice/consequence" in error for error in errors)
+    report = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("No anchor supporting-cast choice/consequence" in warning for warning in report["warnings"])
+    assert not any("anchor supporting" in error for error in report["errors"])
+
+    # Check the cast gate independently: unfinished arcs may span many text slices,
+    # while fabricated choice/delta history must still be rejected.
+    sys.path.insert(0, str(SCRIPTS))
+    try:
+        spec = importlib.util.spec_from_file_location("cast_gate_test", SCRIPTS / "validate_project.py")
+        assert spec and spec.loader
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        for document, chapter in ((no_anchor, 5), (no_anchor_progress, 15)):
+            cast_errors, cast_warnings = [], []
+            validator.validate_cast_arcs(document, chapter, "serial", cast_errors, cast_warnings)
+            assert not cast_errors, cast_errors
+            assert cast_warnings
+        no_anchor_progress["characters"][0]["lastAdvancedChapter"] = 15
+        cast_errors = []
+        validator.validate_cast_arcs(no_anchor_progress, 15, "serial", cast_errors, [])
+        assert any("matching choice/delta history evidence" in error for error in cast_errors)
+    finally:
+        sys.path.remove(str(SCRIPTS))
 
 
 def test_commit_validation_and_restore(base: Path) -> None:
@@ -1591,6 +1613,44 @@ def test_commit_validation_and_restore(base: Path) -> None:
     assert rollback_validation["ok"]
 
 
+def test_event_context_carry_forward(base: Path) -> None:
+    project, stage = base / "event-carry", base / "event-carry-stage"
+    initialize(project, "跨章意图复用")
+    prepare_stage(project, stage, 1)
+    contract = read_json(stage / "contracts/chapter-0001.json")
+    contract["eventId"] = "side-door-check"
+    write_json(stage / "contracts/chapter-0001.json", contract)
+    intent_dir = stage / "intents/chapter-0001"
+    (intent_dir / "precard.md").write_text("接续侧门检查；事件尚未结束。\n", encoding="utf-8")
+    commit(project, stage)
+
+    prepare_stage(project, stage, 2)
+    carried_contract = read_json(project / "contracts/chapter-0001.json")
+    carried_contract["chapter"] = 2
+    write_json(stage / "contracts/chapter-0002.json", carried_contract)
+    for source in (project / "intents/chapter-0001").iterdir():
+        shutil.copy2(source, stage / "intents/chapter-0002" / source.name)
+    protagonist = read_json(project / "project.json")["ensemble"]["protagonistId"]
+    intent_path = stage / "intents/chapter-0002" / f"{protagonist}.json"
+    rejected = commit(project, stage, expect=1)
+    assert "intent chapter must match" in rejected["error"]
+    assert read_json(project / "project.json")["lastCommittedChapter"] == 1
+
+    carried_intent = read_json(intent_path)
+    carried_intent["chapter"] = 2
+    write_json(intent_path, carried_intent)
+    (stage / "sessions/test-chapter-0002.md").write_text(
+        "沿用第1章的前卡、意图与裁定，当前检查行动和合法性条件未变。\n", encoding="utf-8"
+    )
+    commit(project, stage)
+    carried_intent.pop("chapter")
+    original_intent = read_json(project / "intents/chapter-0001" / f"{protagonist}.json")
+    original_intent.pop("chapter")
+    assert carried_intent == original_intent
+    assert (project / "intents/chapter-0002/ruling.json").read_bytes() == (project / "intents/chapter-0001/ruling.json").read_bytes()
+    assert read_json(project / "contracts/chapter-0002.json")["arcStatus"] == "open"
+
+
 def test_chapter_metrics_cuts_by_length_without_padding() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         short = Path(temporary) / "short.md"
@@ -1628,7 +1688,6 @@ def test_chapter_metrics_cuts_by_length_without_padding() -> None:
         )
     assert short_report["lengthSignal"] == "continue"
     assert short_report["lengthAction"] == "write-the-event"
-    assert "不要回头补" in short_report["note"]
     assert ready_report["lengthSignal"] == "cut"
     assert ready_report["lengthAction"] == "next-chapter"
     assert long_report["lengthSignal"] == "overflow"
@@ -1655,6 +1714,7 @@ def main() -> None:
         test_migration(base)
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
+        test_event_context_carry_forward(base)
     test_chapter_metrics_cuts_by_length_without_padding()
     print("longform-webnovel v8 integration checks passed")
 

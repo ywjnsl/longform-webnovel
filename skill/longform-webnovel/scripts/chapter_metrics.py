@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Report useful, non-prescriptive metrics for a Chinese webnovel chapter."""
+"""Measure prose for chapter cutting; --target is a cut threshold, not a story-length goal."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
+from chapter_cut import suggest_cut
 from webnovel_io import ASCII_WORD_RE, CJK_RE, strip_markdown
 
 
@@ -23,24 +24,28 @@ def metrics(text: str, target: int) -> dict[str, object]:
     normalized = [re.sub(r"\s+", "", p) for p in paragraphs if len(re.sub(r"\s+", "", p)) >= 20]
     repeated = sorted([p for p, count in Counter(normalized).items() if count > 1])
     long_paragraphs = sum(1 for p in normalized if len(p) > 180)
-    lower = round(target * 0.9)
-    upper = round(target * 1.14)
-    if content_chars < lower:
+    cut = suggest_cut(text, target)
+    if content_chars < target:
         length_signal = "continue"
         length_action = "write-the-event"
-        note = f"未到切章字数。事情还没完结，就接着写这件事，写到约 {target} 再切下一章。不要回头补回合、物件或手续。事情已经完结，就停在完结处，不要补字。"
-    elif content_chars <= upper:
+        note = f"连续推进当前事件并保存草稿，约 {target} 个有效字时切片。"
+    elif cut["status"] != "ready":
+        length_signal = "overflow"
+        length_action = "inspect-boundary"
+        note = "阈值附近没有可用的句段边界。核对已有正文，不改写情节以匹配章长。"
+    elif content_chars <= target + cut["window"]:
         length_signal = "cut"
         length_action = "next-chapter"
-        note = "已到切章字数。本章停在这里。事情未完结就新开下一章接着写，不要把后文补回本章，也不要补字。"
+        note = "已接近切分阈值。在已有文本的完整句子或段落间断开，不等待事件结束，也不补章尾。切点后已写文字原样留给下一章；事情未完就从断处接着写。"
     else:
         length_signal = "overflow"
         length_action = "move-excess"
-        note = "超过切章字数。多出来的后文放进下一章。不要为了留在本章再加字。"
+        note = "已超过切分范围。在阈值附近切开已有文本，尾后文字原样留给下一章，不压缩前文、不丢后文，也不把事件赶到结局来匹配一章长度。"
     return {
         "contentChars": content_chars,
         "target": target,
-        "cutRange": [lower, upper],
+        "cutPoint": cut["cutPoint"],
+        "cutStatus": cut["status"],
         "lengthSignal": length_signal,
         "lengthAction": length_action,
         "paragraphs": len(paragraphs),
@@ -55,7 +60,7 @@ def metrics(text: str, target: int) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("chapter", type=Path)
-    parser.add_argument("--target", type=int, default=2500)
+    parser.add_argument("--target", type=int, default=2500, help="Effective-character cut threshold; not a per-chapter plot or padding target")
     args = parser.parse_args()
     if args.target <= 0:
         raise SystemExit("--target must be positive")

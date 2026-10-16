@@ -23,3 +23,5 @@ jobs:
         run: python tests/test_longform_webnovel.py
       - name: Run naturalness gate tests
         run: python skill/longform-webnovel/tests/test_naturalness_gate.py
+      - name: Run chapter cut tests
+        run: python skill/longform-webnovel/tests/test_chapter_cut.py

@@ -945,6 +945,8 @@ def validate_ensemble(root: Path, project: dict, committed: object, errors: list
                     errors.append(f"{intent_path.name}: emotion.trigger required")
                 if item.get("characterId") != character_id:
                     errors.append(f"{intent_path.name}: characterId must match filename")
+                if item.get("chapter") != chapter:
+                    errors.append(f"{intent_path.name}: intent chapter must match its chapter directory")
 
 
 def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: list[str], warnings: list[str]) -> None:
@@ -1131,7 +1133,7 @@ def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: lis
         and character["introducedChapter"] <= committed
         for character in characters
     ):
-        errors.append("By five audited chapters, the project needs at least one anchor supporting character with an independent arc")
+        warnings.append("No anchor supporting character after five audited chapters; review the current events without adding cast to meet a chapter quota")
     if mode == "serial" and isinstance(committed, int) and committed - legacy_through >= 5 and active_anchors:
         recent_start = max(legacy_through + 1, committed - 4)
         if not any(recent_start <= chapter <= committed for chapter in recent_arc_chapters):
@@ -1139,7 +1141,7 @@ def validate_cast_arcs(cast_doc: dict, committed: object, mode: str, errors: lis
     if mode == "serial" and isinstance(committed, int) and committed - legacy_through >= 15:
         cycle_start = committed - 14
         if not any(cycle_start <= chapter <= committed for chapter in anchor_arc_chapters):
-            errors.append(f"At least one anchor supporting character must advance by choice/consequence in chapters {cycle_start}-{committed}")
+            warnings.append(f"No anchor supporting-cast choice/consequence in chapters {cycle_start}-{committed}; review the related events without forcing a chapter-bound turn")
 
 
 def main() -> int:

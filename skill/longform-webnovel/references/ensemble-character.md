@@ -4,7 +4,7 @@
 
 ## 意图 JSON
 
-写入 `intents/chapter-NNNN/{id}.json`（多拍用数组）。必须含 `emotion.trigger`、`wantNow`、`wouldDo`、`wouldSay`、`wouldNeverSay`。
+写入 `intents/chapter-NNNN/{id}.json`（多拍用数组）。同一事件跨章可按 [ensemble.md](ensemble.md) 复制仍有效的意图快照并更新 `chapter`；章号变化本身不触发新的欲望、情绪或行动提案。必须含 `emotion.trigger`、`wantNow`、`wouldDo`、`wouldSay`、`wouldNeverSay`。
 
 ```json
 {

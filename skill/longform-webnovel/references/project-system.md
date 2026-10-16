@@ -54,12 +54,12 @@
 - `timeline.md`：已发生事件的时间顺序，只记录正史。
 - `series-map.md`：长篇保存可收束主线与远期选择；短故事保存单一主承诺和结局边界。
 - `current-volume.md`：长篇保存当前卷；短故事保存全文有限结构。
-- `rolling-outline.md`：长篇保持未来 5–10 章；短故事覆盖全部剩余分节。
+- `rolling-outline.md`：长篇保留接下来几个事件与因果顺序，约5–10章只估计工作量；短故事覆盖全部剩余分节。
 - `current-arc.md`：当前未完成弧的目标、估计章窗和还差什么；章不是收束单位。
 - `cast/{id}/`：角色稳定人设与隔离情绪状态。主角用 `ensemble.protagonistId`，不要占用 `cast-arcs` 保留 id `protagonist`。
 - `story-state.json`：当前章结束时的机器可读快照。
 - `threads.json`：主线、支线、悬念、伏笔和承诺的生命周期。
-- `rewards.json`：未来爽点计划与已经兑现的 3/5 章节拍账本。
+- `rewards.json`：长篇按贯穿线段序保存兑现计划与实际正文证据；短故事按全文结构锚点记录回报，不把3/5段误作章号。
 - `cast-arcs.json`：核心/常驻配角的独立目标、弧光阶段、选择证据、转折窗口与关系网络。
 - `decisions.json`：重大决策的待确认、已确认和否决记录。
 - `reviews/`：每章绑定最终正文哈希的语言风险扫描、网文自然度审稿、编辑诊断和目标读者模拟。
@@ -72,7 +72,7 @@
 
 ## 状态规则
 
-`project.json` 是提交索引。`storyMode` 使用 `serial`、`fanqie-short-story` 或 `novella`；旧项目缺失时按 `serial`。`ensemble` 保存群像仿真：`enabled`、`protagonistId`、探索配额、同时上场上限，以及从哪一章开始强制合同/意图。短故事另以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。短中篇以 `finiteStory` 保存目标总字数、可选最低字数、状态和结尾类型，详见 [novella.md](novella.md)，不设置必须写满的章节数。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
+`project.json` 是提交索引。`storyMode` 使用 `serial`、`fanqie-short-story` 或 `novella`；旧项目缺失时按 `serial`。`targetChapterChars` 在长篇与短中篇中是正文切分阈值，不是单章创作目标。`ensemble` 保存群像仿真开关、主角ID、同时上场上限和合同强制起点；探索拍数字段保留兼容，不限定正文拍数或章尾。短故事以 `shortStory` 保存目标总字符数、预计分节数、创作状态和结尾类型，详见 [length-modes.md](length-modes.md)。短中篇以 `finiteStory` 保存全书目标、可选最低字数、状态和结尾类型，详见 [novella.md](novella.md)，不设置必须写满的章节数。`lastCommittedChapter` 只能指向正文和状态都已完成的章。`latestDraftChapter` 可以领先，表示存在未提交正文。
 
 短中篇沿用这些目录：`series-map.md` 存全书终点、副线与人物归宿，`current-volume.md` 存全书阶段，`rolling-outline.md` 保留剩余阶段并只细化当前事件。阶段不绑定章号，不执行长篇 3/5 段周期或短故事的分节编号锚点；结局交付才允许完结。完成状态和全文终审的公共检查在有限篇幅模式间共用，旧短故事字段保持兼容。
 
