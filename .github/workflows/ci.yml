@@ -25,3 +25,5 @@ jobs:
         run: python skill/longform-webnovel/tests/test_naturalness_gate.py
       - name: Run chapter cut tests
         run: python skill/longform-webnovel/tests/test_chapter_cut.py
+      - name: Run draft recovery tests
+        run: python skill/longform-webnovel/tests/test_draft_checkpoint.py

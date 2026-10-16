@@ -1651,6 +1651,40 @@ def test_event_context_carry_forward(base: Path) -> None:
     assert read_json(project / "contracts/chapter-0002.json")["arcStatus"] == "open"
 
 
+def test_persistent_tail_across_commit_and_restore(base: Path) -> None:
+    project, stage = base / "draft-recovery", base / "draft-recovery-stage"
+    initialize(project, "持久尾稿恢复")
+    prepare_stage(project, stage, 1)
+    head = stage / "chapters/第0001章-测试章.md"
+    tail = base / "recovery-tail.md"
+    source = base / "recovery-source.md"
+    tail_raw = "未提交的尾稿仍在追查另一条线索。\r\n".encode("utf-8")
+    tail.write_bytes(tail_raw)
+    source.write_bytes(head.read_bytes() + tail_raw)
+    checkpoint_script = str(SCRIPTS / "draft_checkpoint.py")
+    saved = json.loads(run(
+        sys.executable, checkpoint_script, "save", "--project", str(project),
+        "--after-chapter", "1", "--source", str(source), "--head", str(head), "--tail", str(tail),
+    ).stdout)
+    checkpoint = Path(saved["checkpoint"])
+    check = [sys.executable, checkpoint_script, "check", "--project", str(project)]
+    assert json.loads(run(*check, expect=1).stdout)["status"] == "awaiting-commit"
+    first = commit(project, stage)
+    assert json.loads(run(*check).stdout)["status"] == "ready"
+    assert all(not path.startswith("drafts/") for path in first["files"])
+    assert read_json(project / "project.json")["totalContentChars"] == content_chars(head.read_text())
+    assert not any("未提交的尾稿" in path.read_text() for path in (project / "state").glob("*.json"))
+    source.unlink()
+    tail.unlink()
+    prepare_stage(project, stage, 2)
+    second = commit(project, stage)
+    assert json.loads(run(*check).stdout)["status"] == "no-checkpoint"
+    assert (checkpoint / "tail-working.md").read_bytes() == tail_raw
+    run(sys.executable, str(SCRIPTS / "commit_chapter.py"), "--project", str(project), "--restore", second["backup"])
+    assert json.loads(run(*check).stdout)["status"] == "ready"
+    assert (checkpoint / "tail-working.md").read_bytes() == tail_raw
+
+
 def test_chapter_metrics_cuts_by_length_without_padding() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         short = Path(temporary) / "short.md"
@@ -1715,6 +1749,7 @@ def main() -> None:
         test_cast_arcs(base)
         test_commit_validation_and_restore(base)
         test_event_context_carry_forward(base)
+        test_persistent_tail_across_commit_and_restore(base)
     test_chapter_metrics_cuts_by_length_without_padding()
     print("longform-webnovel v8 integration checks passed")
 

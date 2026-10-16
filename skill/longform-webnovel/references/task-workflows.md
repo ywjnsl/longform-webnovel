@@ -50,7 +50,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 2. 若 `schemaVersion` 旧于当前版本，缺少 v6 群像文件、v7 自然度门禁或 v8 重复门禁，先按 [operations.md](operations.md) 运行 `migrate_project.py`。
 3. 读取 `canon/story-contract.md`、`canon/style-profile.md`、`canon/publishing-package.md`、`canon/laws.md`、`planning/current-volume.md`、`planning/rolling-outline.md`、`planning/current-arc.md`。
 4. 读取 `state/story-state.json`、`state/threads.json`、`state/rewards.json`、`state/cast-arcs.json`、`state/decisions.json`，以及上场角色的 `cast/{id}/state.json`。
-5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；读取 `canon/style-profile.md` 中作者确认的声音证据和适用于本章场景的朱雀候选样本（若存在）。角色状态指向更早的关系转折、未结代价或旧目标时，回查对应正文；只查当前事件需要的前因，不因章界重置关系和情绪。
+5. 读取最近 1–2 章正文、对应审稿报告和最新 `sessions/` 记录；长篇与短中篇先按 [operations.md](operations.md) 的“尾稿保存与跨会话恢复”运行 `draft_checkpoint.py check --project <项目目录>`，优先恢复已写工作尾稿，核对前章最终稿与尾稿的接续。读取 `canon/style-profile.md` 中作者确认的声音证据和适用于本章场景的朱雀候选样本（若存在）。角色状态指向更早的关系转折、未结代价或旧目标时，回查对应正文；只查当前事件需要的前因，不因章界重置关系和情绪。
 6. 运行 `validate_project.py`。先处理错误；把警告纳入本章计划。
 7. 若存在会阻断本章或当前写作范围的未决重大决策，先给出 2–4 个明确选项及影响，等待作者选择；未来章的判断点不提前阻断当前章。
 8. **筹备。** 若无阻断，新事件按 [ensemble.md](ensemble.md) 写合同、隔离收意图并依法则裁定；同一未完事件跨章先复用有效的前卡、意图与裁定，只有影响选择或合法性的新事实才触发更新。逐章归档不等于逐章重新提案，复制快照的方法见ensemble。先核对当前事件所需的法则、时间线、角色卡与正文，再按任务选读写法参考。短故事或番茄投稿在筹备与编辑阶段核对签约、人物与一致性，开篇另核对信息流入口。按 [writer-context.md](writer-context.md) 选取具体事实、关键意图、相关正文与声音依据，不向写手堆叠课堂全文、诊断清单或机制名称。
@@ -65,7 +65,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 把正文和状态更新视为同一次提交。不得先直接修改正式项目再补状态：
 
 1. 按 [operations.md](operations.md) 创建 staging 目录，把新正文和所有拟更新文件按项目相对路径写入 staging。
-2. 写作时先保存连续正文草稿；切出约2500有效字的一片后，按实际内容确定标题，写入 staging 的 `chapters/第NNNN章-标题.md`。未完事件仍留在当前弧与滚动事件纲中，尾后草稿不能提前进入正史。不要覆盖现有章节，除非用户明确要求修订。保存该片原稿到 `reviews/drafts/第NNNN章-before-naturalization.md`，完成后处理并写 `reviews/第NNNN章-naturalization.md`，再运行指标与审稿；报告绑定最终正文。
+2. 写作时先保存连续正文草稿；切出约2500有效字的一片后，先按operations用 `draft_checkpoint.py save` 保存切片前原稿、前片与尾稿，再按实际内容确定标题，写入 staging 的 `chapters/第NNNN章-标题.md`。未完事件仍留在当前弧与滚动事件纲中，尾后草稿不能提前进入正史。不要覆盖现有章节，除非用户明确要求修订。保存该片原稿到 `reviews/drafts/第NNNN章-before-naturalization.md`，完成后处理并写 `reviews/第NNNN章-naturalization.md`，再运行指标与审稿；报告绑定最终正文。前片提交后先检查保存点，再接续工作尾稿，避免语言或结构改动使尾稿失配。
 3. 写作时用 `chapter_cut.py` 定位未切草稿的边界，默认只输出报告。`continue` 表示当前事件继续推进；`ready` 给出 `cutPoint.offset`（原始文本的Unicode字符索引）及两片有效字数；`needs-boundary` 表示附近未找到句段边界，检查已有文本，不改写剧情来适应切点。阈值使用项目的 `targetChapterChars`（默认2500）；`--window` 默认100是自动选点的距离限制，不是写作篇幅合同。事件已经结束时加 `--final` 处理余片。需要导出时同时指定两个新路径，脚本保留原稿与全部尾后文字，拒绝覆盖已有文件：
 
 ```bash
@@ -156,6 +156,7 @@ python3 <skill-dir>/scripts/chapter_cut.py <连续草稿> --target 2500 --head <
 - `scripts/performance_feedback.py`：保存发布后统计窗口，计算阅读/完读漏斗并生成带样本限制的诊断。
 - `scripts/commit_chapter.py`：在隔离预览中校验后原子替换文件；失败时自动回滚。
 - `scripts/chapter_cut.py`：定位连续草稿的句段切点，可导出当前片和尾后原文。
+- `scripts/draft_checkpoint.py`：保存项目内切片与尾稿，按已提交章号恢复；前章或尾稿变化时提示接续核对。
 - `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号，并显示同一切点建议。
 - `scripts/opening_audit.py`：按有效字符口径截取短故事前 100/200/300 字窗口，输出入口审稿所需的文本与基础指标；不代替语义判断。
 - `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。

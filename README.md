@@ -79,6 +79,7 @@ python3 tests/test_longform_webnovel.py
 python3 skill/longform-webnovel/tests/test_naturalness_gate.py
 python3 skill/longform-webnovel/tests/test_repetition_audit.py
 python3 skill/longform-webnovel/tests/test_chapter_cut.py
+python3 skill/longform-webnovel/tests/test_draft_checkpoint.py
 ```
 
 运行时只依赖 Python 标准库。
