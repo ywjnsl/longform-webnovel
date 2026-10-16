@@ -53,9 +53,13 @@ def main() -> None:
     assert "贯穿线" in text
     assert "不自动写下一卷" in text
     assert "不锁在第 3、5、15 章" in text
-    assert "presence" in text
+    workflow_text = (SKILL / "references" / "task-workflows.md").read_text(encoding="utf-8")
+    assert "task-workflows.md" in text
+    assert "writer-context.md" in text
+    assert (SKILL / "references" / "writer-context.md").is_file()
+    assert "presence" in workflow_text
     assert "细纲最后一拍" not in text
-    assert "lengthSignal" in text and "continue" in text
+    assert "lengthSignal" in workflow_text and "continue" in workflow_text
     length_text = (SKILL / "references" / "length-modes.md").read_text(encoding="utf-8")
     craft_text = (SKILL / "references" / "chapter-craft.md").read_text(encoding="utf-8")
     outline_text = (SKILL / "references" / "chapter-outline.md").read_text(encoding="utf-8")

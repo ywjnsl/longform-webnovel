@@ -4,25 +4,17 @@
 
 `serial` 先确定接下去的这一件事，顺着它写正文。细纲不是正文。写到约 2500 个有效字就切下一章；事情没完，下一章接着写，直到完结。事情完结就停，不补字。用户要求连续多章时，完成本章后必须新建下一章标题，基于上一章真实后果继续写同一件事，不能把多章正文合并成一章。每一章有自己的标题，标题只标这一章走到的那一截。章尾不把这件事收掉，停在正常往下走的地方：话还在说、人还在办、手还在动，下一章接着这一下写。不另加总结、钩子或「到此为止」。不刻意凑字。切章后直接承接，不重新搭建入口；本章推进已有行动、理解或关系即可，不为章级结构补升级或回报。对白场能让读者辨明谁在说、在哪里、有何牵挂，就不必逐句插入环境、衣着或手部动作。`fanqie-short-story` 按已确认的全文与分节职责决定单节长度，可在不注水的前提下合理增加分节；单篇不分节时直接使用全文目标。平台统计口径可能不同；首次发布后以平台显示值校准。正文需要快，但不能把“快”误解为持续吵闹或机械反转。
 
-## 先参考再写
+## 筹备与按需参考
 
-禁止先写正文再补读参考。长篇与短中篇先按各自模式写明「接下去的事」再开写，不填场景拍细纲。
+本文供筹备与编辑按问题选节，不是每章写手的整份必读教程。正文阶段先读 [writer-context.md](writer-context.md)，使用已对齐的前文、当前人物与规则；空间不清、对白同声或疏密失当时，再补读对应小节。
 
-当场读取，不能凭聊天记忆代替：
+筹备先核对 `canon/laws.md`、`canon/timeline.md`、上场角色的skill/state及相关正文，再写 [接下去的事](chapter-outline.md)。长篇与短中篇不填场景拍细纲，已有合同和前卡覆盖的信息不另抄一份。
 
-1. [scene-craft.md](scene-craft.md) 的场面核对项与 [prose-naturalization.md](prose-naturalization.md) 的“初稿先成立”；
-2. [fanqie-consistency.md](fanqie-consistency.md) 与 `canon/laws.md`、`canon/timeline.md`；
-3. 上场角色 `cast/{id}/SKILL.md` 与 `state.json`；
-4. `fanqie-short-story` 或番茄投稿：[fanqie-signing-quality.md](fanqie-signing-quality.md)、[fanqie-character-craft.md](fanqie-character-craft.md)；
-5. 第一节或长篇前三章：[short-story-information-flow.md](short-story-information-flow.md)、[fanqie-new-book.md](fanqie-new-book.md)。
-
-读完后才填 [接下去的事](chapter-outline.md)。接续点与当前事件不清楚时，先核对项目规划。
-
-当前事件涉及关系转折、成长、组织接纳或阶段转换时，读 [narrative-continuity.md](narrative-continuity.md)。在已有卡片中沿用最相关的前因，不另列逐章情绪节点；写后检查其真实后果是否进入下一次相处、选择或对旧目标的理解。收益转换、场外后果与新环境中的能力差异也按该文件诊断，不强制每场使用。
+关系转折、成长或阶段转换需要设计与诊断时，按需读 [narrative-continuity.md](narrative-continuity.md)；规则矛盾用 [fanqie-consistency.md](fanqie-consistency.md)。短故事或番茄投稿的筹备与编辑按 [fanqie-signing-quality.md](fanqie-signing-quality.md)、[fanqie-character-craft.md](fanqie-character-craft.md) 核对，开篇再用 [short-story-information-flow.md](short-story-information-flow.md)、[fanqie-new-book.md](fanqie-new-book.md)。把当前所需结论交给写手，不让正文逐项展示检查结果。
 
 ## 写前卡片
 
-以下是事件或分节的核对项，已有合同与写前卡覆盖的直接复用，不另抄一份清单。`serial` 与 `novella` 只细化当前事件，不按每章分配这些项目：
+以下供筹备或编辑遇到问题时定位；已有合同与写前卡覆盖的直接复用，不另抄一份清单，也不要求每项都在本章显现。`serial` 与 `novella` 只细化当前事件，不按每章分配这些项目：
 
 - 本章视角与当下欲望；
 - 进入场景时已有的问题；
@@ -39,7 +31,7 @@
 
 `fanqie-short-story` 的每节仍须有局部回报，但不把“短故事有结局”误读成“每节都要把一件事写完”。先标出本节事件线 ID 和阶段：`opening` 引爆问题，`middle` 推进并加压，`turn` 改变判断或代价，`closing` 完成事件级解决。前面阶段可以把未完成动作、选择后果或合理中断交给下一节；只有最后一节和标记为 `closing` 的分节才检查事件结案。
 
-按 [章节细纲](chapter-outline.md) 列出本节通常 3–5 个场景拍。每拍写入口动作、目的、阻碍与反应、转折与代价、状态落点和离场条件。分节结尾只需落在当前动作、选择、代价或余波的自然位置，不强制总结、身份揭示、突然来人或断章钩子。对白主要交锋另填 [dialogue-craft.md](dialogue-craft.md)，把角色意图改写成受具体目的、回避和关系推动的台词。
+按 [章节细纲](chapter-outline.md) 列出本节通常 3–5 个场景拍。每拍写入口动作、目的、阻碍与反应、转折与代价、状态落点和离场条件。分节结尾只需落在当前动作、选择、代价或余波的自然位置，不强制总结、身份揭示、突然来人或断章钩子。对白主要交锋难以区分声音时，按 [dialogue-craft.md](dialogue-craft.md) 定位缺失依据，已有意图和人物卡覆盖的不另填卡。
 
 如果删掉本章不会影响后续状态，本章尚无存在价值。写前先完成 [ensemble.md](ensemble.md) 的合同与裁定；写手不得发明角色没打算做的关键选择，也不得要求本章把当前弧写完。
 
@@ -177,7 +169,7 @@
 ## 配角与关系
 
 - 写前读取 `state/cast-arcs.json`，优先让到达 `nextTurnWindow` 的核心配角进入能改变局势的场景。
-- 配角参与关键场景时，至少让一人依据自己的目标作出主角没有安排的选择；选择应产生可追踪的收益、代价或关系变化。
+- 配角的关键选择依据自己的目标，允许改变主角的安排；已发生的选择应有可追踪的后果。不要求每场都增加一次独立行动或关系变化，延续既有态度也可以成立。
 - 配角弧光优先从其事业、信念、责任、身份、求生需求或既有关系中生长，不默认添加爱情。即使主角不在场，该角色的行动理由仍应成立。
 - 关系可以是亲情、友情、师徒、同袍、竞争、债务、利益、恐惧或爱情。爱可以指向主角、反派或其他配角，但不等于被回应、被奖励、获赦免或自动洗白；双方仍按各自立场行动。
 - 普通出场、赞叹主角、递送情报或重复既有态度不算弧光推进。只有选择及其后果能写入 `history`。
