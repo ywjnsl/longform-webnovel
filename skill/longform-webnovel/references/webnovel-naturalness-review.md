@@ -42,7 +42,7 @@
 
 1. 记录初审正文 SHA-256。
 2. 先处理重复审计：没有功能的重复应修订；确需保留的每个 exact/near finding 都要写入哈希绑定的 `repetitionExceptions`，给出具体编辑理由。再顺读并按十三类模式列证据簇；每项必须说明 `readerCost` 和只影响命中段的 `direction`。长篇还要检查是否整章独句成段、动作后补战术字幕，或为凑字新开场面。短故事最后一节额外检查 `truncated-ending` 与 `theme-closure`，二者都非法，不能用避开其中一个当借口写成另一个。
-3. 无成立问题簇时标记 `pass`，`revision.action` 为 `not-needed`，不得继续寻找理由润色。
+3. 按 [prose-naturalization.md](prose-naturalization.md) 的「交稿后的四格」，用本章原句回答区分、原件、换嘴、停处。四格都答得上，或本场声明无单据、无规矩时区分和原件为「本场无」，则没有新的改稿理由。无成立问题簇时标记 `pass`，`revision.action` 为 `not-needed`，不得继续寻找理由润色，也不得把换嘴仍像人话的短句改成更有人设的对句。某一格对不上时，只把那一格写成 finding，映射到已有类别，不整场重写。
 4. 只有轻微、可保留的风险时标记 `pass-with-notes`。未解决的高优先级问题不得放在此状态蒙混通过。
 5. 结构问题按 [prose-naturalization.md](prose-naturalization.md) 的“初稿先成立”及既有修订权限处理，不能借本审稿扩大冻结范围或添加失误。影响沉浸、人物或收尾且需要修改时标记 `needs-revision`，按 [prose-naturalization.md](prose-naturalization.md) 最多自动定向修改一次。不得整章重新生成，不得把标红段改成更短更工整的功能金句，也不得为自然化新增场面。
 6. 修改稿先作为候选，按 [prose-naturalization.md](prose-naturalization.md) 的“改写准入与候选取舍”，用原先记录的阅读问题逐处比较收益与代价，不因标为“改后”就优先采用。若变成流程说明、人物同声或过度压缩，恢复相应原段，仍有阻断问题则报告，不反复润色。再对选定的最终正文重新运行章节指标、重复审计、语言扫描、本审稿、编辑审稿和读者模拟。最终报告只引用最终正文中仍存在的逐字证据；实际保留的自然度修改写入 `revision.changedCategories`，并用 `beforeTextSha256` 记录修改前版本。全部恢复原文时使用 `not-needed`，尝试与恢复留在过程记录中。旧重复报告与旧例外随正文哈希一并失效。
