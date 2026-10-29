@@ -54,7 +54,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 - 短故事动笔前建立入口合同；标题、前 300 字、主情绪发动机、情绪波形、主动选择和试读节点按 [short-story-information-flow.md](short-story-information-flow.md)、[fanqie-new-book.md](fanqie-new-book.md) 与 [length-modes.md](length-modes.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
-- 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。终审收口必须主承诺兑现且最后一场动作做完，细则见 [fanqie-signing-quality.md](fanqie-signing-quality.md)。人物选择一致性、胜利代价、情绪身体反应与对白辨识见 [fanqie-character-craft.md](fanqie-character-craft.md)。
+- 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。终审收口必须主承诺兑现且最后一场动作做完，细则见 [fanqie-signing-quality.md](fanqie-signing-quality.md)。人物选择一致性、胜利代价、情绪表达与对白辨识见 [fanqie-character-craft.md](fanqie-character-craft.md)。
 - 发布后不要从一次小流量测试反推永久结论。保存推荐状态和完整漏斗数据；下一个故事的选题与包装可以吸收数据，但不能把无样本的猜测写成平台规则。
 
 ## 继续连载
@@ -95,7 +95,7 @@ python3 <skill-dir>/scripts/chapter_cut.py <连续草稿> --target 2500 --head <
 
    `fanqie-short-story` 的第一节还要运行 `opening_audit.py <章节文件> --window 300`，并按 [short-story-information-flow.md](short-story-information-flow.md) 完成冷读者复述与编辑因果检查。正文变化后重新运行，不能沿用旧窗口判断。
 
-4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。番茄短故事的编辑诊断必须按 [fanqie-signing-quality.md](fanqie-signing-quality.md) 与 [fanqie-character-craft.md](fanqie-character-craft.md) 回答空转、人物动机、机制是否运行、胜利代价、情绪是否落到身体、对白是否推进利益而非播报背景、总结句是否替作者或读者下结论、最后一节收口是否做完。第一节与长篇前三章另按 [fanqie-new-book.md](fanqie-new-book.md) 回答设定微创新、首屏看点、无效开篇花活和枯燥句。写章还要按 [fanqie-consistency.md](fanqie-consistency.md) 回答战力/金钱/规则是否对上法则库、时间地点是否接得上、有没有为爽点降智。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。作者提供朱雀逐段标红时，按 [prose-naturalization.md](prose-naturalization.md) 的段落合同执行：未标红段落原样保留；标红段只允许删除、合并或就地改写，禁止扩成新场面，也禁止改成更短的功能金句段。三份报告与自然度对象都必须绑定当前正文 SHA-256。
+4. 先运行 `repetition_audit.py`，将结果写入 `reviews/第NNNN章-repetition.json`：番茄短故事比较全部较早已提交分节，长篇默认比较最近 5 章。再运行 `prose_lint.py` 写入 `reviews/第NNNN章-lint.json`，并按 [review-system.md](review-system.md) 分离执行网文自然度审稿、编辑审稿和目标读者模拟，写入 `reviews/第NNNN章-review.json`。番茄短故事的编辑诊断必须按 [fanqie-signing-quality.md](fanqie-signing-quality.md) 与 [fanqie-character-craft.md](fanqie-character-craft.md) 回答空转、人物动机、机制是否运行、胜利代价、情绪表达是否可信且符合声音、对白是否符合人物与场景、必要交代有无重复、叙述评论是否符合已确认声音与知情权限、最后一节收口是否做完。第一节与长篇前三章另按 [fanqie-new-book.md](fanqie-new-book.md) 回答设定微创新、首屏看点、无效开篇花活和枯燥句。写章还要按 [fanqie-consistency.md](fanqie-consistency.md) 回答战力/金钱/规则是否对上法则库、时间地点是否接得上、有没有为爽点降智。自然度 finding 必须引用问题簇的逐字证据并说明读者代价；每个保留的 exact/near 重复 finding 都必须有绑定最终正文哈希的 `repetitionExceptions` 和具体编辑理由。不能根据单个词命中机械重写。作者提供朱雀逐段标红时，按 [prose-naturalization.md](prose-naturalization.md) 的段落合同执行：未标红段落原样保留；标红段只允许删除、合并或就地改写，禁止扩成新场面，也禁止改成更短的功能金句段。三份报告与自然度对象都必须绑定当前正文 SHA-256。
 5. 若重复、自然度或其他审稿存在阻断项，自动定向修改一次并重新运行指标、重复审计、语言扫描、自然度审稿、编辑审稿和读者模拟。仍有未处置重复、高优先级问题、`needs-revision` 或弃读风险时停止提交；只有符合对应门禁契约的明确例外才可保留。
 6. 从已经通过审查的正文抽取新增事实：人物状态、关系变化、时间地点、资源变化、公开信息、秘密揭示、世界规则实例。有时间跳跃、换地点、新伤、新钱或新规则时，同步更新 `canon/timeline.md` 与 `canon/laws.md`。
 7. 在 staging 中更新 `state/story-state.json`，不得删除仍然有效的旧事实。
@@ -160,7 +160,7 @@ python3 <skill-dir>/scripts/chapter_cut.py <连续草稿> --target 2500 --head <
 - 写章后以正文为主，简报章节、约略字数、门禁状态及必要的实际变化与未决事项；没有发生的情绪、关系、成长或兑现不逐项汇报。下一步方向需要作者判断时再说明。
 - 配角弧光推进时：报告是谁主动做了什么、付出什么代价，以及其目标、能力、身份、信念、关系或立场如何改变。
 - 有重大决策时：先说明为什么现在必须决定，再给 2–4 个差异明确的选项和影响。
-- 开新书时：正文之前展示终选书名的检索结论、3 个差异明显的书名字效方向及推荐项、适配目标生成器的一次成图提示词、纯底图提示词、标题区域重绘提示词和负面提示词。画面按「画面层」写一种构图和前、中、远三层，只展示入口冲突。不能只交付“书法、大气、金色描边”或“帅气主角加大头贴”之类抽象形容。
+- 用户要求发布包装时：按 [publishing-package.md](publishing-package.md) 交付本次请求的书名、封面或投稿包；实际完成的检索才报告结论。封面涉及书名字效、构图与提示词时按 [cover-typography.md](cover-typography.md) 提供具体方案。仅开书或写正文时可以沿用暂定书名，未完成包装保持 `unconfirmed`，不要求在正文之前展示整套包装。
 - 有校验问题时：区分阻断错误和可继续的警告。
 - 不用“无限生成”承诺掩盖上下文限制；依靠项目文件实现跨会话延续。
 
