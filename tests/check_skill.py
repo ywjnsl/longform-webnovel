@@ -82,6 +82,9 @@ def main() -> None:
     assert "不要用直角引号" in text
     assert "正文对白用中文双引号" in writer_text
     assert "正文对白用中文双引号" in dialogue_text
+    assert "同一套叮嘱" in text
+    assert "表演在意" in dialogue_text
+    assert "机制样品" in writer_text
     assert "支流" in outline_text
     engine_text = (SKILL / "references" / "continuation-engine.md").read_text(encoding="utf-8")
     assert "一卷一条贯穿线" in engine_text
