@@ -258,7 +258,7 @@ def prepare_stage(
                 ],
                 "openQuestions": ["对手会怎样回应这次局面变化"],
             },
-            "resolution": {"action": "accepted", "notes": "独立审阅未发现阻断问题。"},
+            "resolution": {"action": "accepted", "notes": "测试夹具模拟通过结论，不代表真实独立审阅。"},
         },
     )
     project["totalContentChars"] = project.get("totalContentChars", 0) + content_chars(chapter_text)
@@ -751,6 +751,52 @@ def test_publishing_package(base: Path) -> None:
     assert "major decision" in refused.stderr
     confirmed = json.loads(run(*changed_args, "--confirmed").stdout)
     assert confirmed["title"] == "昨日寄来的死信"
+
+
+def test_drafting_with_unconfirmed_package(base: Path) -> None:
+    project = base / "unconfirmed-package"
+    stage = base / "unconfirmed-package-stage"
+    initialize(project, "暂定书名")
+    index = read_json(project / "project.json")
+    index["publishingPackage"] = {
+        "status": "unconfirmed",
+        "titleStatus": "unconfirmed",
+        "uniquenessStatus": "unconfirmed",
+        "coverPromptStatus": "unconfirmed",
+        "updatedAt": index["createdAt"],
+    }
+    write_json(project / "project.json", index)
+    # Use the real unconfirmed template, including its unfinished packaging fields.
+    template = base / "unconfirmed-template"
+    run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(template), "--title", "暂定书名")
+    shutil.copy2(template / "canon/publishing-package.md", project / "canon/publishing-package.md")
+
+    prepare_stage(project, stage, 1)
+    (stage / "reviews/第0001章-review.json").unlink()
+    rejected = commit(project, stage, expect=1)
+    assert "review.json" in rejected["error"]
+    assert read_json(project / "project.json")["lastCommittedChapter"] == 0
+
+    prepare_stage(project, stage, 1)
+    committed = commit(project, stage)
+    assert any("before publication" in warning for warning in committed["warnings"])
+    assert read_json(project / "project.json")["publishingPackage"]["status"] == "unconfirmed"
+    validated = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
+    assert validated["ok"]
+
+    contract = project / "canon/story-contract.md"
+    original_contract = contract.read_text(encoding="utf-8")
+    contract.write_text("# 故事合同\n\n待确认\n", encoding="utf-8")
+    rejected = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("unresolved marker" in error and "story-contract.md" in error for error in rejected["errors"])
+    contract.write_text(original_contract, encoding="utf-8")
+
+    # Deferring packaging must not permit a false active/confirmed declaration.
+    index = read_json(project / "project.json")
+    index["publishingPackage"]["status"] = "active"
+    write_json(project / "project.json", index)
+    rejected = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout)
+    assert any("publishingPackage status fields" in error for error in rejected["errors"])
 
 
 def test_market_research(base: Path) -> None:
@@ -1737,6 +1783,7 @@ def main() -> None:
         test_committed_project_guards(base)
         test_style_profiles(base)
         test_publishing_package(base)
+        test_drafting_with_unconfirmed_package(base)
         test_market_research(base)
         test_short_story_market_boundary(base)
         test_story_overlap(base)

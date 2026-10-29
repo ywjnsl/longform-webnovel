@@ -1,4 +1,4 @@
 interface:
   display_name: "中文网文、短中篇与短故事"
   short_description: "长篇连载、短中篇完结与短故事，支持群像角色和真人感改稿"
-  default_prompt: "使用 $longform-webnovel 创建一部有强制网文自然度审稿、角色隔离意图、未完成弧和多类型配角弧光的中文长篇网文、短中篇完整小说或番茄短故事。"
+  default_prompt: "使用 $longform-webnovel 按我的目标试写、续写或修订中文小说，保留人物声音，并在正式入库时完成审稿与正史同步。"

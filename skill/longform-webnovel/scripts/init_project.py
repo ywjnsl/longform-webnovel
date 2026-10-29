@@ -238,7 +238,7 @@ PUBLISHING_TEMPLATE = """# 书名与封面包装
 
 待确认：书名位置、断行、字体家族与字重、字号层级、字色、描边/阴影，以及作者名和平台角标的避让规则。
 
-在第一章正文前按 `references/publishing-package.md` 确认书名、公开检索记录、封面提示词和书名排版说明。
+可先使用暂定书名创作。发布前按 `references/publishing-package.md` 确认书名、公开检索记录、封面提示词和书名排版说明；未完成时保留 `unconfirmed`，不阻断正文入库。
 """
 
 MARKET_BRIEF_TEMPLATE = """# 市场观察

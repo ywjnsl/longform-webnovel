@@ -38,7 +38,7 @@ staging/
 └── sessions/2026-08-21-chapter-0016.md
 ```
 
-必须暂存 `project.json`、四个章节快照状态文件、新章节正文、确定性重复报告、语言风险扫描和独立审稿报告。四个快照为 `story-state.json`、`threads.json`、`rewards.json` 和 `cast-arcs.json`；群像强制章还要暂存合同、ruling、`planning/current-arc.md` 和上场角色 `cast/{id}/state.json`。朱雀截图及 `externalNaturalness` 仅在作者提供逐段证据时暂存。提交脚本会从正式项目构造隔离预览，其他未变化文件可以省略。
+必须暂存 `project.json`、四个章节快照状态文件、新章节正文、确定性重复报告、语言风险扫描和审稿报告。四个快照为 `story-state.json`、`threads.json`、`rewards.json` 和 `cast-arcs.json`；群像强制章还要暂存合同、ruling、`planning/current-arc.md` 和上场角色 `cast/{id}/state.json`。朱雀截图及 `externalNaturalness` 仅在作者提供逐段证据时暂存。提交脚本会从正式项目构造隔离预览，其他未变化文件可以省略。
 
 三个审稿 JSON 必须绑定最终正文的 SHA-256；`第NNNN章-review.json` 内的 `naturalness.reviewedTextSha256` 也必须匹配。正文发生任何修改后，重跑 `repetition_audit.py`、`prose_lint.py`、网文自然度审稿、编辑审稿和读者模拟，不能沿用旧报告、finding ID 或重复例外。番茄短故事的重复报告必须列入全部较早已提交分节，长篇默认列入最近 5 章；每个保留的 exact/near finding 都要在 `naturalness.repetitionExceptions` 中按最终哈希记录具体编辑理由。执行过自然度定向修改时，最终报告另存修改前哈希与处理类别。结构和阻断规则见 [review-system.md](review-system.md)。
 

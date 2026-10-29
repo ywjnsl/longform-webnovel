@@ -80,7 +80,7 @@
 
 `project.json.styleProfile` 保存主风格、辅风格、状态和更新时间；它必须与 `canon/style-profile.md` 的选择区一致。预设、自定义手法卡和换风格规则见 [style-system.md](style-system.md)。
 
-`project.json.publishingPackage` 保存定名、唯一性检查和封面提示词状态。新书第一章提交前必须为 `active`；旧项目迁移可为 `legacy`。完整流程见 [publishing-package.md](publishing-package.md)。
+`project.json.publishingPackage` 保存定名、唯一性检查和封面提示词状态。创作期间可保留 `unconfirmed`，校验提示发布包装未完成；整套发布包装完成并确认后才标记 `active`。旧项目迁移可为 `legacy`。完整流程见 [publishing-package.md](publishing-package.md)。
 
 `project.json.marketResearch` 保存可选研究状态、截止日期和来源/样本数，必须与 `canon/market-brief.md` 和对应快照一致。`unrequested` 不阻止创作。格式与边界见 [market-research.md](market-research.md)。
 
@@ -92,7 +92,7 @@
 
 长篇用 `project.json.rewardCadence` 保存贯穿线段序：`smallEvery: 3`、`majorEvery: 5`、`supercycle: 15`。这两个间隔只数贯穿线段，支流不计入，除非该段付的是贯穿线的账。不按文件章号强制第 3 章或第 5 章兑现。短故事保留该字段以兼容项目工具，但不执行这段序，改用全文比例结构锚点。改变模式或节拍属于故事合同级决定，必须由作者确认。
 
-`rewards.json` 的完整结构和证据规则见 [reward-system.md](reward-system.md)。长篇每 3 章需要 `small` 以上兑现、每 5 章需要 `major`；短故事只在不可逆选择、中点翻转、决定性对抗和结局等有限结构位置记录兑现。
+`rewards.json` 的完整结构和证据规则见 [reward-system.md](reward-system.md)。长篇按贯穿线段序参考每 3 段 `small` 以上兑现、每 5 段 `major`，不按章号分配；短故事只在不可逆选择、中点翻转、决定性对抗和结局等有限结构位置记录兑现。
 
 `cast-arcs.json` 不复制人物正史。稳定人设放在 `characters.md`；当前弧光与关系变化按 [supporting-cast.md](supporting-cast.md) 记录。迁移前旧章可标记为未审计，新章必须随章节快照同步。
 

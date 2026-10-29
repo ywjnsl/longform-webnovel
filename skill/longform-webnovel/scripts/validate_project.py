@@ -1346,8 +1346,10 @@ def main() -> int:
             if style_status == "unconfirmed" or style_primary == "unselected":
                 errors.append("Committed project must confirm a language style profile")
             if package_status == "unconfirmed":
-                errors.append("Committed project must confirm its title and provide a cover prompt before prose")
+                warnings.append("Publishing package is unconfirmed; complete title research and cover preparation before publication")
             for relative in CORE_TEXT_FILES:
+                if relative == "canon/publishing-package.md" and package_status == "unconfirmed":
+                    continue
                 content = (root / relative).read_text(encoding="utf-8")
                 markers = [marker for marker in UNRESOLVED_MARKERS if marker in content]
                 if markers:
