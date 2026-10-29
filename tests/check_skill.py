@@ -78,6 +78,10 @@ def main() -> None:
     assert "过了今晚，这单就不算你的了" in writer_text
     assert "旁白解释他其实是在叮嘱" in text
     assert "没有刀口" in text
+    assert "正文对白用中文双引号" in text
+    assert "不要用直角引号" in text
+    assert "正文对白用中文双引号" in writer_text
+    assert "正文对白用中文双引号" in dialogue_text
     assert "支流" in outline_text
     engine_text = (SKILL / "references" / "continuation-engine.md").read_text(encoding="utf-8")
     assert "一卷一条贯穿线" in engine_text
