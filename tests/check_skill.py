@@ -68,7 +68,16 @@ def main() -> None:
     assert "不写场景拍细纲" in outline_text
     assert "像人在场" in craft_text
     assert "不是正文的四段" in (SKILL / "references" / "scene-craft.md").read_text(encoding="utf-8")
-    assert "同一张嘴" in (SKILL / "references" / "dialogue-craft.md").read_text(encoding="utf-8")
+    dialogue_text = (SKILL / "references" / "dialogue-craft.md").read_text(encoding="utf-8")
+    assert "同一张嘴" in dialogue_text
+    assert "口气留在" in dialogue_text
+    assert "三种说法" in dialogue_text
+    assert "没有刀口" in dialogue_text
+    writer_text = (SKILL / "references" / "writer-context.md").read_text(encoding="utf-8")
+    assert "口气留在嘴里" in writer_text
+    assert "过了今晚，这单就不算你的了" in writer_text
+    assert "旁白解释他其实是在叮嘱" in text
+    assert "没有刀口" in text
     assert "支流" in outline_text
     engine_text = (SKILL / "references" / "continuation-engine.md").read_text(encoding="utf-8")
     assert "一卷一条贯穿线" in engine_text
