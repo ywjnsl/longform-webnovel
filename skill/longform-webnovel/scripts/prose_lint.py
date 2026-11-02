@@ -41,11 +41,70 @@ EXPLANATION_MARKERS = (
     "之所以",
     "一下子通透了",
     "心里通透了",
+    "心里全明白了",
     "分明是把",
     "说白了就是",
+    "为什么呢？因为",
+)
+CROWD_HYPE_PATTERNS = (
+    ("哄的一声炸开了锅", re.compile(r"哄的一声炸开了锅|顿时炸开了锅|人群炸开了锅")),
+    ("议论纷纷", re.compile(r"议论纷纷")),
+    ("第一…第二…第三…", re.compile(r"[“「]第一[，,。][”」][\s\S]{1,420}[“「]第二[，,。][”」][\s\S]{1,420}[“「]第三[，,。][”」]")),
+    ("半年都抬不起头", re.compile(r"竖起大拇指[^。！？!?\n]{0,40}抬不起头")),
 )
 NARRATOR_INTRUSION = ("她不知道的是", "他不知道的是", "殊不知", "多年以后", "仿佛预示")
-DIALOGUE_TAGS = ("说道", "问道", "笑道", "冷声道", "沉声道", "淡淡地说", "缓缓开口")
+TRANSITION_CLICHES = (
+    "就在这时",
+    "下一秒",
+    "紧接着",
+    "话音刚落",
+    "闻言",
+    "闻此",
+    "听罢",
+)
+LAZY_EMOTION_ATMOSPHERE_MARKERS = (
+    "不由得",
+    "不禁",
+    "不由自主",
+    "下意识地",
+    "下意识",
+    "前所未有的",
+    "难以言喻",
+    "微微一笑",
+    "嘴角微微上扬",
+    "勾起一抹弧度",
+    "缓缓开口",
+    "沉声道",
+    "闪过一丝寒光",
+    "气氛瞬间凝滞",
+    "空气仿佛凝固",
+    "寒意席卷全身",
+    "五味杂陈",
+    "喉结滚动",
+    "喉结滚了滚",
+    "心头一紧",
+    "气得浑身发抖",
+)
+DIRECT_EMOTION_LABELS = (
+    "很愤怒",
+    "十分愤怒",
+    "很难过",
+    "十分难过",
+    "很震惊",
+    "十分震惊",
+    "很委屈",
+    "十分委屈",
+    "气笑了",
+    "火冒三丈",
+    "恼羞成怒",
+)
+PPT_SENTENCE_PATTERNS = (
+    ("是…是…更是…", re.compile(r"是[^，。！？!?\n]{1,18}[，,]是[^，。！？!?\n]{1,18}[，,]更是")),
+    ("难道这不是…吗", re.compile(r"难道这?不是[^。！？!?\n]{1,28}吗[？?]")),
+    ("这，就是…", re.compile(r"这[，,]\s*就是")),
+    ("关联词成串", re.compile(r"(?:因为[^。！？!?\n]{1,30}所以[^。！？!?\n]{1,30}(?:虽然|但是|而且)|虽然[^。！？!?\n]{1,30}但是[^。！？!?\n]{1,30}(?:因为|所以|而且))")),
+)
+DIALOGUE_TAGS = ("说道", "问道", "笑道", "冷声道", "沉声道", "淡淡地说", "缓缓开口", "回答道", "开口道", "低吼道")
 MODIFIER_MARKERS = ("其实", "显然", "忽然", "突然", "缓缓", "轻轻", "微微", "默默", "下意识地", "终于", "只是", "竟然")
 SIMILE_MARKERS = ("仿佛", "犹如", "宛若", "如同", "像是")
 SUMMARY_ENDINGS = (
@@ -299,14 +358,68 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
         )
 
     tag_count, tag_evidence = count_markers(body, DIALOGUE_TAGS)
-    if tag_count >= 4 and tag_count / unit > 3:
+    if tag_count >= 3 or (tag_count >= 2 and tag_count / unit > 1.5):
         findings.append(
             {
                 "code": "dialogue-tag-density",
                 "severity": "review",
                 "count": tag_count,
                 "evidence": tag_evidence[:4],
-                "message": "Dialogue tags recur densely; a plain 说 can stay, but a tag wall may replace action and distinct voices.",
+                "message": "Dialogue tags ('说道/回答道/开口道/沉声道') recur; cut dialogue tags down and let lines and actions identify the speaker.",
+            }
+        )
+
+    transition_count, transition_evidence = count_markers(body, TRANSITION_CLICHES)
+    if transition_count >= 1:
+        findings.append(
+            {
+                "code": "transition-cliche-markers",
+                "severity": "review",
+                "count": transition_count,
+                "evidence": transition_evidence[:6],
+                "message": "Transition cliches ('就在这时/下一秒/紧接着/话音刚落/闻言/闻此/听罢') are lazy narration; delete on sight and cut straight to the concrete action.",
+            }
+        )
+
+    lazy_count, lazy_evidence = count_markers(body, (*LAZY_EMOTION_ATMOSPHERE_MARKERS, *DIRECT_EMOTION_LABELS))
+    if lazy_count >= 2:
+        findings.append(
+            {
+                "code": "lazy-emotion-or-atmosphere-cliche",
+                "severity": "review",
+                "count": lazy_count,
+                "evidence": lazy_evidence[:6],
+                "message": "Replace emotion/expression conclusions ('不由得/下意识/喉结滚动/心头一紧/气笑了/很难过/很愤怒') with visible physical evidence or spoken lines.",
+            }
+        )
+
+    ppt_count, ppt_evidence = count_regex_patterns(body, PPT_SENTENCE_PATTERNS)
+    if ppt_count >= 1:
+        findings.append(
+            {
+                "code": "ppt-rhetorical-formula",
+                "severity": "review",
+                "count": ppt_count,
+                "evidence": ppt_evidence[:4],
+                "message": "PPT-like rhetorical formulas ('是…是…更是…', '难道这不是…吗', '这，就是…', stacked conjunctions) sound synthetic; rewrite as concrete spoken or physical beats.",
+            }
+        )
+
+    para_lengths = [content_char_count(p) for p in body.splitlines() if content_char_count(p) >= 40]
+    uniform_blocks: list[str] = []
+    for idx in range(len(para_lengths) - 2):
+        w = para_lengths[idx : idx + 3]
+        avg_w = sum(w) / 3.0
+        if avg_w >= 65 and max(w) - min(w) <= 8:
+            uniform_blocks.append(f"paras[{idx+1}..{idx+3}]={w}")
+    if len(uniform_blocks) >= 2:
+        findings.append(
+            {
+                "code": "equal-length-paragraph-blocks",
+                "severity": "review",
+                "count": len(uniform_blocks),
+                "evidence": uniform_blocks[:4],
+                "message": "Three consecutive paragraphs have nearly identical lengths like copy-pasted blocks; break one paragraph's rhythm.",
             }
         )
 
@@ -445,6 +558,18 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": couplet_count,
                 "evidence": couplet_evidence[:4],
                 "message": "Antithetical theme couplets recur (你的X用来A，我的X用来B / X可以，X不能); keep only the half that changes money or relation.",
+            }
+        )
+
+    hype_count, hype_evidence = count_regex_patterns(body, CROWD_HYPE_PATTERNS)
+    if hype_count >= 2 or any("第一" in item or "炸开了锅" in item for item in hype_evidence):
+        findings.append(
+            {
+                "code": "stage-recap-or-crowd-hype",
+                "severity": "review",
+                "count": hype_count,
+                "evidence": [item[:36] for item in hype_evidence[:4]],
+                "message": "Stage-like numbered rules ('第一…第二…第三…'), crowd-chorus cliches ('哄的一声炸开了锅 / 议论纷纷'), or sidekick applause summarize the payoff; let concrete actions carry the scene.",
             }
         )
 
