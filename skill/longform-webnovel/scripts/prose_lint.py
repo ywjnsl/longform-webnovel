@@ -121,6 +121,9 @@ TRIAD_PATTERNS = (
     re.compile(r"既不[^，,。！？!?\n]{1,16}[，,]也不[^，,。！？!?\n]{1,16}[，,]"),
 )
 DASH_CHAIN_RE = re.compile(r"(?:——|—)(?:[^。！？!?\n]{0,48}(?:——|—))+")
+INDIRECT_SPEECH_RE = re.compile(
+    r"(?:他|她|[\u3400-\u9fff]{2,3})(?:又|只|才|还|便|就|先|也)?(?:说|问|答|回|喊|骂|叮嘱|嘀咕|嘟囔)[，,：:]?(?!\s*[“「『])"
+)
 
 
 def mean(values: list[int]) -> float:
@@ -457,15 +460,23 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
             }
         )
 
+    paragraphs_list = [line.strip() for line in body.splitlines() if line.strip()]
+    max_window_craft = 0
+    for idx in range(max(1, len(paragraphs_list))):
+        window_text = "\n".join(paragraphs_list[idx : idx + 5])
+        window_hits = sum(1 for marker in OCCUPATION_CRAFT_MARKERS if marker in window_text)
+        if window_hits > max_window_craft:
+            max_window_craft = window_hits
     craft_hits = [marker for marker in OCCUPATION_CRAFT_MARKERS if marker in body]
-    if len(craft_hits) >= 5:
+    total_craft_occurrences = sum(body.count(marker) for marker in OCCUPATION_CRAFT_MARKERS)
+    if len(craft_hits) >= 5 and (max_window_craft >= 4 or total_craft_occurrences / unit >= 1.2):
         findings.append(
             {
                 "code": "occupation-micro-action-cluster",
                 "severity": "review",
-                "count": len(craft_hits),
+                "count": total_craft_occurrences,
                 "evidence": craft_hits[:6],
-                "message": "Occupational process verbs cluster (repair, postpartum care, sewing, kitchen); do not pair each line of dialogue with a decomposed craft beat.",
+                "message": "Occupational process verbs cluster densely in a scene (repair, postpartum care, sewing, kitchen); keep only the step that snags or changes a choice, not a full craft checklist.",
             }
         )
 
@@ -477,6 +488,37 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": metrics["sentences"],
                 "evidence": [f"mean={metrics['meanSentenceChars']}", f"p50={metrics['sentenceLengthP50']}"],
                 "message": "Sentences are clipped into short staccato beats; let clauses flow with natural spoken breath instead of chopping every action into 5-10 character fragments.",
+            }
+        )
+
+    if metrics["sentences"] >= 30 and metrics["sentenceLengthP25"] >= 17.5:
+        findings.append(
+            {
+                "code": "over-smoothed-sentence-flow",
+                "severity": "review",
+                "count": metrics["sentences"],
+                "evidence": [
+                    f"p25={metrics['sentenceLengthP25']}",
+                    f"mean={metrics['meanSentenceChars']}",
+                    f"dialogueRatio={metrics['dialogueRatio']}",
+                ],
+                "message": "Even the shortest 25% of sentences are long (>=17.5 chars), often from turning live dialogue into a wall of '他说/她说' indirect narration; restore short spoken retorts and direct quotes.",
+            }
+        )
+
+    indirect_hits = [match.group(0) for match in INDIRECT_SPEECH_RE.finditer(body)]
+    if metrics["contentChars"] >= 1800 and metrics["dialogueRatio"] < 0.22 and len(indirect_hits) / unit >= 4.0:
+        findings.append(
+            {
+                "code": "summary-narration-flatten",
+                "severity": "review",
+                "count": len(indirect_hits),
+                "evidence": [
+                    f"dialogueRatio={metrics['dialogueRatio']}",
+                    f"indirectPer1k={round(len(indirect_hits) / unit, 2)}",
+                    *list(dict.fromkeys(indirect_hits))[:4],
+                ],
+                "message": "Live scenes are flattened into indirect '他说/她说' summary narration (low direct dialogue ratio), which causes short drafts and forces artificial mid-story padding; write out real-time quoted exchanges.",
             }
         )
 
