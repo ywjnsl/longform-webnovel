@@ -1188,6 +1188,23 @@ def test_prose_lint(base: Path) -> None:
     }
     assert "cadence-packaging" in cadence_codes
 
+    zhuque_risks = base / "第0006章-朱雀高危句型.txt"
+    zhuque_risks.write_text(
+        "不是原谅，是手酸了。我不是来骂人，我是来告诉你。不是恨你，是我爸不上楼。\n"
+        "推迟。推迟一次，老师会问。他签了。签的时候手不抖。脚步顿住，顿得很硬。\n"
+        "他站得很慢，响得很轻，放得很正，压得很稳，划得不重，点得很小。\n",
+        encoding="utf-8",
+    )
+    zhuque_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(zhuque_risks)).stdout
+        )["findings"]
+    }
+    assert "corrective-scaffold-density" in zhuque_codes
+    assert "anadiplosis-chain" in zhuque_codes
+    assert "degree-complement-cluster" in zhuque_codes
+
     baseline_paths: list[str] = []
     for index in range(3):
         path = base / f"第{index + 10:04d}章-人工基线.md"

@@ -30,7 +30,20 @@ MICRO_ACTIONS = (
     "映入眼帘",
     "脸色一变",
 )
-EXPLANATION_MARKERS = ("显然", "这意味着", "换句话说", "他意识到", "她意识到", "可想而知", "毋庸置疑", "之所以")
+EXPLANATION_MARKERS = (
+    "显然",
+    "这意味着",
+    "换句话说",
+    "他意识到",
+    "她意识到",
+    "可想而知",
+    "毋庸置疑",
+    "之所以",
+    "一下子通透了",
+    "心里通透了",
+    "分明是把",
+    "说白了就是",
+)
 NARRATOR_INTRUSION = ("她不知道的是", "他不知道的是", "殊不知", "多年以后", "仿佛预示")
 DIALOGUE_TAGS = ("说道", "问道", "笑道", "冷声道", "沉声道", "淡淡地说", "缓缓开口")
 MODIFIER_MARKERS = ("其实", "显然", "忽然", "突然", "缓缓", "轻轻", "微微", "默默", "下意识地", "终于", "只是", "竟然")
@@ -51,7 +64,15 @@ CORRECTIVE_PATTERNS = (
     ("并非…而是/只是…", re.compile(r"并非[^。！？!?\n]{0,48}(?:而是|只是)")),
     ("不是…。而是/只是…", re.compile(r"不是[^。！？!?\n]{0,64}[。！？!?]\s*(?:我|他|她|他们|她们|这|那)?(?:而是|只是)")),
     ("没有…。而是/只是…", re.compile(r"没有[^。！？!?\n]{0,64}[。！？!?]\s*(?:我|他|她|他们|她们|这|那)?(?:而是|只是)")),
+    ("不是…，是…", re.compile(r"不是[^，,。！？!?\n“”]{1,20}[，,]\s*(?:而)?是[^，,。！？!?\n]{1,24}")),
+    ("不是…。是…", re.compile(r"(?:我|他|她|这|那)?不是[^。！？!?\n“”]{1,20}[。！？!?]\s*(?:我|他|她|这|那)?是[^。！？!?\n]{1,28}")),
 )
+ANADIPLOSIS_PATTERNS = (
+    re.compile(r"([\u3400-\u9fff]{1,6}?)(?:了)?[。！？!?]\s*\1(?:的|了|时|候|时候|之后|以后|一次|一|就|才|不|也|还|都)"),
+    re.compile(r"([\u3400-\u9fff]{2,6})[。！？!?]\s*\1"),
+    re.compile(r"([\u3400-\u9fff]{1,3}?)(?:了|住|着)?[，,]\s*\1得[\u3400-\u9fff]{1,6}"),
+)
+DEGREE_COMPLEMENT_RE = re.compile(r"[\u3400-\u9fff]得(?:很|太|格外|有些|有点|异常|十分)[\u3400-\u9fff]{1,3}")
 THEME_CLOSURE_MARKERS = (
     "我没有拿到",
     "我拿回了",
@@ -354,6 +375,46 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": len(symmetry_evidence),
                 "evidence": symmetry_evidence,
                 "message": "Several symmetrical constructions appear together; inspect whether they create an unintended quotable cadence or serve a deliberate character voice.",
+            }
+        )
+
+    anadiplosis_hits = [
+        match.group(0).strip()
+        for pattern in ANADIPLOSIS_PATTERNS
+        for match in pattern.finditer(body)
+    ]
+    unique_anadiplosis = list(dict.fromkeys(anadiplosis_hits))
+    if len(anadiplosis_hits) >= 3 or (len(anadiplosis_hits) >= 2 and len(anadiplosis_hits) / unit > 0.8):
+        findings.append(
+            {
+                "code": "anadiplosis-chain",
+                "severity": "review",
+                "count": len(anadiplosis_hits),
+                "evidence": unique_anadiplosis[:4],
+                "message": "Tail-to-head word echoing (顶真/回环) or verb-plus-得 repetition recurs densely; merge into natural speech instead of chaining clause endings.",
+            }
+        )
+
+    degree_hits = [match.group(0) for match in DEGREE_COMPLEMENT_RE.finditer(body)]
+    if len(degree_hits) >= 5 and len(degree_hits) / unit > 1.2:
+        findings.append(
+            {
+                "code": "degree-complement-cluster",
+                "severity": "review",
+                "count": len(degree_hits),
+                "evidence": list(dict.fromkeys(degree_hits))[:4],
+                "message": "Frequent 'X得很Y' degree complements may make action descriptions sound mechanically annotated; keep concrete physical results instead.",
+            }
+        )
+
+    if metrics["sentences"] >= 20 and (metrics["meanSentenceChars"] < 12.5 or metrics["sentenceLengthP50"] <= 10.0):
+        findings.append(
+            {
+                "code": "staccato-sentence-clipping",
+                "severity": "review",
+                "count": metrics["sentences"],
+                "evidence": [f"mean={metrics['meanSentenceChars']}", f"p50={metrics['sentenceLengthP50']}"],
+                "message": "Sentences are clipped into short staccato beats; let clauses flow with natural spoken breath instead of chopping every action into 5-10 character fragments.",
             }
         )
 
