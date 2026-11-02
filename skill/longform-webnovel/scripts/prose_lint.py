@@ -83,6 +83,32 @@ THEME_CLOSURE_MARKERS = (
     "原来真正",
     "这才是",
 )
+ANTITHETICAL_COUPLET_PATTERNS = (
+    ("你的…用来…，我的…用来…", re.compile(r"你的[^，。！？!?\n]{1,12}用来[^，。！？!?\n]{1,24}[，,]\s*我的[^，。！？!?\n]{1,12}用来")),
+    ("我的…用来…，你的…用来…", re.compile(r"我的[^，。！？!?\n]{1,12}用来[^，。！？!?\n]{1,24}[，,]\s*你的[^，。！？!?\n]{1,12}用来")),
+    ("X可以，X不能", re.compile(r"([\u3400-\u9fff]{2,6})可以[，,]\1不能")),
+    ("X不X…不管", re.compile(r"([\u3400-\u9fff]{1,3})不\1[^。！？!?\n]{0,10}不管")),
+)
+MOTIF_RECITATION_RE = re.compile(
+    r"(?:买|替人|替他|替她)[^。！？!?\n]{0,8}(?:嘴|说话|张嘴)|买人说话|被人买走|买你吗|买不走|传话"
+)
+OCCUPATION_CRAFT_MARKERS = (
+    "拧螺丝",
+    "换螺母",
+    "抹机油",
+    "拧死",
+    "碘伏",
+    "热敷",
+    "吸奶",
+    "含接",
+    "刮猪",
+    "乳头霜",
+    "腹带",
+    "擦了身",
+    "擦身",
+    "倒扣在晾架",
+    "刷开",
+)
 REASONING_OPENING_RE = re.compile(r"^(?:我|他|她|他们|她们|这|那)(?:没有|不是|只是|终于|才发现|才明白)")
 SYMMETRY_PATTERNS = (
     re.compile(r"[\u3400-\u9fff]{1,8}在[，,、][\u3400-\u9fff]{1,8}在"),
@@ -404,6 +430,42 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": len(degree_hits),
                 "evidence": list(dict.fromkeys(degree_hits))[:4],
                 "message": "Frequent 'X得很Y' degree complements may make action descriptions sound mechanically annotated; keep concrete physical results instead.",
+            }
+        )
+
+    couplet_count, couplet_evidence = count_regex_patterns(body, ANTITHETICAL_COUPLET_PATTERNS)
+    if couplet_count >= 2:
+        findings.append(
+            {
+                "code": "antithetical-couplet-density",
+                "severity": "review",
+                "count": couplet_count,
+                "evidence": couplet_evidence[:4],
+                "message": "Antithetical theme couplets recur (你的X用来A，我的X用来B / X可以，X不能); keep only the half that changes money or relation.",
+            }
+        )
+
+    motif_hits = [match.group(0) for match in MOTIF_RECITATION_RE.finditer(body)]
+    if len(motif_hits) >= 4:
+        findings.append(
+            {
+                "code": "motif-recitation-cluster",
+                "severity": "review",
+                "count": len(motif_hits),
+                "evidence": list(dict.fromkeys(motif_hits))[:4],
+                "message": "A title-level metaphor (买嘴/传话/替人张嘴) is restated across scenes; say it once at the clash, then move to a new concrete obstacle.",
+            }
+        )
+
+    craft_hits = [marker for marker in OCCUPATION_CRAFT_MARKERS if marker in body]
+    if len(craft_hits) >= 5:
+        findings.append(
+            {
+                "code": "occupation-micro-action-cluster",
+                "severity": "review",
+                "count": len(craft_hits),
+                "evidence": craft_hits[:6],
+                "message": "Occupational process verbs cluster (repair, postpartum care, sewing, kitchen); do not pair each line of dialogue with a decomposed craft beat.",
             }
         )
 

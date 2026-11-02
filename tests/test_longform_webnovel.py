@@ -1205,6 +1205,23 @@ def test_prose_lint(base: Path) -> None:
     assert "anadiplosis-chain" in zhuque_codes
     assert "degree-complement-cluster" in zhuque_codes
 
+    zhuque_motif = base / "第0007章-朱雀隐喻对仗.txt"
+    zhuque_motif.write_text(
+        "你的卡用来买人说话，我的卡用来把该给的给清。办事可以，办事不能把人的嘴买走。暖不暖她不管，房租暖。\n"
+        "困跟拿钱买她的嘴是两回事。你昨天当众买何棠的嘴。就爱掏钱让人替他张嘴。那他们还能买你吗。谁买都买不走。\n"
+        "碘伏绕了一圈。热敷了十分钟。吸奶器收了三十毫升。含接调一下。刮猪脚。乳头霜拧开。腹带勒着。她擦了身。奶瓶倒扣在晾架。\n",
+        encoding="utf-8",
+    )
+    motif_codes = {
+        item["code"]
+        for item in json.loads(
+            run(sys.executable, str(SCRIPTS / "prose_lint.py"), str(zhuque_motif)).stdout
+        )["findings"]
+    }
+    assert "antithetical-couplet-density" in motif_codes
+    assert "motif-recitation-cluster" in motif_codes
+    assert "occupation-micro-action-cluster" in motif_codes
+
     baseline_paths: list[str] = []
     for index in range(3):
         path = base / f"第{index + 10:04d}章-人工基线.md"
