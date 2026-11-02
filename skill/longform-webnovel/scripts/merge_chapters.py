@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge committed webnovel chapters into one manuscript file."""
+"""Merge a completed fanqie short story into one manuscript file."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from pathlib import Path
 from webnovel_io import content_char_count, load_json, write_text_atomic
 
 
-CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
-TITLE_RE = re.compile(r"^#\s+第\d{4,}章(?:\s+.*)?$")
+CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.txt$")
+TITLE_RE = re.compile(r"^(?:#\s+)?第\d{4,}章(?:\s+.*)?$")
 
 
 def find_chapters(project: Path, committed: int) -> list[tuple[int, Path]]:
@@ -20,7 +20,7 @@ def find_chapters(project: Path, committed: int) -> list[tuple[int, Path]]:
     chapter_dir = project / "chapters"
     if not chapter_dir.is_dir():
         raise ValueError(f"Missing chapters directory: {chapter_dir}")
-    for path in chapter_dir.glob("*.md"):
+    for path in chapter_dir.glob("*.txt"):
         match = CHAPTER_RE.match(path.name)
         if not match:
             continue
@@ -54,11 +54,17 @@ def main() -> int:
 
     project = args.project.expanduser().resolve()
     manifest = load_json(project / "project.json")
+    mode = manifest.get("storyMode") or "serial"
+    if mode != "fanqie-short-story":
+        raise ValueError("合成稿只用于番茄短故事。长篇与短中篇按已提交章节交付，不生成合成稿。")
+    short_story = manifest.get("shortStory")
+    if not isinstance(short_story, dict) or short_story.get("status") != "complete":
+        raise ValueError("短故事需标记 complete 并通过项目校验后，才生成合成稿。")
     committed = manifest.get("lastCommittedChapter")
     if not isinstance(committed, int) or committed <= 0:
         raise ValueError("project.json needs a positive lastCommittedChapter")
 
-    output = (args.output or (project / f"{manifest.get('title', 'manuscript')}-合并稿.md")).expanduser().resolve()
+    output = (args.output or (project / f"{manifest.get('title', 'manuscript')}-合成稿.txt")).expanduser().resolve()
     if project / "chapters" in output.parents:
         raise ValueError("Merged output must not be written inside chapters/")
     if output.exists() and not args.force:

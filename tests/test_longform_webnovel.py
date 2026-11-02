@@ -181,7 +181,7 @@ def prepare_stage(
         write_json(stage / relative, document)
 
     snippet = body_evidence or f"第{chapter}章的关键兑现终于落在众人眼前。"
-    chapter_path = stage / "chapters" / f"第{chapter:04d}章-测试章.md"
+    chapter_path = stage / "chapters" / f"第{chapter:04d}章-测试章.txt"
     chapter_path.parent.mkdir(parents=True, exist_ok=True)
     chapter_text = f"# 第{chapter}章\n\n局面持续推进。{snippet}\n"
     chapter_path.write_text(chapter_text, encoding="utf-8")
@@ -197,8 +197,8 @@ def prepare_stage(
     digest = hashlib.sha256(chapter_text.encode("utf-8")).hexdigest()
     previous = sorted(
         (int(match.group(1)), path)
-        for path in (project_root / "chapters").glob("第*章-*.md")
-        if (match := re.match(r"^第(\d{4,})章-.+\.md$", path.name))
+        for path in (project_root / "chapters").glob("第*章-*.txt")
+        if (match := re.match(r"^第(\d{4,})章-.+\.txt$", path.name))
         and int(match.group(1)) < chapter
     )
     compared = previous if project.get("storyMode") == "fanqie-short-story" else previous[-5:]
@@ -264,8 +264,8 @@ def prepare_stage(
     project["totalContentChars"] = project.get("totalContentChars", 0) + content_chars(chapter_text)
     if overwrite_first:
         replacement = "# 被预览替换，但不应污染正式项目\n\n替换后的正文仍然有效。\n"
-        original = (project_root / "chapters" / "第0001章-测试章.md").read_text(encoding="utf-8")
-        (stage / "chapters" / "第0001章-测试章.md").write_text(replacement, encoding="utf-8")
+        original = (project_root / "chapters" / "第0001章-测试章.txt").read_text(encoding="utf-8")
+        (stage / "chapters" / "第0001章-测试章.txt").write_text(replacement, encoding="utf-8")
         project["totalContentChars"] += content_chars(replacement) - content_chars(original)
     write_json(stage / "project.json", project)
     session = stage / "sessions" / f"test-chapter-{chapter:04d}.md"
@@ -480,7 +480,7 @@ def test_novella_mode(base: Path) -> None:
     digest = hashlib.sha256()
     for chapter in range(1, 5):
         parent = stage if chapter == 4 else project
-        path = parent / "chapters" / f"第{chapter:04d}章-测试章.md"
+        path = parent / "chapters" / f"第{chapter:04d}章-测试章.txt"
         digest.update(f"chapter:{chapter:04d}:{path.name}\n".encode("utf-8"))
         digest.update(path.read_bytes())
     final = {
@@ -537,7 +537,14 @@ def test_novella_mode(base: Path) -> None:
 def test_committed_project_guards(base: Path) -> None:
     project = base / "guard-errors"
     run(sys.executable, str(SCRIPTS / "init_project.py"), "--path", str(project), "--title", "错误防线")
-    chapter = project / "chapters" / "第0001章-未同步.md"
+    rejected = project / "chapters" / "第0001章-旧稿.md"
+    rejected.write_text("这里不该是 Markdown 章节。\n", encoding="utf-8")
+    markdown_errors = json.loads(
+        run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project), expect=1).stdout
+    )["errors"]
+    assert any("must be a txt file" in error for error in markdown_errors)
+    rejected.unlink()
+    chapter = project / "chapters" / "第0001章-未同步.txt"
     chapter.write_text("# 第一章\n\n这里已经出现正文，但索引字数没有同步。\n", encoding="utf-8")
     index = read_json(project / "project.json")
     index["lastCommittedChapter"] = 1
@@ -1263,10 +1270,10 @@ def test_migration(base: Path) -> None:
     assert validation["ok"] and any("Legacy chapters through 3" in warning for warning in validation["warnings"])
 
     legacy_revision_stage = base / "legacy-revision-stage"
-    legacy_chapter_text = (project / "chapters" / "第0003章-旧章.md").read_text(encoding="utf-8")
+    legacy_chapter_text = (project / "chapters" / "第0003章-旧章.txt").read_text(encoding="utf-8")
     prepare_stage(project, legacy_revision_stage, 3)
-    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
-    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.txt"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.txt")
     staged_index = read_json(legacy_revision_stage / "project.json")
     staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
     write_json(legacy_revision_stage / "project.json", staged_index)
@@ -1278,8 +1285,8 @@ def test_migration(base: Path) -> None:
     assert "review needs naturalness object" in rejected_revision["error"]
 
     prepare_stage(project, legacy_revision_stage, 3)
-    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
-    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.txt"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.txt")
     staged_index = read_json(legacy_revision_stage / "project.json")
     staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
     write_json(legacy_revision_stage / "project.json", staged_index)
@@ -1291,8 +1298,8 @@ def test_migration(base: Path) -> None:
     assert "review needs reader object" in rejected_revision["error"]
 
     prepare_stage(project, legacy_revision_stage, 3)
-    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.md"
-    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.md")
+    generated_chapter = legacy_revision_stage / "chapters" / "第0003章-测试章.txt"
+    generated_chapter.replace(legacy_revision_stage / "chapters" / "第0003章-旧章.txt")
     staged_index = read_json(legacy_revision_stage / "project.json")
     staged_index["totalContentChars"] -= content_chars(legacy_chapter_text)
     write_json(legacy_revision_stage / "project.json", staged_index)
@@ -1562,11 +1569,11 @@ def test_commit_validation_and_restore(base: Path) -> None:
     first = commit(project, stage)
     first_backup = Path(first["backup"])
     assert read_json(project / "project.json")["lastCommittedChapter"] == 1
-    original_first = (project / "chapters" / "第0001章-测试章.md").read_text(encoding="utf-8")
+    original_first = (project / "chapters" / "第0001章-测试章.txt").read_text(encoding="utf-8")
 
     prepare_stage(project, stage, 2)
     commit(project, stage, dry_run=True)
-    assert (project / "chapters" / "第0001章-测试章.md").read_text(encoding="utf-8") == original_first
+    assert (project / "chapters" / "第0001章-测试章.txt").read_text(encoding="utf-8") == original_first
 
     restored = json.loads(
         run(
@@ -1580,7 +1587,7 @@ def test_commit_validation_and_restore(base: Path) -> None:
     )
     assert restored["validation"]["ok"]
     assert read_json(project / "project.json")["lastCommittedChapter"] == 0
-    assert not (project / "chapters" / "第0001章-测试章.md").exists()
+    assert not (project / "chapters" / "第0001章-测试章.txt").exists()
 
     prepare_stage(project, stage, 1)
     commit(project, stage)
@@ -1654,7 +1661,7 @@ def test_commit_validation_and_restore(base: Path) -> None:
     finally:
         sys.path.remove(str(SCRIPTS))
     assert read_json(project / "project.json")["lastCommittedChapter"] == 9
-    assert not (project / "chapters" / "第0010章-测试章.md").exists()
+    assert not (project / "chapters" / "第0010章-测试章.txt").exists()
     rollback_validation = json.loads(run(sys.executable, str(SCRIPTS / "validate_project.py"), str(project)).stdout)
     assert rollback_validation["ok"]
 
@@ -1701,7 +1708,7 @@ def test_persistent_tail_across_commit_and_restore(base: Path) -> None:
     project, stage = base / "draft-recovery", base / "draft-recovery-stage"
     initialize(project, "持久尾稿恢复")
     prepare_stage(project, stage, 1)
-    head = stage / "chapters/第0001章-测试章.md"
+    head = stage / "chapters/第0001章-测试章.txt"
     tail = base / "recovery-tail.md"
     source = base / "recovery-source.md"
     tail_raw = "未提交的尾稿仍在追查另一条线索。\r\n".encode("utf-8")
@@ -1774,6 +1781,89 @@ def test_chapter_metrics_cuts_by_length_without_padding() -> None:
     assert long_report["lengthAction"] == "move-excess"
 
 
+def test_merge_manuscript_only_for_completed_short_story(base: Path) -> None:
+    serial = base / "merge-serial"
+    run(
+        sys.executable,
+        str(SCRIPTS / "init_project.py"),
+        "--path",
+        str(serial),
+        "--title",
+        "长篇不合成",
+        "--style",
+        "fanqie-clean",
+        "--mode",
+        "serial",
+    )
+    denied = json.loads(
+        run(sys.executable, str(SCRIPTS / "merge_chapters.py"), "--project", str(serial), expect=1).stdout
+    )
+    assert denied["ok"] is False
+    assert "番茄短故事" in denied["error"]
+
+    novella = base / "merge-novella"
+    run(
+        sys.executable,
+        str(SCRIPTS / "init_project.py"),
+        "--path",
+        str(novella),
+        "--title",
+        "短中篇不合成",
+        "--style",
+        "fanqie-clean",
+        "--mode",
+        "novella",
+    )
+    denied_novella = json.loads(
+        run(sys.executable, str(SCRIPTS / "merge_chapters.py"), "--project", str(novella), expect=1).stdout
+    )
+    assert "番茄短故事" in denied_novella["error"]
+
+    short = base / "merge-short"
+    run(
+        sys.executable,
+        str(SCRIPTS / "init_project.py"),
+        "--path",
+        str(short),
+        "--title",
+        "短故事合成",
+        "--style",
+        "fanqie-clean",
+        "--mode",
+        "fanqie-short-story",
+        "--sections",
+        "1",
+    )
+    planning = json.loads(
+        run(sys.executable, str(SCRIPTS / "merge_chapters.py"), "--project", str(short), expect=1).stdout
+    )
+    assert "complete" in planning["error"]
+
+    index = read_json(short / "project.json")
+    index["lastCommittedChapter"] = 1
+    index["shortStory"]["status"] = "complete"
+    write_json(short / "project.json", index)
+    chapter = short / "chapters" / "第0001章-灯.txt"
+    chapter.write_text("# 第0001章 灯\n\n她把灯拧亮。\n", encoding="utf-8")
+    output = short / "短故事合成-合成稿.txt"
+    merged = json.loads(
+        run(
+            sys.executable,
+            str(SCRIPTS / "merge_chapters.py"),
+            "--project",
+            str(short),
+            "--output",
+            str(output),
+            "--strip-headings",
+        ).stdout
+    )
+    assert merged["ok"] is True
+    assert merged["chapters"] == 1
+    text = output.read_text(encoding="utf-8")
+    assert "她把灯拧亮。" in text
+    assert not any(line.startswith("# ") for line in text.splitlines())
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="longform-webnovel-v2-") as temporary:
         base = Path(temporary)
@@ -1797,6 +1887,7 @@ def main() -> None:
         test_commit_validation_and_restore(base)
         test_event_context_carry_forward(base)
         test_persistent_tail_across_commit_and_restore(base)
+        test_merge_manuscript_only_for_completed_short_story(base)
     test_chapter_metrics_cuts_by_length_without_padding()
     print("longform-webnovel v8 integration checks passed")
 

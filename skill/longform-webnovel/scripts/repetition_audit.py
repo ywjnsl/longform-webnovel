@@ -13,7 +13,7 @@ from pathlib import Path
 
 from webnovel_io import load_json, story_mode, write_json_atomic
 
-CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
+CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.(?:txt|md)$")
 UNIT_RE = re.compile(r"[^。！？!?]+[。！？!?]?")
 CONTENT_RE = re.compile(r"[A-Za-z0-9\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 NORMALIZE_RE = re.compile(r"[^A-Za-z0-9\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
@@ -163,7 +163,7 @@ def project_comparisons(primary: Path, project_root: Path) -> list[Path]:
         return []
     current = int(match.group(1))
     candidates: list[tuple[int, Path]] = []
-    for path in (project_root / "chapters").glob("第*章-*.md"):
+    for path in (project_root / "chapters").glob("第*章-*.txt"):
         candidate_match = CHAPTER_RE.match(path.name)
         if candidate_match and int(candidate_match.group(1)) < current:
             candidates.append((int(candidate_match.group(1)), path))

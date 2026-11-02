@@ -9,6 +9,8 @@ import re
 from pathlib import Path
 
 from webnovel_io import (
+    CHAPTER_MD_RE,
+    CHAPTER_TXT_RE,
     CURRENT_CAST_SCHEMA,
     CURRENT_PROJECT_SCHEMA,
     CURRENT_REWARD_SCHEMA,
@@ -23,9 +25,6 @@ from webnovel_io import (
 )
 from webnovel_style import PRESETS, render_legacy_profile, render_profile, render_unselected_profile
 from init_project import TEXT_FILES, write_character
-
-
-CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
 
 
 def render_legacy_package(title: str) -> str:
@@ -301,10 +300,19 @@ def main() -> int:
             }
         )
     total_content_chars = 0
-    for chapter_path in (root / "chapters").glob("*.md"):
-        match = CHAPTER_RE.match(chapter_path.name)
-        if match and int(match.group(1)) <= committed:
-            total_content_chars += content_char_count(chapter_path.read_text(encoding="utf-8"))
+    chapter_dir = root / "chapters"
+    renames: list[tuple[Path, Path]] = []
+    if chapter_dir.is_dir():
+        for chapter_path in list(chapter_dir.glob("*.txt")) + list(chapter_dir.glob("*.md")):
+            match = CHAPTER_TXT_RE.match(chapter_path.name) or CHAPTER_MD_RE.match(chapter_path.name)
+            if match and int(match.group(1)) <= committed:
+                total_content_chars += content_char_count(chapter_path.read_text(encoding="utf-8"))
+        for chapter_path in chapter_dir.glob("*.md"):
+            if not CHAPTER_MD_RE.match(chapter_path.name):
+                continue
+            target = chapter_path.with_suffix(".txt")
+            if not target.exists():
+                renames.append((chapter_path, target))
     project["totalContentChars"] = total_content_chars
 
     rewards["schemaVersion"] = CURRENT_REWARD_SCHEMA
@@ -331,6 +339,7 @@ def main() -> int:
         or json.dumps(project, ensure_ascii=False, sort_keys=True) != original_project
         or json.dumps(rewards, ensure_ascii=False, sort_keys=True) != original_rewards
         or json.dumps(cast_doc, ensure_ascii=False, sort_keys=True) != original_cast
+        or bool(renames)
     )
     result = {
         "fromVersion": old_version,
@@ -357,6 +366,7 @@ def main() -> int:
             paths.append(Path(f"cast/{protagonist_id}/SKILL.md"))
             paths.append(Path(f"cast/{protagonist_id}/state.json"))
         backup = backup_files(root, paths, f"migration-v{old_version}-to-v{CURRENT_PROJECT_SCHEMA}")
+        moved: list[tuple[Path, Path]] = []
         try:
             write_json_atomic(project_path, project)
             write_json_atomic(rewards_path, rewards)
@@ -383,7 +393,13 @@ def main() -> int:
                 write_text_atomic(arc_path, TEXT_FILES["planning/current-arc.md"])
             if cast_needs_write:
                 write_character(root, protagonist_id, "主角")
+            for source, target in renames:
+                source.replace(target)
+                moved.append((target, source))
         except Exception:
+            for new_path, old_path in reversed(moved):
+                if new_path.exists() and not old_path.exists():
+                    new_path.replace(old_path)
             restore_backup(root, backup)
             raise
         result["backup"] = str(backup)

@@ -54,7 +54,7 @@ python3 <skill-dir>/scripts/init_project.py \
 - 最后一章记录已交付的 `major` 结局回报，实际字数满足作者明确下限。
 - 按章号顺序通读全文，生成绑定全部已提交章文件名和正文哈希的 `reviews/final-review.json`，与最后一章一起暂存提交。
 
-终审复用 [review-system.md](review-system.md) 的全文结构，将 `storyMode` 写为 `novella`，`checks` 在通用七项之外增加 `subplots`、`characterDestinations`、`lengthContract`，均须为 `pass`。下限与结局回报由校验器检查；文学判断由审稿记录承担，脚本通过不证明小说质量。
+终审复用 [review-system.md](review-system.md) 的全文结构，将 `storyMode` 写为 `novella`，`checks` 在通用七项之外增加 `subplots`、`characterDestinations`、`lengthContract`，均须为 `pass`。下限与结局回报由校验器检查；文学判断由审稿记录承担，脚本通过不证明小说质量。完结后不生成合成稿，正文以各章文件为准。
 
 目标总字数与明确下限分开：仅低于目标的九成会提示复核，低于明确下限会阻断完结。不得为消除提示注水。完结章号可以不同于任何估算，不能要求刚好写满 20 章。完结后停止自动续写；修改已有正文使用 `--allow-revision` 并更新终审，新续作或改模式需重新确认合同。
 

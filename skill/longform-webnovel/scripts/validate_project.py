@@ -13,6 +13,8 @@ from pathlib import Path
 from market_brief import validate_snapshot
 from publishing_package import analyze_title
 from webnovel_io import (
+    CHAPTER_MD_RE,
+    CHAPTER_TXT_RE,
     CURRENT_CAST_SCHEMA,
     CURRENT_PROJECT_SCHEMA,
     CURRENT_REWARD_SCHEMA,
@@ -134,7 +136,7 @@ FINAL_REVIEW_CHECKS = (
     "titleResonance",
     "endingBoundary",
 )
-CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
+CHAPTER_RE = CHAPTER_TXT_RE
 PLACEHOLDER_VALUES = {"待填写", "待规划", "待复核", "tbd", "todo"}
 CORE_TEXT_FILES = (
     "canon/story-contract.md",
@@ -1316,9 +1318,12 @@ def main() -> int:
             warnings.append(f"Chapter {draft} has draft content not fully committed to state")
 
         for path in (root / "chapters").glob("*.md"):
+            if CHAPTER_MD_RE.match(path.name):
+                errors.append(f"Chapter prose must be a txt file, not markdown: {path.name}")
+        for path in (root / "chapters").glob("*.txt"):
             match = CHAPTER_RE.match(path.name)
             if not match:
-                warnings.append(f"Chapter filename does not match 第NNNN章-标题.md: {path.name}")
+                warnings.append(f"Chapter filename does not match 第NNNN章-标题.txt: {path.name}")
                 continue
             number = int(match.group(1))
             if number in chapter_files:

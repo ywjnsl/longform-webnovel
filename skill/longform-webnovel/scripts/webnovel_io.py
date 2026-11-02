@@ -21,6 +21,9 @@ VALID_STORY_MODES = {"serial", "fanqie-short-story", "novella"}
 FINITE_STORY_MODES = {"fanqie-short-story", "novella"}
 CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 ASCII_WORD_RE = re.compile(r"[A-Za-z0-9]+")
+CHAPTER_TITLE_LINE_RE = re.compile(r"^第\d{4,}章(?:\s+.*)?$")
+CHAPTER_TXT_RE = re.compile(r"^第(\d{4,})章-.+\.txt$")
+CHAPTER_MD_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
 
 
 def utc_now() -> str:
@@ -34,7 +37,7 @@ def strip_markdown(text: str) -> str:
         if line.lstrip().startswith("```"):
             in_fence = not in_fence
             continue
-        if in_fence or line.lstrip().startswith("#"):
+        if in_fence or line.lstrip().startswith("#") or CHAPTER_TITLE_LINE_RE.match(line.strip()):
             continue
         lines.append(re.sub(r"!?(?:\[([^]]*)\])\([^)]*\)", r"\1", line))
     return "\n".join(lines)

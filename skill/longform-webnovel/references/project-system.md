@@ -31,7 +31,7 @@
 │   ├── rewards.json
 │   ├── cast-arcs.json
 │   └── decisions.json
-├── chapters/
+├── chapters/                 # 正文章节只放 第NNNN章-标题.txt，不生成章节 Markdown
 ├── reviews/
 ├── research/
 │   ├── market-snapshots/
@@ -76,7 +76,9 @@
 
 短中篇沿用这些目录：`series-map.md` 存全书终点、副线与人物归宿，`current-volume.md` 存全书阶段，`rolling-outline.md` 保留剩余阶段并只细化当前事件。阶段不绑定章号，不执行长篇 3/5 段周期或短故事的分节编号锚点；结局交付才允许完结。完成状态和全文终审的公共检查在有限篇幅模式间共用，旧短故事字段保持兼容。
 
-`totalContentChars` 必须等于全部已提交正文的有效字符总数，口径与 `chapter_metrics.py` 一致：忽略 Markdown 标题和代码块，中文按字、连续英文或数字按词计数。正式提交后，故事合同、人物、世界、语言风格、当前卷和滚动章纲不得仍残留初始化模板中的“待填写”“待确认”“待规划”。
+`chapters/` 里的正文章节只使用 `第NNNN章-标题.txt`。正文是纯文本，不加 Markdown 标题；需要章名时，首行写成 `第NNNN章 标题`。不要再生成章节 `.md`。审稿说明、交接和设定文档仍用 Markdown。
+
+`totalContentChars` 必须等于全部已提交正文的有效字符总数，口径与 `chapter_metrics.py` 一致：忽略 Markdown 标题、首行章名和代码块，中文按字、连续英文或数字按词计数。正式提交后，故事合同、人物、世界、语言风格、当前卷和滚动章纲不得仍残留初始化模板中的“待填写”“待确认”“待规划”。
 
 `project.json.styleProfile` 保存主风格、辅风格、状态和更新时间；它必须与 `canon/style-profile.md` 的选择区一致。预设、自定义手法卡和换风格规则见 [style-system.md](style-system.md)。
 

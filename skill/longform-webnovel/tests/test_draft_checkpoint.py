@@ -37,7 +37,7 @@ class DraftCheckpointTests(unittest.TestCase):
         return save(self.root, 1, self.source, self.head, self.tail)
 
     def commit_first(self, body="他把灯递过去。"):
-        path = self.root / "chapters/第0001章-门口.md"
+        path = self.root / "chapters/第0001章-门口.txt"
         path.write_text('# 第一章 门口\n\n' + body + '\n')
         self.set_chapter(1)
         return path

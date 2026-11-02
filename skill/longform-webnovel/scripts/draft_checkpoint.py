@@ -99,7 +99,7 @@ def inspect(root: Path) -> tuple[dict, Path | None, dict | None]:
         or first + rest != raw
     ):
         raise ValueError("Recovery snapshots changed; restore them before resuming")
-    chapters = list((root / "chapters").glob(f"第{chapter:04d}章-*.md"))
+    chapters = list((root / "chapters").glob(f"第{chapter:04d}章-*.txt"))
     if len(chapters) != 1:
         raise ValueError("Expected one committed predecessor chapter")
     predecessor = chapters[0]

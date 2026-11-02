@@ -14,7 +14,7 @@ from pathlib import Path
 from webnovel_io import content_char_count, strip_markdown, write_json_atomic
 
 
-CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.md$")
+CHAPTER_RE = re.compile(r"^第(\d{4,})章-.+\.(?:txt|md)$")
 SENTENCE_SPLIT_RE = re.compile(r"[。！？!?]+")
 CJK_ONLY_RE = re.compile(r"[^\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 DIALOGUE_RE = re.compile(r"[“「『](.*?)[”」』]", re.S)

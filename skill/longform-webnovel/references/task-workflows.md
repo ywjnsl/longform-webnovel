@@ -54,6 +54,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 - 短故事动笔前建立入口合同；标题、前 300 字、主情绪发动机、情绪波形、主动选择和试读节点按 [short-story-information-flow.md](short-story-information-flow.md)、[fanqie-new-book.md](fanqie-new-book.md) 与 [length-modes.md](length-modes.md) 联动检查。前 300 字必须让冷读者说清“谁遇到什么、做了什么、会失去什么、接下来等哪个答案”，但不按固定句数或反转次数机械写作。
 - 把 `shortStory.status` 从 `planning` 更新为 `drafting` 后再提交第一节。全文终审通过、主要线索闭合且结局回报已交付后改为 `complete`。
 - 标记 `complete` 后停止自动续写。改成长篇、增加续作或重开结局都必须询问作者。
+- 短故事标记 `complete` 且项目校验通过后，按 [operations.md](operations.md) 运行 `merge_chapters.py --strip-headings` 生成合成稿。长篇与短中篇不生成合成稿，正文以各章文件为准。
 - 短故事进入 `complete` 前必须完成全文外部读者终审，写入 `reviews/final-review.json`；这里的“第三视角”指作者退场的普通读者审读，不改变正文既定人称。终审收口必须主承诺兑现且最后一场动作做完，细则见 [fanqie-signing-quality.md](fanqie-signing-quality.md)。人物选择一致性、胜利代价、情绪表达与对白辨识见 [fanqie-character-craft.md](fanqie-character-craft.md)。
 - 发布后不要从一次小流量测试反推永久结论。保存推荐状态和完整漏斗数据；下一个故事的选题与包装可以吸收数据，但不能把无样本的猜测写成平台规则。
 
@@ -84,7 +85,7 @@ python3 <skill-dir>/scripts/init_project.py --path <项目目录> --title <书�
 把正文和状态更新视为同一次提交。不得先直接修改正式项目再补状态：
 
 1. 按 [operations.md](operations.md) 创建 staging 目录，把新正文和所有拟更新文件按项目相对路径写入 staging。
-2. 写作时先保存连续正文草稿；切出约2500有效字的一片后，先按operations用 `draft_checkpoint.py save` 保存切片前原稿、前片与尾稿，再按实际内容确定标题，写入 staging 的 `chapters/第NNNN章-标题.md`。未完事件仍留在当前弧与滚动事件纲中，尾后草稿不能提前进入正史。不要覆盖现有章节，除非用户明确要求修订。保存该片原稿到 `reviews/drafts/第NNNN章-before-naturalization.md`，完成后处理并写 `reviews/第NNNN章-naturalization.md`，再运行指标与审稿；报告绑定最终正文。前片提交后先检查保存点，再接续工作尾稿，避免语言或结构改动使尾稿失配。
+2. 写作时先保存连续正文草稿；切出约2500有效字的一片后，先按operations用 `draft_checkpoint.py save` 保存切片前原稿、前片与尾稿，再按实际内容确定标题，写入 staging 的 `chapters/第NNNN章-标题.txt`。正文是纯文本：不要加 `#` 标题，不要把同一章再写成 `.md`。章名需要出现时，首行只写 `第NNNN章 标题`。未完事件仍留在当前弧与滚动事件纲中，尾后草稿不能提前进入正史。不要覆盖现有章节，除非用户明确要求修订。保存该片原稿到 `reviews/drafts/第NNNN章-before-naturalization.txt`，完成后处理并写 `reviews/第NNNN章-naturalization.md`，再运行指标与审稿；报告绑定最终正文。前片提交后先检查保存点，再接续工作尾稿，避免语言或结构改动使尾稿失配。
 3. 写作时用 `chapter_cut.py` 定位未切草稿的边界，默认只输出报告。`continue` 表示当前事件继续推进；`ready` 给出 `cutPoint.offset`（原始文本的Unicode字符索引）及两片有效字数；`needs-boundary` 表示附近未找到句段边界，检查已有文本，不改写剧情来适应切点。阈值使用项目的 `targetChapterChars`（默认2500）；`--window` 默认100是自动选点的距离限制，不是写作篇幅合同。事件已经结束时加 `--final` 处理余片。需要导出时同时指定两个新路径，脚本保留原稿与全部尾后文字，拒绝覆盖已有文件：
 
 ```bash
@@ -104,7 +105,7 @@ python3 <skill-dir>/scripts/chapter_cut.py <连续草稿> --target 2500 --head <
 10. 在 staging 中更新 `state/cast-arcs.json`：只为本章真实发生的配角选择、人生状态或关系变化追加证据；普通露面不算弧光推进。有人离开当前这段，或到了该回来的时候，同步改他的 `presence`：当前下线但之后还会出现的，写明回到哪条线和哪件事之后；留给后卷或这条线已经说完的，写明卷或原因。同步更新上场角色的 `cast/{id}/state.json`、`contracts/chapter-NNNN.json`、`intents/chapter-NNNN/` 与 `planning/current-arc.md`。弧未闭环则保持 `open`。卡上标明不再出场的人，本章不再写回来。
 11. 在 staging 中更新 `planning/rolling-outline.md`：长篇只移除已经真正结束的事件，未完事件沿用原完成条件并更新接续点，不因切出一章就删掉这一段。保持贯穿线起点、必经转折和卷末可见；支流不占章号。兑现记录在实际发生的文本切片中，不按章号补齐15章锚点。短故事删除已完成分节并保留全部剩余结构，不向结局之后补锚点。
 12. 在 staging 中更新 `project.json` 的章号、总字数和当前卷；新增 `sessions/` 交接记录。短故事最后一节或短中篇最后一章若要标记 `complete`，同时暂存 `reviews/final-review.json`；短中篇更新 `finiteStory.status`，终审另核对副线、人物归宿和篇幅合同。
-13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。
+13. 运行 `commit_chapter.py --project <项目> --staging <staging>`。它会构造预览项目、校验、备份并提交；不要绕过此步骤。长篇与短中篇提交后只保留章节文件，不把已提交章合并成合成稿。短故事只在全文标记 `complete` 且校验通过后才生成合成稿。
 
 提交失败时正式项目保持原状态，修复 staging 后重试。若异常中断造成部分写入，使用脚本报告的备份目录执行 `commit_chapter.py --restore`，不得假装提交成功。
 
@@ -180,7 +181,7 @@ python3 <skill-dir>/scripts/chapter_cut.py <连续草稿> --target 2500 --head <
 - `scripts/draft_checkpoint.py`：保存项目内切片与尾稿，按已提交章号恢复；前章或尾稿变化时提示接续核对。
 - `scripts/chapter_metrics.py`：统计正文有效字数、段落、对话比例和重复段落信号，并显示同一切点建议。
 - `scripts/opening_audit.py`：按有效字符口径截取短故事前 100/200/300 字窗口，输出入口审稿所需的文本与基础指标；不代替语义判断。
-- `scripts/merge_chapters.py`：将已提交章节按顺序合并为单一 Markdown，可移除章节 H1，并验证有效字数不变。
+- `scripts/merge_chapters.py`：仅在番茄短故事标记 `complete` 后，将已提交 txt 分节合并为 `{书名}-合成稿.txt`，可移除首行章名，并验证有效字数不变。长篇与短中篇调用会被拒绝。
 - `scripts/prose_lint.py`：扫描模板化语言和项目基线漂移，只输出编辑风险信号。
 - `scripts/repetition_audit.py`：检查当前章节内及规定前文范围中的长句精确重复与高相似复述，输出哈希绑定的编辑证据。
 - `scripts/validate_project.py`：校验项目结构、JSON 状态、剧情线窗口、爽点正文证据、模式重复、群像合同/意图和提交一致性。

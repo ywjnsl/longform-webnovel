@@ -72,13 +72,13 @@ class RepetitionAuditTests(unittest.TestCase):
             (root / "project.json").write_text(
                 json.dumps({"storyMode": "fanqie-short-story"}), encoding="utf-8"
             )
-            self.write_chapter(chapters, "第0001章-一.md", "第一节里只有这一句足够长的测试正文。")
-            self.write_chapter(chapters, "第0002章-二.md", "第二节里只有这一句足够长的测试正文。")
-            third = self.write_chapter(chapters, "第0003章-三.md", "第三节里只有这一句足够长的测试正文。")
+            self.write_chapter(chapters, "第0001章-一.txt", "第一节里只有这一句足够长的测试正文。")
+            self.write_chapter(chapters, "第0002章-二.txt", "第二节里只有这一句足够长的测试正文。")
+            third = self.write_chapter(chapters, "第0003章-三.txt", "第三节里只有这一句足够长的测试正文。")
             comparisons = project_comparisons(third, root)
             result = analyze_paths(third, comparisons)
             self.assertEqual(
-                ["chapters/第0003章-三.md", "chapters/第0001章-一.md", "chapters/第0002章-二.md"],
+                ["chapters/第0003章-三.txt", "chapters/第0001章-一.txt", "chapters/第0002章-二.txt"],
                 result["scopeFiles"],
             )
 

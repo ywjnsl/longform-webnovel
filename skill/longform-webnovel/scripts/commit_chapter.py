@@ -145,8 +145,11 @@ def validate_transition(root: Path, staged: dict[str, Path], allow_revision: boo
     elif new_committed != old_committed + 1:
         raise ValueError(f"Normal commit must advance exactly one chapter from {old_committed}")
     chapter_prefix = f"chapters/第{new_committed:04d}章-"
-    if not any(relative.startswith(chapter_prefix) and relative.endswith(".md") for relative in staged):
-        raise ValueError(f"Staging needs the chapter {new_committed}正文 file")
+    staged_chapters = [relative for relative in staged if relative.startswith(chapter_prefix)]
+    if any(relative.endswith(".md") for relative in staged_chapters):
+        raise ValueError(f"正文章节必须写成 txt，不要提交 Markdown：{chapter_prefix}*.md")
+    if not any(relative.endswith(".txt") for relative in staged_chapters):
+        raise ValueError(f"Staging needs chapters/第{new_committed:04d}章-标题.txt")
     for suffix in ("lint", "review"):
         review_path = f"reviews/第{new_committed:04d}章-{suffix}.json"
         if review_path not in staged:
@@ -188,7 +191,7 @@ def validate_legacy_chapter_revision(
     chapter_paths = [
         shadow / relative
         for relative in staged
-        if relative.startswith(chapter_prefix) and relative.endswith(".md")
+        if relative.startswith(chapter_prefix) and relative.endswith(".txt")
     ]
     errors: list[str] = []
     decisions = load_json(shadow / "state" / "decisions.json")
