@@ -230,6 +230,9 @@ def text_metrics(text: str) -> dict:
         "sentenceLengthP25": round(quantile(sentence_lengths, 0.25), 2),
         "sentenceLengthP50": round(quantile(sentence_lengths, 0.50), 2),
         "sentenceLengthP75": round(quantile(sentence_lengths, 0.75), 2),
+        "sentencesLe12Share": round(sum(1 for n in sentence_lengths if n <= 12) / sentence_count, 3) if sentence_count else 0.0,
+        "sentencesGe40": sum(1 for n in sentence_lengths if n >= 40),
+        "maxSentenceChars": max(sentence_lengths) if sentence_lengths else 0,
         "meanParagraphChars": round(mean(paragraph_lengths), 2),
         "paragraphLengthCv": round(coefficient_of_variation(paragraph_lengths), 3),
         "dialogueRatio": round(dialogue_chars / total, 3) if total else 0.0,
@@ -613,6 +616,28 @@ def analyze(text: str, baseline_texts: list[str]) -> dict:
                 "count": metrics["sentences"],
                 "evidence": [f"mean={metrics['meanSentenceChars']}", f"p50={metrics['sentenceLengthP50']}"],
                 "message": "Sentences are clipped into short staccato beats; let clauses flow with natural spoken breath instead of chopping every action into 5-10 character fragments.",
+            }
+        )
+
+    if (
+        metrics["contentChars"] >= 6000
+        and metrics["sentences"] >= 200
+        and metrics["sentencesLe12Share"] >= 0.48
+        and metrics["maxSentenceChars"] < 100
+    ):
+        findings.append(
+            {
+                "code": "metronome-without-release",
+                "severity": "review",
+                "count": metrics["sentences"],
+                "evidence": [
+                    f"le12Share={metrics['sentencesLe12Share']}",
+                    f"mean={metrics['meanSentenceChars']}",
+                    f"p50={metrics['sentenceLengthP50']}",
+                    f"ge40={metrics['sentencesGe40']}",
+                    f"max={metrics['maxSentenceChars']}",
+                ],
+                "message": "About half the sentences are <=12 chars and nothing runs to 100, so the irreversible beat never changes the rhythm. Make the sentence where the contested object actually breaks the long one. A later 70-char mishap does not count, and do not lengthen random lines to raise variance.",
             }
         )
 
